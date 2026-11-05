@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KT 공식가입센터 | 기업전화·기업용 인터넷·GIGA office·KT IPTV</title>
+<meta name="description" content="KT 기업전화·기업용 인터넷·GIGA office·IPTV 가입 상담. 365일 새벽 3시까지 상담 가능. 1644-9637.">
+<meta property="og:title" content="KT 공식가입센터 | 기업전화·기업용 인터넷·GIGA office·KT IPTV">
+<meta property="og:description" content="KT 기업전화·기업용 인터넷·GIGA office·IPTV 가입 상담. 365일 새벽 3시까지 상담 가능. 1644-9637.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="assets/style.css?v=4">
+<style>
+.hero{position:relative;overflow:hidden;background:#1a1a1a}
+.hero-track{position:relative;height:clamp(480px,74vh,720px)}
+.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1s var(--ease);background-size:cover;background-position:center}
+.hero-slide.is-active{opacity:1}
+.hero-slide::before{content:"";position:absolute;inset:0;background:linear-gradient(95deg,rgba(8,10,15,.74) 0%,rgba(8,10,15,.44) 42%,rgba(8,10,15,.1) 78%)}
+.hero-inner{position:relative;height:100%;display:flex;align-items:center}
+.hero-copy{max-width:760px;color:#fff;padding-bottom:20px}
+.hero-copy .eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.76);margin-bottom:20px}
+.hero-copy .eyebrow::before{content:"";width:26px;height:2px;background:var(--red)}
+.hero-title{font-size:clamp(36px,5vw,68px);line-height:1.14;font-weight:800;letter-spacing:-.045em;text-shadow:0 4px 30px rgba(0,0,0,.28)}
+.hero-sub{margin-top:20px;font-size:clamp(15px,1.2vw,18px);color:rgba(255,255,255,.84);max-width:520px;line-height:1.7}
+.hero-actions{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
+.hero-ui{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:40px;background:rgba(14,16,22,.55);backdrop-filter:blur(6px);color:#fff;z-index:3}
+.hero-ui button{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;color:#fff;transition:background .2s}
+.hero-ui button:hover{background:rgba(255,255,255,.14)}
+.hero-count{font-size:13px;font-weight:600;letter-spacing:.08em;min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.hero-count span{color:rgba(255,255,255,.55)}
+.hero-ui .divider{width:1px;height:16px;background:rgba(255,255,255,.24);margin:0 4px}
+.sol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.sol-card{position:relative;display:block;border-radius:16px;overflow:hidden;background:#111;aspect-ratio:31/32;box-shadow:var(--shadow-sm);isolation:isolate;border:1px solid var(--line)}
+.sol-card img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease)}
+.sol-card::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(6,7,10,.74) 0%,rgba(6,7,10,.3) 32%,rgba(6,7,10,0) 62%)}
+.sol-card .label{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#fff}
+.sol-card .label span{font-size:20px;font-weight:700;letter-spacing:-.03em}
+.sol-card .label .arw{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.16);transition:transform .35s var(--ease),background .3s}
+.sol-card:hover img{transform:scale(1.06)}
+.sol-card:hover .label .arw{transform:translateX(4px);background:var(--red)}
+.sol-card .tag{position:absolute;z-index:2;top:14px;left:14px;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:#fff;background:rgba(9,10,14,.42);border:1px solid rgba(255,255,255,.24);padding:4px 9px;border-radius:20px;backdrop-filter:blur(4px)}
+.suggest-box{position:relative;overflow:hidden;border-radius:20px;background:radial-gradient(120% 140% at 86% 20%,rgba(160,120,255,.55) 0%,rgba(160,120,255,0) 55%),linear-gradient(112deg,#42379b 0%,#5b4bc4 46%,#7d63dd 100%);padding:54px 58px;min-height:280px;display:flex;align-items:center}
+.suggest-box::after{content:"";position:absolute;right:-90px;top:-120px;width:420px;height:420px;border-radius:50%;border:1px solid rgba(255,255,255,.14)}
+.suggest-copy{position:relative;z-index:2;color:#fff;max-width:620px}
+.suggest-copy .kicker{font-size:clamp(17px,1.7vw,24px);font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.02em}
+.suggest-copy h2{margin-top:10px;font-size:clamp(23px,2.8vw,36px);font-weight:800;letter-spacing:-.04em;line-height:1.34}
+.suggest-tel{display:flex;align-items:center;gap:12px;margin-top:24px}
+.suggest-tel svg{width:28px;height:28px;stroke:#fff;fill:none;opacity:.9}
+.suggest-tel a{font-size:clamp(25px,3vw,34px);font-weight:800;letter-spacing:-.02em;color:#fff}
+.suggest-tel a:hover{text-decoration:underline;text-underline-offset:6px}
+.suggest-img{position:absolute;right:34px;bottom:-24px;width:min(38%,420px);z-index:1;filter:drop-shadow(0 22px 36px rgba(12,8,40,.4));pointer-events:none}
+.suggest-cta{display:flex;justify-content:center;margin-top:34px}
+.promo-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.promo-card{position:relative;background:var(--card);border-radius:22px;padding:52px 50px 46px;min-height:340px;display:flex;flex-direction:column;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.promo-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.promo-card h3{font-size:29px;font-weight:800;letter-spacing:-.04em;color:#111}
+.promo-card .red{margin-top:13px;font-size:clamp(23px,2.4vw,31px);line-height:1.4;font-weight:800;letter-spacing:-.04em;color:var(--red)}
+.promo-card .desc{margin-top:14px;color:#6d7280;font-size:15px;max-width:330px}
+.promo-card .btn{margin-top:auto;align-self:flex-start;border-radius:40px;--btn-h:46px;padding:0 22px;font-size:14px}
+.promo-card .ghost-num{position:absolute;right:26px;top:10px;font-size:118px;font-weight:900;letter-spacing:-.06em;color:#fff;line-height:1;pointer-events:none;user-select:none}
+@media (max-width:1024px){.sol-grid{grid-template-columns:repeat(2,1fr);gap:20px}.promo-grid{grid-template-columns:1fr}.suggest-box{padding:40px 36px;min-height:auto}.suggest-img{width:34%;right:10px;bottom:-10px}}
+@media (max-width:760px){.hero-track{height:clamp(430px,70vh,540px)}.hero-copy{padding-bottom:64px}.hero-title{font-size:33px;line-height:1.2}.hero-sub{font-size:14px;margin-top:14px}.hero-actions{margin-top:22px}.hero-actions .btn{--btn-h:46px;font-size:14px;padding:0 16px}.sol-card .label{padding:16px}.sol-card .label span{font-size:16px}.sol-card .tag{display:none}.suggest-box{padding:30px 22px 36px;border-radius:16px}.suggest-copy h2{font-size:21px}.suggest-img{position:relative;right:auto;bottom:auto;width:62%;margin:24px 0 -6px auto}.promo-card{padding:34px 26px 32px;min-height:270px;border-radius:18px}.promo-card h3{font-size:23px}.promo-card .ghost-num{font-size:86px;right:16px}}
+</style>
+</head>
+<body class="home">
+
+<header class="site-header" id="header">
+  <div class="wrap hd-inner">
+    <a href="index.html" class="logo" aria-label="KT 공식가입센터 홈">
+      <img class="logo-img" src="assets/img/kt-logo.png" alt="KT">
+      <span class="logo-txt">공식가입센터</span>
+    </a>
+    <ul class="nav"><li><a href="tel.html">기업전화</a></li><li><a href="corporate.html">기업용 인터넷</a></li><li><a href="office.html">GIGA office</a></li><li><a href="iptv.html">KT IPTV</a></li><li><a href="inquiry.html">상담문의</a></li></ul>
+    <button class="menu-btn" id="menuBtn" aria-label="전체 메뉴 열기" aria-expanded="false" aria-controls="drawer"><i></i><i></i><i></i></button>
+  </div>
+</header>
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-veil" data-close-drawer></div>
+  <aside class="drawer-panel" role="dialog" aria-modal="true" aria-label="전체 메뉴">
+    <div class="drawer-top">
+      <span class="logo-txt">전체 메뉴</span>
+      <button class="drawer-close" data-close-drawer aria-label="메뉴 닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <nav class="drawer-nav">
+      <div class="drawer-g">KT 기업전화</div><a href="tel.html">기업인터넷 전화<span>바로가기</span></a><div class="drawer-g">KT 기업용 인터넷</div><a href="corporate.html">기업용 인터넷<span>바로가기</span></a><a href="office.html">GIGA office<span>바로가기</span></a><div class="drawer-g">KT IPTV</div><a href="iptv.html">IPTV 상품안내<span>바로가기</span></a><div class="drawer-g">고객지원</div><a href="inquiry.html">1:1 문의하기<span>바로가기</span></a><a href="call.html">전화상담신청<span>바로가기</span></a>
+    </nav>
+    <div class="drawer-foot">
+      <p>365일 새벽 3시까지 상담 OK</p>
+      <a href="tel:1644-9637" class="num">1644-9637</a>
+      <button class="btn btn-red" style="width:100%;margin-top:14px" data-open-modal>상담 신청하기</button>
+    </div>
+  </aside>
+</div>
+<main>
+
+<section class="hero" aria-label="메인 배너">
+  <div class="hero-track">
+    <div class="hero-slide is-active" style="background-image:url('assets/img/hero1.webp')">
+      <div class="wrap hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">KT Business Center</p>
+          <h1 class="hero-title">KT 기업용 가입센터</h1>
+          <p class="hero-sub">기업전화부터 기업용 인터넷·GIGA office·KT IPTV까지.<br>KT 전문 상담사가 설치부터 사후관리까지 책임집니다.</p>
+          <div class="hero-actions">
+            <button class="btn btn-red" data-open-modal>가입 상담 신청 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            <a href="tel:1644-9637" class="btn btn-ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1644-9637</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-slide" style="background-image:url('assets/img/hero2.webp')">
+      <div class="wrap hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">Enterprise Telephony</p>
+          <h1 class="hero-title">기업 통신,<br>한 번에 끝내세요</h1>
+          <p class="hero-sub">인터넷·전화·보안·클라우드 콜센터까지 한 곳에서.<br>전국 어디든 당일 방문 견적이 가능합니다.</p>
+          <div class="hero-actions">
+            <button class="btn btn-red" data-open-modal>가입 상담 신청 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            <a href="tel:1644-9637" class="btn btn-ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1644-9637</a>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  <div class="hero-ui" role="group" aria-label="배너 컨트롤">
+    <button id="prevSlide" aria-label="이전 배너"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <span class="hero-count"><b id="curNum">1</b><span> / 2</span></span>
+    <button id="nextSlide" aria-label="다음 배너"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    <span class="divider" aria-hidden="true"></span>
+    <button id="playToggle" aria-label="배너 자동재생 정지" aria-pressed="true">
+      <svg id="pauseIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1.4"/><rect x="14" y="4" width="4" height="16" rx="1.4"/></svg>
+      <svg id="playIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M7 4.5v15c0 .8.9 1.3 1.6.8l11-7.5a1 1 0 000-1.6l-11-7.5A1 1 0 007 4.5z"/></svg>
+    </button>
+  </div>
+</section>
+
+<section class="sec" id="solution">
+  <div class="wrap">
+    <div class="head head--center"><h2>앞서가는 기업의 현명한 선택,<br><span class="accent">KT 전문가가 설치 및 관리 합니다.</span></h2>
+      <p>상담부터 설치·공사, 사후관리까지 한 명의 담당자가 끝까지 책임집니다.</p></div>
+    <div class="sol-grid">
+      <a href="tel.html" class="sol-card">
+        <span class="tag">TELEPHONY</span>
+        <img src="assets/img/card_tel.webp" alt="기업용 유선전화로 통화하는 모습" loading="lazy">
+        <div class="label"><span>기업전화</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
+      </a>
+      <a href="corporate.html" class="sol-card">
+        <span class="tag">INTERNET</span>
+        <img src="assets/img/card_net.webp" alt="광케이블로 연결되는 기업 인터넷" loading="lazy">
+        <div class="label"><span>기업 인터넷</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
+      </a>
+      <a href="security.html" class="sol-card">
+        <span class="tag">SECURITY</span>
+        <img src="assets/img/card_sec.webp" alt="기업 보안을 상징하는 방패 그래픽" loading="lazy">
+        <div class="label"><span>보안</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
+      </a></div>
+  </div>
+</section>
+
+<section class="sec" style="padding-top:0">
+  <div class="wrap">
+    <div class="suggest-box">
+      <div class="suggest-copy">
+        <p class="kicker">원하시는 상품이 없나요?</p>
+        <h2>고객님께 딱 맞는 상품을 추천해드려요</h2>
+        <div class="suggest-tel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg><a href="tel:1644-9637">1644-9637</a></div>
+      </div>
+      <img class="suggest-img" src="assets/img/banner_phone.webp" alt="모바일로 상품을 확인하는 모습" loading="lazy">
+    </div>
+    <div class="suggest-cta"><button class="btn btn-red" data-open-modal>상품 문의하기 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
+  </div>
+</section>
+
+
+<section class="sec sec--soft" style="padding:64px 0">
+  <div class="wrap">
+    <div class="grid-2" style="gap:44px">
+      <div>
+        <div class="board-head"><h2>문의 내역</h2><a href="inquiry.html" style="font-size:13px;color:var(--muted);font-weight:600">더보기 ›</a></div>
+        <div class="tbl-wrap"><table class="bd"><caption class="sr">최근 상담 문의</caption>
+          <thead><tr><th scope="col">날짜</th><th scope="col">문의 내용</th><th scope="col">이름</th><th scope="col">현황</th></tr></thead>
+          <tbody><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-04</td><td class="tt"><a href="inquiry.html">기업 와이파이, 인터넷전화, 팩스번호 신규가입 문의</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">이*경</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">유선 전화 신청</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">신*윤</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">인터넷 전화 문의</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">김*환</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">법인 인터넷전화 주소이전문의</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">이*</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">인터넷 전화 설치 문의</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">김*규</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">사무실 인터넷 설치</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">안*용</td><td style="width:92px"><span class="badge">접수완료</span></td></tr></tbody></table></div>
+      </div>
+      <div>
+        <div class="board-head"><h2>설치 및 공사일정</h2><a href="inquiry.html" style="font-size:13px;color:var(--muted);font-weight:600">더보기 ›</a></div>
+        <div class="tbl-wrap"><table class="bd"><caption class="sr">최근 설치 및 공사 일정</caption>
+          <thead><tr><th scope="col">날짜</th><th scope="col">공사내역</th><th scope="col">회사명</th></tr></thead>
+          <tbody><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">역삼, 1GA, WIFI 2, 전화기 6, 대표번호 1, 랜공사 (무료)</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">주******콜</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">청주 대부농장, 인터넷 1회선, 축사내 IP 카메라 설치, wifi 설치</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">대**장</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-02</td><td class="tt"><a href="inquiry.html">이천, 신규 세무사 사무실, 전화기 5회선 인터넷 1기가, 대표번호 1</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">세******님</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-01</td><td class="tt"><a href="inquiry.html">충정로 오피스넷 2회선, wifi 2, 전화기 14회선 랜공사 3·4층 (무료)</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">주****발</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-01</td><td class="tt"><a href="inquiry.html">충주, 공장 GA2, FAX1, 전화기 6, 본사 GA1, 전화 14, WIFI 2</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">가****발</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-01</td><td class="tt"><a href="inquiry.html">충북, LG장애로 약정내 탈환, 1GA WIFI 1, 전화기 7, 공유기 2</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">우***국</td></tr></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" style="padding:76px 0 92px">
+  <div class="wrap">
+    <div class="promo-grid">
+      <article class="promo-card">
+        <span class="ghost-num" aria-hidden="true">01</span>
+        <h3>기업전화</h3>
+        <p class="red">기업전화의 다양한 성능<br>유선전화 / 무선전화</p>
+        <p class="desc">대표번호·내선·녹취까지 필요한 기능만 골라 구성합니다.</p>
+        <a href="tel.html" class="btn btn-red">페이지 보기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+      </article>
+      <article class="promo-card">
+        <span class="ghost-num" aria-hidden="true">02</span>
+        <h3>KT IPTV</h3>
+        <p class="red">269개 채널<br>UHD 화질<br>VOD 30만 편</p>
+        <p class="desc">사무실·휴게실·고객 대기 공간까지. 결합 시 월 10,000원대.</p>
+        <a href="iptv.html" class="btn btn-red">페이지 보기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<aside class="quick" id="quick" aria-label="상담 바로가기">
+  <button class="quick-toggle" id="quickToggle" aria-label="상담 위젯 접기">접기</button>
+  <div class="qtitle">상담하기</div>
+  <div class="qbody">
+    <a class="qbtn call" href="call.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1:1 문의상담</a>
+    <a class="qbtn kakao" href="http://pf.kakao.com/_xnBPen/chat" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.4c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-1 3.6c-.1.4.3.7.7.5l4.2-2.7c.3 0 .6.1.9.1 5 0 9-3.1 9-7s-4-7-9-7z"/></svg> 실시간 카톡상담</a>
+  </div>
+  <div class="qnum">
+    <p class="qt">고객센터</p>
+    <p class="txt">상담은 365일<br>새벽 3시까지 상담 OK</p>
+    <a href="tel:1644-9637" class="num">1644-9637</a>
+  </div>
+  <img class="qimg" src="assets/img/side.webp" alt="" loading="lazy">
+</aside>
+<nav class="mobile-bar" aria-label="모바일 상담 메뉴">
+  <a href="call.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15a2 2 0 01-2 2H8l-4 4V5a2 2 0 012-2h12a2 2 0 012 2z"/></svg>1:1 문의</a>
+  <a href="http://pf.kakao.com/_xnBPen/chat" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.4c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-1 3.6c-.1.4.3.7.7.5l4.2-2.7c.3 0 .6.1.9.1 5 0 9-3.1 9-7s-4-7-9-7z"/></svg> 카톡상담</a>
+  <a href="tel:1644-9637" class="tel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 전화상담</a>
+  <button id="goTop" aria-label="맨 위로"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg>TOP</button>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="f-top">
+      <div class="f-brand">
+        <div class="f-logo"><img class="logo-img" src="assets/img/kt-logo.png" alt="KT"><span class="logo-txt">공식가입센터</span></div>
+        <p class="f-small">soonycompany</p>
+      </div>
+      <div class="f-links">
+        <a href="call.html">상담신청</a><span class="dot" aria-hidden="true"></span>
+        <a href="agree.html">이용약관</a><span class="dot" aria-hidden="true"></span>
+        <a href="privacy.html"><b>개인정보처리방침</b></a><span class="dot" aria-hidden="true"></span>
+        <a href="email.html">이메일무단수집거부</a>
+      </div>
+    </div>
+    <div class="f-info"><span><b>상호</b> soonycompany</span><span class="sep">|</span><span><b>대표자</b> 김순희</span><span class="sep">|</span><span><b>사업자등록번호</b> 428-15-01782</span></div>
+    <div class="f-info"><span><b>주소</b> 서울 구로구 부일로 869</span></div>
+    <div class="f-info"><span><b>고객센터</b> 1644-9637</span><span class="sep">|</span><span><b>이메일</b> soonycompaany@naver.com</span></div>
+    <div class="f-bottom">
+      <p class="f-copy">Copyright © 2019 soonycompany 1644-9637. All rights reserved.</p>
+      <p class="f-powered">Powered by kt기업가입센터</p>
+    </div>
+  </div>
+</footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-veil" data-close-modal></div>
+  <div class="modal-card">
+    <button class="modal-close" data-close-modal aria-label="닫기"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <form id="consultForm" novalidate>
+      <h2 id="modalTitle">가입 상담 신청</h2>
+      <p class="sub">담당자가 확인 후 빠르게 연락드립니다. (365일 새벽 3시까지)</p>
+      <div class="field" style="margin-top:16px"><label for="fName">이름 <span class="req">*</span></label>
+        <input id="fName" name="name" type="text" placeholder="홍길동" autocomplete="name" data-req><span class="msg">이름을 입력해 주세요.</span></div>
+      <div class="field" style="margin-top:14px"><label for="fTel">연락처 <span class="req">*</span></label>
+        <input id="fTel" name="tel" type="tel" placeholder="010-0000-0000" autocomplete="tel" inputmode="numeric" data-req data-type="tel"><span class="msg">연락 가능한 전화번호를 입력해 주세요.</span></div>
+      <div class="field" style="margin-top:14px"><label for="fProduct">관심 상품</label>
+        <select id="fProduct" name="product"><option>KT 기업인터넷 전화</option><option>KT 기업용 인터넷</option><option>GIGA office</option><option>KT IPTV</option><option>기타 문의</option></select></div>
+      <div class="field" style="margin-top:14px"><label for="fMsg">문의 내용 <span style="color:#a0a4b0;font-weight:500">(선택)</span></label>
+        <textarea id="fMsg" name="message" style="height:84px" placeholder="설치 지역, 회선 수 등 알려주시면 더 정확한 상담이 가능합니다."></textarea></div>
+      <div class="agree-wrap" style="margin-top:16px"><label class="agree"><input type="checkbox" id="fAgree" data-req><span>개인정보 수집·이용에 동의합니다. <b style="color:#8b90a0;font-weight:500">(필수)</b></span></label>
+        <span class="msg" style="display:none;color:#e03c35;font-size:12px;font-weight:600;margin-top:6px">개인정보 수집·이용에 동의해 주세요.</span></div>
+      <div class="modal-actions"><button type="button" class="btn btn-line" data-close-modal>취소</button><button type="submit" class="btn btn-red">상담 신청하기</button></div>
+      <p class="form-note">※ 본 페이지는 데모용으로, 실제 접수는 고객센터 1644-9637로 연락 주시기 바랍니다.</p>
+    </form>
+    <div class="done" id="done">
+      <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></div>
+      <h3>상담 신청이 접수되었습니다</h3>
+      <p>빠른 시일 내에 담당자가 연락드립니다.<br>급하신 경우 <b>1644-9637</b>로 전화 주세요.</p>
+      <button class="btn btn-red" style="width:100%;margin-top:22px" data-close-modal>확인</button>
+    </div>
+  </div>
+</div>
+<script src="assets/app.js?v=4" defer></script>
+
+<!-- tawk.to live chat -->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
+(function(){
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;s1.src='https://embed.tawk.to/6aebe23520b8d93c3658a11a/1k6kmn90a';s1.charset='UTF-8';s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+})();
+</script></body>
+</html>
