@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>문의 관리자 | KT 공식가입센터</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+body{background:#f6f7fb}
+.adm{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+.adm h1{font-size:26px;font-weight:800;letter-spacing:-.03em}
+.adm .sub{color:#8b90a0;font-size:14px;margin-top:8px}
+.login{max-width:380px;margin:80px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:var(--shadow-md)}
+.login input{width:100%;height:48px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font:inherit;margin-top:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-top:16px}
+.card .hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card .tt{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.card .meta{font-size:12.5px;color:#8b90a0;margin-top:6px}
+.card .ct{white-space:pre-wrap;margin-top:14px;font-size:14px;color:#3b3e47;background:#fafbff;border-radius:10px;padding:14px;line-height:1.7}
+.card textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-size:14px;margin-top:12px;resize:vertical}
+.card .row{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+.card .ok{font-size:12.5px;color:#0a9d58;font-weight:700;margin-right:auto;align-self:center}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#f1f2f7;color:#6b7080}
+.badge.done{background:#e9f8f0;color:#0a9d58}
+.badge.kind{background:#eef2ff;color:#4a5fc8;margin-right:2px}
+</style></head>
+<body>
+<div class="adm">
+  <div id="loginBox" class="login">
+    <h1>문의 관리자</h1>
+    <p class="sub">관리자 비밀번호를 입력해 주세요.</p>
+    <input type="password" id="admPw" placeholder="관리자 비밀번호" autocomplete="current-password">
+    <button class="btn btn-red" id="admLogin" style="width:100%;margin-top:14px" type="button">로그인</button>
+    <p id="admErr" style="color:#e03c35;font-size:13px;margin-top:10px"></p>
+  </div>
+  <div id="listBox" style="display:none">
+    <h1>문의 관리</h1>
+    <p class="sub">최근 200건까지 표시됩니다. 답변을 저장하면 사이트에 '답변완료'로 표시됩니다.</p>
+    <div id="admList"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var token = sessionStorage.getItem("adm") || "";
+  var base = "/api";
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
+  function dt(s){ return String(s||"").slice(0,16); }
+
+  function render(list){
+    $("loginBox").style.display = "none";
+    $("listBox").style.display = "";
+    if(!list.length){ $("admList").innerHTML = '<div class="card">등록된 문의가 없습니다.</div>'; return; }
+    $("admList").innerHTML = list.map(function(p){
+      return '<div class="card" data-id="'+p.id+'">'
+        + '<div class="hd"><span class="badge kind">'+(p.kind==='inquiry'?'1:1문의':'상담신청')+'</span><span class="tt">'+esc(p.title)+'</span>'
+        + (p.reply ? '<span class="badge done">답변완료</span>' : '<span class="badge">답변대기</span>')+'</div>'
+        + '<div class="meta">'+esc(p.author)+' · '+(p.phone?esc(p.phone)+' · ':'')+esc(p.product||"")+' · '+dt(p.created_at)+'</div>'
+        + '<div class="ct">'+esc(p.content)+'</div>'
+        + '<textarea placeholder="답변을 입력하세요">'+esc(p.reply||"")+'</textarea>'
+        + '<div class="row"><span class="ok" style="display:none">저장되었습니다</span>'
+        + '<button class="btn btn-red" type="button" data-save>답변 저장</button></div>'
+        + '</div>';
+    }).join("");
+  }
+
+  function load(){
+    fetch(base + "/admin", { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({ password: token }) })
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j.ok){ sessionStorage.removeItem("adm"); $("admErr").textContent = "비밀번호가 올바르지 않습니다."; return; }
+        render(j.list||[]);
+      })
+      .catch(function(){ $("admErr").textContent = "서버에 연결할 수 없습니다. 배포 상태를 확인해 주세요."; });
+  }
+
+  $("admLogin").addEventListener("click", function(){
+    token = $("admPw").value;
+    sessionStorage.setItem("adm", token);
+    $("admErr").textContent = "";
+    load();
+  });
+  $("admPw").addEventListener("keydown", function(e){ if(e.key==="Enter") $("admLogin").click(); });
+
+  $("admList").addEventListener("click", function(e){
+    var b = e.target.closest("[data-save]"); if(!b) return;
+    var card = b.closest(".card");
+    var id = card.dataset.id;
+    var reply = card.querySelector("textarea").value.trim();
+    if(reply.length < 2){ alert("답변을 2자 이상 입력해 주세요."); return; }
+    b.disabled = true; b.textContent = "저장 중…";
+    fetch(base + "/posts/" + id + "/reply", {
+      method: "POST", headers: { "content-type":"application/json", "x-admin": token },
+      body: JSON.stringify({ reply: reply })
+    }).then(function(r){ return r.json(); }).then(function(j){
+      b.disabled = false; b.textContent = "답변 저장";
+      if(!j.ok){ alert("저장 실패: " + (j.error||"알 수 없는 오류")); return; }
+      card.querySelector(".ok").style.display = "";
+      var badge = card.querySelector(".badge");
+      badge.className = "badge done"; badge.textContent = "답변완료";
+    }).catch(function(){ b.disabled = false; b.textContent = "답변 저장"; alert("저장 실패: 네트워크 오류"); });
+  });
+
+  if(token) load();
+})();
+</script>
+</body></html>

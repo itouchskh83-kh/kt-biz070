@@ -3,15 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>1:1 문의하기 | soonycompany KT 공식가입센터</title>
-<meta name="description" content="KT 기업전화·인터넷·하이오더·서빙로봇 1:1 상담 문의. 전문 상담원이 신속하게 답변드립니다.">
-<meta property="og:title" content="1:1 문의하기 | soonycompany KT 공식가입센터">
-<meta property="og:description" content="KT 기업전화·인터넷·하이오더·서빙로봇 1:1 상담 문의. 전문 상담원이 신속하게 답변드립니다.">
+<title>상담 문의 내역 | soonycompany KT 공식가입센터</title>
+<meta name="description" content="KT 기업전화·기업용 인터넷·GIGA office·IPTV 상담 접수 현황. 실시간으로 접수 내역을 확인하실 수 있습니다.">
+<meta property="og:title" content="상담 문의 내역 | soonycompany KT 공식가입센터">
+<meta property="og:description" content="KT 기업전화·기업용 인터넷·GIGA office·IPTV 상담 접수 현황. 실시간으로 접수 내역을 확인하실 수 있습니다.">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="assets/style.css?v=5">
-
+<link rel="stylesheet" href="assets/style.css?v=6">
+<style>
+.bd-board thead th{white-space:nowrap}
+.bd-board .no{width:74px;color:#9aa0b0;font-variant-numeric:tabular-nums}
+.bd-board .tt{font-weight:600}
+.bd-board .tt .lk{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin-right:7px;border-radius:6px;background:#f1f2f7;color:#8b90a0;vertical-align:-3px}
+.bd-board .who{width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.bd-board .dt{width:120px;white-space:nowrap;color:#6b7080;text-align:center}
+.bd-board .bd-row{cursor:pointer;transition:background .16s}
+.bd-board .bd-row:hover{background:#fbfbff}
+.bd-board .bd-empty{text-align:center;color:var(--muted);padding:46px 0}
+.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:26px;flex-wrap:wrap}
+.pager .pg{min-width:38px;height:38px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;color:#4a4f5c;transition:.16s}
+.pager .pg:hover:not(:disabled){border-color:#f6b3af;color:var(--red)}
+.pager .pg.on{background:var(--red);border-color:var(--red);color:#fff}
+.pager .pg:disabled{opacity:.38;cursor:default}
+.pager .pg-dots{color:#9aa0b0;padding:0 2px}
+.board-actions{display:flex;justify-content:flex-end;margin-top:18px}
+.board-sub{margin-top:6px;font-size:14px;color:var(--muted)}
+.board-sub b{color:var(--ink)}
+.bd-note{margin-top:30px}
+.modal-card.wide{width:min(680px,100%)}
+.mf{display:grid;gap:14px}
+.mf label{display:block;font-size:13px;font-weight:700;color:#3b3e47;margin-bottom:7px}
+.mf input,.mf select,.mf textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-size:14.5px;background:#fff}
+.mf textarea{min-height:130px;resize:vertical;line-height:1.65}
+.mf input:focus,.mf select:focus,.mf textarea:focus{outline:none;border-color:#f6a9a4;box-shadow:0 0 0 3px rgba(244,81,74,.1)}
+.mf .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mf .hint{font-size:12px;color:var(--muted);margin-top:6px}
+.mf .err{color:var(--red-600);font-size:13px;font-weight:600;min-height:18px}
+.secret-box{display:flex;gap:10px;align-items:flex-start;background:var(--red-050);border:1px solid #ffe0de;border-radius:10px;padding:13px 15px}
+.secret-box svg{flex:0 0 auto;margin-top:2px;color:var(--red-600)}
+.secret-box p{font-size:12.5px;color:#7b4b48;line-height:1.6}
+.lock-wrap{text-align:center;padding:14px 0 4px}
+.lock-wrap .ic{width:56px;height:56px;margin:0 auto 16px;display:grid;place-items:center;border-radius:50%;background:var(--soft);color:#8b90a0}
+.lock-wrap p{font-size:14px;color:#6b7080;margin-bottom:16px}
+.lock-wrap input{width:100%;max-width:240px;margin:0 auto;display:block;text-align:center;letter-spacing:.3em;font-size:18px;font-weight:700;border:1px solid var(--line);border-radius:10px;padding:12px;height:52px}
+.dt-title{font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1.4;padding-right:40px}
+.dt-title .chip{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:var(--red-600);background:var(--red-050);border-radius:20px;padding:3px 9px;vertical-align:3px}
+.dt-meta{font-size:12.5px;color:var(--muted);margin-top:8px}
+.dt-body{white-space:pre-wrap;margin-top:20px;font-size:14.5px;line-height:1.8;color:#31343d;border-top:1px solid var(--line);padding-top:20px}
+.dt-reply{margin-top:22px;background:#f7f8ff;border:1px solid #e6e8f6;border-radius:12px;padding:18px 20px}
+.dt-reply.waiting{background:#fafafa;border-color:var(--line)}
+.dt-reply .rh{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:#3b3193}
+.dt-reply .rh span{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--muted)}
+.dt-reply .rc{white-space:pre-wrap;margin-top:10px;font-size:14px;line-height:1.75;color:#4a4f5c}
+@media (max-width:640px){
+  .mf .two{grid-template-columns:1fr}
+  .bd-board .who,.bd-board .dt{display:none}
+  .bd-board .no{width:44px;font-size:12px}
+  .pager .pg{min-width:34px;height:34px;font-size:13px}
+}
+</style>
 </head>
 <body class="">
 
@@ -45,35 +96,37 @@
 <main>
 
 <section class="phero">
-  <div class="bg" style="background-image:url('assets/img/hero_b.webp')"></div>
-  <div class="wrap inner"><div class="crumb"><a href="index.html">홈</a><span>/</span><a href="inquiry.html">상담문의</a><span>/</span><span class="now">1:1 문의하기</span></div><p class="eyebrow">Customer Service</p><h1>1:1 문의하기</h1><p class="lead">궁금한 점을 남겨주시면 전문 상담원이 확인 후 신속하게 연락드립니다. 365일 새벽 3시까지 상담 가능합니다.</p><div class="hero-actions"><button class="btn btn-red" data-open-modal>상담 신청하기 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><a href="tel:1644-9637" class="btn btn-ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1644-9637</a></div></div>
+  <div class="bg d" style="background-image:url('assets/img/hero_b.webp')"></div>
+  <div class="bg m" style="background-image:url('assets/img/hero_b_m.webp')"></div>
+  <div class="wrap inner"><div class="crumb"><a href="index.html">홈</a><span>/</span><a href="inquiry.html">상담문의</a><span>/</span><span class="now">상담 문의 내역</span></div><p class="eyebrow">Consultation History</p><h1>상담 문의 내역</h1><p class="lead">현재 접수된 상담 신청 내역입니다. 이름은 개인정보 보호를 위해 일부 가려서 표시됩니다.</p><div class="hero-actions"><button class="btn btn-red" data-open-modal>상담 신청하기 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><a href="tel:1644-9637" class="btn btn-ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1644-9637</a></div></div>
 </section>
 <section class="sec">
   <div class="wrap">
     <div class="board-head">
-      <div><h2>문의 내역</h2><p style="margin-top:6px;font-size:14px;color:var(--muted)">총 <b style="color:var(--ink)">150</b>건이 등록되어 있습니다.</p></div>
+      <div>
+        <h2>상담 접수 현황</h2>
+        <p class="board-sub">총 <b id="bdTotal">0</b>건 · 상담신청과 1:1문의가 함께 집계됩니다.</p>
+      </div>
       <div class="search-row">
-        <select aria-label="검색 항목"><option>제목</option><option>내용</option><option>작성자</option></select>
-        <input type="search" placeholder="검색어를 입력하세요" aria-label="검색어">
-        <button type="button">검색</button>
+        <select id="bdKind" aria-label="유형"><option value="all">전체 유형</option><option value="consult">상담신청</option><option value="inquiry">1:1문의</option></select>
+        <select id="bdField" aria-label="검색 항목"><option value="all">전체</option><option value="title">제목</option><option value="author">작성자</option></select>
+        <input type="search" id="bdQuery" placeholder="검색어를 입력하세요" aria-label="검색어">
+        <button type="button" id="bdSearch">검색</button>
       </div>
     </div>
     <div class="tbl-wrap">
-      <table class="bd">
-        <caption class="sr">1:1 상담 문의 목록</caption>
-        <thead><tr><th scope="col">번호</th><th scope="col">제목</th><th scope="col">작성자</th><th scope="col">등록일</th><th scope="col">상태</th></tr></thead>
-        <tbody><tr><td style="width:60px;color:#9aa0b0">12</td><td class="tt"><a href="call.html">기업 와이파이, 인터넷전화, 팩스번호 신규가입 문의</a></td><td style="width:100px">이*경</td><td style="width:110px">2026.11.04</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">11</td><td class="tt"><a href="call.html">유선 전화 신청</a></td><td style="width:100px">신*윤</td><td style="width:110px">2026.11.03</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">10</td><td class="tt"><a href="call.html">인터넷 전화 문의</a></td><td style="width:100px">김*환</td><td style="width:110px">2026.11.03</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">9</td><td class="tt"><a href="call.html">법인 인터넷전화 주소이전 문의</a></td><td style="width:100px">이*</td><td style="width:110px">2026.11.03</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">8</td><td class="tt"><a href="call.html">인터넷 전화 설치 문의</a></td><td style="width:100px">김*규</td><td style="width:110px">2026.11.03</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">7</td><td class="tt"><a href="call.html">사무실 인터넷 설치</a></td><td style="width:100px">안*용</td><td style="width:110px">2026.11.03</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">6</td><td class="tt"><a href="call.html">인터넷 전화 만기에 따른 신규가입 문의</a></td><td style="width:100px">이*빈</td><td style="width:110px">2026.11.02</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">5</td><td class="tt"><a href="call.html">법인 오피스넷 가입문의</a></td><td style="width:100px">정*</td><td style="width:110px">2026.11.02</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">4</td><td class="tt"><a href="call.html">사무실 인터넷 TV 신청</a></td><td style="width:100px">허*희</td><td style="width:110px">2026.11.02</td><td style="width:110px"><span class="badge">답변대기</span></td></tr><tr><td style="width:60px;color:#9aa0b0">3</td><td class="tt"><a href="call.html">기업 인터넷관련</a></td><td style="width:100px">송두일</td><td style="width:110px">2026.09.06</td><td style="width:110px"><span class="badge done">답변완료</span></td></tr><tr><td style="width:60px;color:#9aa0b0">2</td><td class="tt"><a href="call.html">AI 콜센터 견적 문의드립니다</a></td><td style="width:100px">고영현</td><td style="width:110px">2026.08.19</td><td style="width:110px"><span class="badge done">답변완료</span></td></tr><tr><td style="width:60px;color:#9aa0b0">1</td><td class="tt"><a href="call.html">일반전화 인터넷전화로 변경</a></td><td style="width:100px">최아영</td><td style="width:110px">2026.01.23</td><td style="width:110px"><span class="badge done">답변완료</span></td></tr></tbody>
+      <table class="bd bd-board">
+        <caption class="sr">상담 접수 목록</caption>
+        <thead><tr><th scope="col" style="width:74px">번호</th><th scope="col">제목</th><th scope="col" style="width:130px">작성자</th><th scope="col" style="width:120px">등록일</th><th scope="col" style="width:110px">상태</th></tr></thead>
+        <tbody id="bdBody"><tr><td colspan="5" class="bd-empty">불러오는 중입니다…</td></tr></tbody>
       </table>
     </div>
-    <div class="pager">
-      <span>이전</span><span class="on">1</span><a href="#">2</a><a href="#">3</a><a href="#">4</a><a href="#">5</a><span>…</span><a href="#">10</a><a href="#">다음</a>
-    </div>
-    <div style="display:flex;justify-content:flex-end;margin-top:20px">
-      <a href="call.html" class="btn btn-red">글쓰기 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
-    </div>
-    <div style="margin-top:34px"><div class="box tint"><h4>이용 안내</h4><ul><li>게시글의 개인정보(이름·연락처)는 비공개로 처리되며 담당자만 확인합니다.</li><li>상담 가능 시간 — 평일·주말 09:00 ~ 익일 03:00 (365일)</li><li>급한 문의는 고객센터 1644-9637로 전화 주시면 더 빠르게 안내해 드립니다.</li></ul></div></div>
+    <div class="pager" id="bdPager" role="navigation" aria-label="페이지 이동"></div>
+    <div class="board-actions"><a href="call.html" class="btn btn-red">상담 신청하기</a></div>
+    <div class="bd-note"><div class="box tint"><h4>이용 안내</h4><ul><li>표시되는 이름은 개인정보 보호를 위해 가운데를 가려서 노출합니다.</li><li>상담 내용과 연락처는 공개되지 않으며 담당자만 확인합니다.</li><li>급한 문의는 고객센터 1644-9637로 전화 주시면 더 빠르게 안내해 드립니다.</li></ul></div></div>
   </div>
 </section>
+<script src="assets/board.js?v=3" defer></script>
 <section class="sec sec--tight"><div class="wrap"><div class="cta">
   <div><p class="t1">365일 새벽 3시까지 상담 OK</p><h3>전화 상담이 더 빠릅니다.</h3><p>365일 새벽 3시까지 상담원이 직접 안내해 드립니다.</p></div>
   <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;z-index:2">
@@ -146,7 +199,7 @@
       <div class="agree-wrap" style="margin-top:16px"><label class="agree"><input type="checkbox" id="fAgree" data-req><span>개인정보 수집·이용에 동의합니다. <b style="color:#8b90a0;font-weight:500">(필수)</b></span></label>
         <span class="msg" style="display:none;color:#e03c35;font-size:12px;font-weight:600;margin-top:6px">개인정보 수집·이용에 동의해 주세요.</span></div>
       <div class="modal-actions"><button type="button" class="btn btn-line" data-close-modal>취소</button><button type="submit" class="btn btn-red">상담 신청하기</button></div>
-      <p class="form-note">※ 본 페이지는 데모용으로, 실제 접수는 고객센터 1644-9637로 연락 주시기 바랍니다.</p>
+      <p class="form-note">접수된 상담 신청은 <a href="inquiry.html" style="color:#f4514a;font-weight:700">문의 내역</a>에 실시간으로 표시됩니다.</p>
     </form>
     <div class="done" id="done">
       <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></div>
@@ -156,7 +209,7 @@
     </div>
   </div>
 </div>
-<script src="assets/app.js?v=5" defer></script>
+<script src="assets/app.js?v=6" defer></script>
 
 <!-- tawk.to live chat -->
 <script type="text/javascript">
