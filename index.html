@@ -10,12 +10,13 @@
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="assets/style.css?v=4">
+<link rel="stylesheet" href="assets/style.css?v=5">
 <style>
 .hero{position:relative;overflow:hidden;background:#1a1a1a}
 .hero-track{position:relative;height:clamp(480px,74vh,720px)}
-.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1s var(--ease);background-size:cover;background-position:center}
-.hero-slide.is-active{opacity:1}
+.hero-slide{position:absolute;inset:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 1s var(--ease),visibility 1s;background-size:cover;background-position:center}
+.hero-slide.is-active{opacity:1;visibility:visible;pointer-events:auto;z-index:2}
+.hero-slide .hero-copy{position:relative;z-index:1}
 .hero-slide::before{content:"";position:absolute;inset:0;background:linear-gradient(95deg,rgba(8,10,15,.74) 0%,rgba(8,10,15,.44) 42%,rgba(8,10,15,.1) 78%)}
 .hero-inner{position:relative;height:100%;display:flex;align-items:center}
 .hero-copy{max-width:760px;color:#fff;padding-bottom:20px}
@@ -24,18 +25,20 @@
 .hero-title{font-size:clamp(36px,5vw,68px);line-height:1.14;font-weight:800;letter-spacing:-.045em;text-shadow:0 4px 30px rgba(0,0,0,.28)}
 .hero-sub{margin-top:20px;font-size:clamp(15px,1.2vw,18px);color:rgba(255,255,255,.84);max-width:520px;line-height:1.7}
 .hero-actions{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
-.hero-ui{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:40px;background:rgba(14,16,22,.55);backdrop-filter:blur(6px);color:#fff;z-index:3}
+.hero-ui{position:absolute;left:50%;bottom:26px;isolation:isolate;transform:translateX(-50%);display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:40px;background:rgba(14,16,22,.55);backdrop-filter:blur(6px);color:#fff;z-index:3}
+.hero-ui{z-index:5}
 .hero-ui button{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;color:#fff;transition:background .2s}
 .hero-ui button:hover{background:rgba(255,255,255,.14)}
 .hero-count{font-size:13px;font-weight:600;letter-spacing:.08em;min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
 .hero-count span{color:rgba(255,255,255,.55)}
 .hero-ui .divider{width:1px;height:16px;background:rgba(255,255,255,.24);margin:0 4px}
-.sol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.sol-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
 .sol-card{position:relative;display:block;border-radius:16px;overflow:hidden;background:#111;aspect-ratio:31/32;box-shadow:var(--shadow-sm);isolation:isolate;border:1px solid var(--line)}
 .sol-card img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease)}
-.sol-card::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(6,7,10,.74) 0%,rgba(6,7,10,.3) 32%,rgba(6,7,10,0) 62%)}
+.sol-card::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(4,5,8,.9) 0%,rgba(4,5,8,.45) 35%,rgba(4,5,8,.06) 68%);transition:opacity .4s var(--ease)}
+.sol-card:hover::after{opacity:.82}
 .sol-card .label{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#fff}
-.sol-card .label span{font-size:20px;font-weight:700;letter-spacing:-.03em}
+.sol-card .label span{font-size:19px;font-weight:700;letter-spacing:-.03em}
 .sol-card .label .arw{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.16);transition:transform .35s var(--ease),background .3s}
 .sol-card:hover img{transform:scale(1.06)}
 .sol-card:hover .label .arw{transform:translateX(4px);background:var(--red)}
@@ -51,6 +54,14 @@
 .suggest-tel a:hover{text-decoration:underline;text-underline-offset:6px}
 .suggest-img{position:absolute;right:34px;bottom:-24px;width:min(38%,420px);z-index:1;filter:drop-shadow(0 22px 36px rgba(12,8,40,.4));pointer-events:none}
 .suggest-cta{display:flex;justify-content:center;margin-top:34px}
+.board-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.board-head h2{font-size:21px;font-weight:800;letter-spacing:-.03em}
+.board-head .live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--red-600);background:var(--red-050);padding:4px 9px;border-radius:20px}
+.board-head .live i{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.6s infinite}
+.board-head .more{margin-left:auto;font-size:13px;color:var(--muted);font-weight:600}
+.board-head .more:hover{color:var(--red)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+.bd td .new{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;color:#fff;background:var(--red);padding:1px 6px;border-radius:20px;vertical-align:middle}
 .promo-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px}
 .promo-card{position:relative;background:var(--card);border-radius:22px;padding:52px 50px 46px;min-height:340px;display:flex;flex-direction:column;overflow:hidden;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
 .promo-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
@@ -59,9 +70,91 @@
 .promo-card .desc{margin-top:14px;color:#6d7280;font-size:15px;max-width:330px}
 .promo-card .btn{margin-top:auto;align-self:flex-start;border-radius:40px;--btn-h:46px;padding:0 22px;font-size:14px}
 .promo-card .ghost-num{position:absolute;right:26px;top:10px;font-size:118px;font-weight:900;letter-spacing:-.06em;color:#fff;line-height:1;pointer-events:none;user-select:none}
-@media (max-width:1024px){.sol-grid{grid-template-columns:repeat(2,1fr);gap:20px}.promo-grid{grid-template-columns:1fr}.suggest-box{padding:40px 36px;min-height:auto}.suggest-img{width:34%;right:10px;bottom:-10px}}
+@media (max-width:1024px){.sol-grid{grid-template-columns:repeat(2,1fr);gap:18px}.promo-grid{grid-template-columns:1fr}.suggest-box{padding:40px 36px;min-height:auto}.suggest-img{width:34%;right:10px;bottom:-10px}}
 @media (max-width:760px){.hero-track{height:clamp(430px,70vh,540px)}.hero-copy{padding-bottom:64px}.hero-title{font-size:33px;line-height:1.2}.hero-sub{font-size:14px;margin-top:14px}.hero-actions{margin-top:22px}.hero-actions .btn{--btn-h:46px;font-size:14px;padding:0 16px}.sol-card .label{padding:16px}.sol-card .label span{font-size:16px}.sol-card .tag{display:none}.suggest-box{padding:30px 22px 36px;border-radius:16px}.suggest-copy h2{font-size:21px}.suggest-img{position:relative;right:auto;bottom:auto;width:62%;margin:24px 0 -6px auto}.promo-card{padding:34px 26px 32px;min-height:270px;border-radius:18px}.promo-card h3{font-size:23px}.promo-card .ghost-num{font-size:86px;right:16px}}
 </style>
+<script>
+(function(){
+  "use strict";
+  document.addEventListener('DOMContentLoaded', function(){
+    /* ---------- hero slider ---------- */
+    var track = document.querySelector('.hero-track');
+    if (track) {
+      var slides = Array.prototype.slice.call(track.querySelectorAll('.hero-slide'));
+      var curNum = document.getElementById('curNum');
+      var idx = Math.max(0, slides.findIndex(function(s){ return s.classList.contains('is-active'); }));
+      var timer = null, playing = true, DELAY = 5500;
+
+      function show(n){
+        if (!slides.length) return;
+        idx = (n + slides.length) % slides.length;
+        slides.forEach(function(s, i){ s.classList.toggle('is-active', i === idx); s.setAttribute('aria-hidden', i === idx ? 'false' : 'true'); });
+        if (curNum) curNum.textContent = String(idx + 1);
+      }
+      function play(){ stop(); if (!playing) return; timer = setInterval(function(){ show(idx + 1); }, DELAY); }
+      function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+
+      var prev = document.getElementById('prevSlide');
+      var next = document.getElementById('nextSlide');
+      var tog  = document.getElementById('playToggle');
+      var pauseIcon = document.getElementById('pauseIcon');
+      var playIcon  = document.getElementById('playIcon');
+
+      if (prev) prev.addEventListener('click', function(){ show(idx - 1); play(); });
+      if (next) next.addEventListener('click', function(){ show(idx + 1); play(); });
+      if (tog) tog.addEventListener('click', function(){
+        playing = !playing;
+        tog.setAttribute('aria-pressed', playing ? 'true' : 'false');
+        tog.setAttribute('aria-label', playing ? '배너 자동재생 정지' : '배너 자동재생 시작');
+        if (pauseIcon) pauseIcon.style.display = playing ? '' : 'none';
+        if (playIcon)  playIcon.style.display  = playing ? 'none' : '';
+        if (playing) play(); else stop();
+      });
+
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      show(idx);
+      if (!reduce) play();
+      track.addEventListener('mouseenter', stop);
+      track.addEventListener('mouseleave', function(){ if (playing) play(); });
+      document.addEventListener('visibilitychange', function(){
+        if (document.hidden) stop(); else if (playing) play();
+      });
+      /* 키보드 좌우 이동 */
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'ArrowLeft' && prev) { show(idx - 1); play(); }
+        if (e.key === 'ArrowRight' && next) { show(idx + 1); play(); }
+      });
+    }
+
+    /* ---------- 최근 문의내역 (접수일 자동 계산) ---------- */
+    var body = document.getElementById('inqBody');
+    if (!body) return;
+    var DATA = [
+      [0,  '사무실 기업용 인터넷 1G 신규 설치 문의드립니다.', '김*수'],
+      [0,  '기업전화 6회선 + 대표번호 함께 신청 가능한가요?', '이*영'],
+      [1,  'KT IPTV 2대 설치 견적 요청드립니다.', '박*진'],
+      [1,  'GIGA office 전용회선 개통 절차 문의', '정*호'],
+      [2,  '기존 타사 인터넷에서 KT로 이동 시 위약금 지원 여부', '최*미'],
+      [3,  '사무실 이전에 따른 인터넷·전화 이전 설치 문의', '한*름'],
+      [4,  '무선 인터넷 전화기 추가 구매 가능한지 문의드립니다.', '오*석'],
+      [5,  '소규모 사무실 3인 사용 기준 요금 안내 부탁드립니다.', '서*아'],
+    ];
+    function fmt(days){
+      var d = new Date(); d.setDate(d.getDate() - days);
+      var m = String(d.getMonth() + 1), dd = String(d.getDate());
+      return d.getFullYear() + '-' + (m.length < 2 ? '0' + m : m) + '-' + (dd.length < 2 ? '0' + dd : dd);
+    }
+    body.innerHTML = DATA.map(function(r){
+      var badge = r[0] === 0 ? '<span class="new">NEW</span>' : '';
+      return '<tr><td style="font-weight:700;color:#1d1f26;white-space:nowrap">' + fmt(r[0]) + '</td>'
+           + '<td class="tt"><a href="inquiry.html">' + r[1] + '</a>' + badge + '</td>'
+           + '<td style="font-weight:700;color:#1d1f26;white-space:nowrap">' + r[2] + '</td>'
+           + '<td><span class="badge">접수완료</span></td></tr>';
+    }).join('');
+  });
+})();
+</script>
+
 </head>
 <body class="home">
 
@@ -96,27 +189,27 @@
 
 <section class="hero" aria-label="메인 배너">
   <div class="hero-track">
-    <div class="hero-slide is-active" style="background-image:url('assets/img/hero1.webp')">
+    <div class="hero-slide is-active" style="background-image:url('assets/img/hero_a.webp')" role="group" aria-roledescription="slide" aria-label="1 / 2">
       <div class="wrap hero-inner">
         <div class="hero-copy">
           <p class="eyebrow">KT Business Center</p>
           <h1 class="hero-title">KT 기업용 가입센터</h1>
           <p class="hero-sub">기업전화부터 기업용 인터넷·GIGA office·KT IPTV까지.<br>KT 전문 상담사가 설치부터 사후관리까지 책임집니다.</p>
           <div class="hero-actions">
-            <button class="btn btn-red" data-open-modal>가입 상담 신청 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            <button class="btn btn-red" type="button" data-open-modal>가입 상담 신청 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
             <a href="tel:1644-9637" class="btn btn-ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1644-9637</a>
           </div>
         </div>
       </div>
     </div>
-    <div class="hero-slide" style="background-image:url('assets/img/hero2.webp')">
+    <div class="hero-slide" style="background-image:url('assets/img/hero_b.webp')" role="group" aria-roledescription="slide" aria-label="2 / 2">
       <div class="wrap hero-inner">
         <div class="hero-copy">
-          <p class="eyebrow">Enterprise Telephony</p>
+          <p class="eyebrow">Total Business Solution</p>
           <h1 class="hero-title">기업 통신,<br>한 번에 끝내세요</h1>
-          <p class="hero-sub">인터넷·전화·보안·클라우드 콜센터까지 한 곳에서.<br>전국 어디든 당일 방문 견적이 가능합니다.</p>
+          <p class="hero-sub">인터넷·전화·IPTV·보안까지 한 곳에서.<br>전국 어디든 당일 방문 견적이 가능합니다.</p>
           <div class="hero-actions">
-            <button class="btn btn-red" data-open-modal>가입 상담 신청 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            <button class="btn btn-red" type="button" data-open-modal>가입 상담 신청 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
             <a href="tel:1644-9637" class="btn btn-ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1644-9637</a>
           </div>
         </div>
@@ -141,18 +234,23 @@
     <div class="sol-grid">
       <a href="tel.html" class="sol-card">
         <span class="tag">TELEPHONY</span>
-        <img src="assets/img/card_tel.webp" alt="기업용 유선전화로 통화하는 모습" loading="lazy">
+        <img src="assets/img/card_tel.webp" alt="기업용 유선전화 단말기" loading="lazy">
         <div class="label"><span>기업전화</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
       </a>
       <a href="corporate.html" class="sol-card">
         <span class="tag">INTERNET</span>
-        <img src="assets/img/card_net.webp" alt="광케이블로 연결되는 기업 인터넷" loading="lazy">
-        <div class="label"><span>기업 인터넷</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
+        <img src="assets/img/card_net.webp" alt="광케이블 네트워크" loading="lazy">
+        <div class="label"><span>기업용 인터넷</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
       </a>
-      <a href="security.html" class="sol-card">
-        <span class="tag">SECURITY</span>
-        <img src="assets/img/card_sec.webp" alt="기업 보안을 상징하는 방패 그래픽" loading="lazy">
-        <div class="label"><span>보안</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
+      <a href="office.html" class="sol-card">
+        <span class="tag">DEDICATED LINE</span>
+        <img src="assets/img/card_office.webp" alt="데이터센터 서버룸" loading="lazy">
+        <div class="label"><span>전용회선(기가오피스)</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
+      </a>
+      <a href="iptv.html" class="sol-card">
+        <span class="tag">IPTV</span>
+        <img src="assets/img/card_iptv.webp" alt="기업 라운지 대형 스크린" loading="lazy">
+        <div class="label"><span>IPTV</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
       </a></div>
   </div>
 </section>
@@ -174,20 +272,14 @@
 
 <section class="sec sec--soft" style="padding:64px 0">
   <div class="wrap">
-    <div class="grid-2" style="gap:44px">
-      <div>
-        <div class="board-head"><h2>문의 내역</h2><a href="inquiry.html" style="font-size:13px;color:var(--muted);font-weight:600">더보기 ›</a></div>
-        <div class="tbl-wrap"><table class="bd"><caption class="sr">최근 상담 문의</caption>
-          <thead><tr><th scope="col">날짜</th><th scope="col">문의 내용</th><th scope="col">이름</th><th scope="col">현황</th></tr></thead>
-          <tbody><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-04</td><td class="tt"><a href="inquiry.html">기업 와이파이, 인터넷전화, 팩스번호 신규가입 문의</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">이*경</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">유선 전화 신청</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">신*윤</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">인터넷 전화 문의</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">김*환</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">법인 인터넷전화 주소이전문의</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">이*</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">인터넷 전화 설치 문의</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">김*규</td><td style="width:92px"><span class="badge">접수완료</span></td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">사무실 인터넷 설치</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">안*용</td><td style="width:92px"><span class="badge">접수완료</span></td></tr></tbody></table></div>
-      </div>
-      <div>
-        <div class="board-head"><h2>설치 및 공사일정</h2><a href="inquiry.html" style="font-size:13px;color:var(--muted);font-weight:600">더보기 ›</a></div>
-        <div class="tbl-wrap"><table class="bd"><caption class="sr">최근 설치 및 공사 일정</caption>
-          <thead><tr><th scope="col">날짜</th><th scope="col">공사내역</th><th scope="col">회사명</th></tr></thead>
-          <tbody><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">역삼, 1GA, WIFI 2, 전화기 6, 대표번호 1, 랜공사 (무료)</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">주******콜</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-03</td><td class="tt"><a href="inquiry.html">청주 대부농장, 인터넷 1회선, 축사내 IP 카메라 설치, wifi 설치</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">대**장</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-02</td><td class="tt"><a href="inquiry.html">이천, 신규 세무사 사무실, 전화기 5회선 인터넷 1기가, 대표번호 1</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">세******님</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-01</td><td class="tt"><a href="inquiry.html">충정로 오피스넷 2회선, wifi 2, 전화기 14회선 랜공사 3·4층 (무료)</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">주****발</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-01</td><td class="tt"><a href="inquiry.html">충주, 공장 GA2, FAX1, 전화기 6, 본사 GA1, 전화 14, WIFI 2</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">가****발</td></tr><tr><td style="width:96px;font-weight:700;color:#1d1f26;white-space:nowrap">2026-11-01</td><td class="tt"><a href="inquiry.html">충북, LG장애로 약정내 탈환, 1GA WIFI 1, 전화기 7, 공유기 2</a></td><td style="width:82px;font-weight:700;color:#1d1f26;white-space:nowrap">우***국</td></tr></tbody></table></div>
-      </div>
+    <div class="board-head">
+      <h2>문의 내역</h2>
+      <span class="live"><i aria-hidden="true"></i>실시간 접수</span>
+      <a href="inquiry.html" class="more">더보기 ›</a>
     </div>
+    <div class="tbl-wrap"><table class="bd"><caption class="sr">최근 상담 문의</caption>
+      <thead><tr><th scope="col" style="width:124px">접수일</th><th scope="col">문의 내용</th><th scope="col" style="width:112px">작성자</th><th scope="col" style="width:96px">현황</th></tr></thead>
+      <tbody id="inqBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:34px 0">최근 접수 내역을 불러오는 중입니다.</td></tr></tbody></table></div>
   </div>
 </section>
 
@@ -218,7 +310,7 @@
   <div class="qtitle">상담하기</div>
   <div class="qbody">
     <a class="qbtn call" href="call.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1:1 문의상담</a>
-    <a class="qbtn kakao" href="http://pf.kakao.com/_xnBPen/chat" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.4c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-1 3.6c-.1.4.3.7.7.5l4.2-2.7c.3 0 .6.1.9.1 5 0 9-3.1 9-7s-4-7-9-7z"/></svg> 실시간 카톡상담</a>
+    <a class="qbtn kakao" href="https://open.kakao.com/o/sWDFgIKd" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.4c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-1 3.6c-.1.4.3.7.7.5l4.2-2.7c.3 0 .6.1.9.1 5 0 9-3.1 9-7s-4-7-9-7z"/></svg> 실시간 카톡상담</a>
   </div>
   <div class="qnum">
     <p class="qt">고객센터</p>
@@ -229,7 +321,7 @@
 </aside>
 <nav class="mobile-bar" aria-label="모바일 상담 메뉴">
   <a href="call.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15a2 2 0 01-2 2H8l-4 4V5a2 2 0 012-2h12a2 2 0 012 2z"/></svg>1:1 문의</a>
-  <a href="http://pf.kakao.com/_xnBPen/chat" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.4c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-1 3.6c-.1.4.3.7.7.5l4.2-2.7c.3 0 .6.1.9.1 5 0 9-3.1 9-7s-4-7-9-7z"/></svg> 카톡상담</a>
+  <a href="https://open.kakao.com/o/sWDFgIKd" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.4c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-1 3.6c-.1.4.3.7.7.5l4.2-2.7c.3 0 .6.1.9.1 5 0 9-3.1 9-7s-4-7-9-7z"/></svg> 카톡상담</a>
   <a href="tel:1644-9637" class="tel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 전화상담</a>
   <button id="goTop" aria-label="맨 위로"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg>TOP</button>
 </nav>
@@ -286,7 +378,7 @@
     </div>
   </div>
 </div>
-<script src="assets/app.js?v=4" defer></script>
+<script src="assets/app.js?v=5" defer></script>
 
 <!-- tawk.to live chat -->
 <script type="text/javascript">
