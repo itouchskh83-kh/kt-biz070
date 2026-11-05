@@ -8,10 +8,13 @@ export async function onRequestGet({ request, env }) {
   const field = u.searchParams.get('field') || 'all';
   const q = (u.searchParams.get('q') || '').trim();
   const kind = u.searchParams.get('kind') || 'all';
+  const per = Math.min(100, Math.max(1, parseInt(u.searchParams.get('per') || '0', 10) || PER));
+  const days = parseInt(u.searchParams.get('days') || '0', 10) || 0;
 
   let where = 'WHERE 1 = 1';
   const binds = [];
   if (kind === 'consult' || kind === 'inquiry') { where += ' AND kind = ?'; binds.push(kind); }
+  if (days > 0) { where += " AND created_at >= datetime('now','+9 hours','-" + days + " days')"; }
   if (q) {
     if (field === 'author') { where += ' AND author LIKE ?'; binds.push('%' + q + '%'); }
     else if (field === 'title') { where += ' AND is_secret = 0 AND title LIKE ?'; binds.push('%' + q + '%'); }
@@ -22,7 +25,7 @@ export async function onRequestGet({ request, env }) {
   const rows = await env.DB.prepare(
     "SELECT id, title, author, created_at, updated_at, is_secret, kind, (reply IS NOT NULL AND reply <> '') AS answered FROM posts " +
     where + ' ORDER BY id DESC LIMIT ? OFFSET ?'
-  ).bind(...binds, PER, (page - 1) * PER).all();
+  ).bind(...binds, per, (page - 1) * per).all();
 
   const list = (rows.results || []).map(r => ({
     id: r.id,
@@ -35,7 +38,7 @@ export async function onRequestGet({ request, env }) {
     secret: !!r.is_secret
   }));
 
-  return json({ ok: true, total: total || 0, page, per: PER, pages: Math.max(1, Math.ceil((total || 0) / PER)), list });
+  return json({ ok: true, total: total || 0, page, per, pages: Math.max(1, Math.ceil((total || 0) / per)), list });
 }
 
 export async function onRequestPost({ request, env, waitUntil }) {
@@ -60,8 +63,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
   const hashv = await hash(password || (crypto.randomUUID() + Date.now()));
   const res = await env.DB.prepare(
-    'INSERT INTO posts (title, content, author, phone, product, password_hash, is_secret, kind) VALUES (?,?,?,?,?,?,1,?)'
-  ).bind(title, content, author, phone, product, hashv, kind).run();
+    'INSERT INTO posts (title, content, author, phone, product, password_hash, is_secret, kind) VALUES (?,?,?,?,?,?,?,?)'
+  ).bind(title, content, author, phone, product, hashv, kind === 'inquiry' ? 1 : 0, kind).run();
 
   const id = res.meta ? res.meta.last_row_id : null;
   const task = notify(env, { title, content, author, phone, product, kind });

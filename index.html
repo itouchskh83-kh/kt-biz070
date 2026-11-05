@@ -58,7 +58,7 @@
 .board-head h2{font-size:21px;font-weight:800;letter-spacing:-.03em}
 .board-head .live{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--red-600);background:var(--red-050);padding:4px 9px;border-radius:20px}
 .board-head .live i{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.6s infinite}
-.board-head .more{margin-left:auto;font-size:13px;color:var(--muted);font-weight:600}
+.board-head .more{margin-left:auto;font-size:13px;color:var(--muted);font-weight:700;padding:6px 2px}
 .board-head .more:hover{color:var(--red)}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
 .bd td .new{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;color:#fff;background:var(--red);padding:1px 6px;border-radius:20px;vertical-align:middle}
@@ -74,7 +74,9 @@
 .board-total b{color:var(--red-600);font-weight:800}
 .roll{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)}
 .roll-head{display:grid;grid-template-columns:124px 1fr 112px 96px;gap:12px;padding:13px 20px;background:var(--soft);border-bottom:1px solid var(--line);font-size:12.5px;font-weight:700;color:#7d8292}
-.roll-view{overflow:hidden;position:relative}
+.roll-view{overflow:hidden;position:relative;height:324px;transition:height .35s var(--ease)}
+.roll.is-expanded .roll-view{height:auto;max-height:486px;overflow-y:auto}
+.roll.is-expanded .roll-view::after{display:none}
 .roll-view::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(to top,#fff,rgba(255,255,255,0));pointer-events:none}
 .roll-track{will-change:transform}
 .roll-row{display:grid;grid-template-columns:124px 1fr 112px 96px;gap:12px;align-items:center;height:54px;padding:0 20px;border-bottom:1px solid #f2f3f8;font-size:14px;color:#3b3e47}
@@ -97,130 +99,7 @@
 }
 @media (max-width:1024px){.sol-grid{grid-template-columns:repeat(2,1fr);gap:18px}.promo-grid{grid-template-columns:1fr}.suggest-box{padding:40px 36px;min-height:auto}.suggest-img{width:34%;right:10px;bottom:-10px}}
 @media (max-width:760px){.hero-track{height:clamp(430px,70vh,540px)}.hero-copy{padding-bottom:64px}.hero-title{font-size:33px;line-height:1.2}.hero-sub{font-size:14px;margin-top:14px}.hero-actions{margin-top:22px}.hero-actions .btn{--btn-h:46px;font-size:14px;padding:0 16px}.sol-card .label{padding:16px}.sol-card .label span{font-size:16px}.sol-card .tag{display:none}.suggest-box{padding:30px 22px 36px;border-radius:16px}.suggest-copy h2{font-size:21px}.suggest-img{position:relative;right:auto;bottom:auto;width:62%;margin:24px 0 -6px auto}.promo-card{padding:34px 26px 32px;min-height:270px;border-radius:18px}.promo-card h3{font-size:23px}.promo-card .ghost-num{font-size:86px;right:16px}}
-</style><script>
-(function(){
-  "use strict";
-  document.addEventListener('DOMContentLoaded', function(){
-    /* ---------- hero slider ---------- */
-    var track = document.querySelector('.hero-track');
-    if (track) {
-      var slides = Array.prototype.slice.call(track.querySelectorAll('.hero-slide'));
-      var curNum = document.getElementById('curNum');
-      var idx = Math.max(0, slides.findIndex(function(s){ return s.classList.contains('is-active'); }));
-      var timer = null, playing = true, DELAY = 5500;
-      function show(n){
-        if (!slides.length) return;
-        idx = (n + slides.length) % slides.length;
-        slides.forEach(function(s, i){ s.classList.toggle('is-active', i === idx); s.setAttribute('aria-hidden', i === idx ? 'false' : 'true'); });
-        if (curNum) curNum.textContent = String(idx + 1);
-      }
-      function play(){ stop(); if (!playing) return; timer = setInterval(function(){ show(idx + 1); }, DELAY); }
-      function stop(){ if (timer) { clearInterval(timer); timer = null; } }
-      var prev = document.getElementById('prevSlide');
-      var next = document.getElementById('nextSlide');
-      var tog  = document.getElementById('playToggle');
-      var pauseIcon = document.getElementById('pauseIcon');
-      var playIcon  = document.getElementById('playIcon');
-      if (prev) prev.addEventListener('click', function(){ show(idx - 1); play(); });
-      if (next) next.addEventListener('click', function(){ show(idx + 1); play(); });
-      if (tog) tog.addEventListener('click', function(){
-        playing = !playing;
-        tog.setAttribute('aria-pressed', playing ? 'true' : 'false');
-        tog.setAttribute('aria-label', playing ? '배너 자동재생 정지' : '배너 자동재생 시작');
-        if (pauseIcon) pauseIcon.style.display = playing ? '' : 'none';
-        if (playIcon)  playIcon.style.display  = playing ? 'none' : '';
-        if (playing) play(); else stop();
-      });
-      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      show(idx);
-      if (!reduce) play();
-      track.addEventListener('mouseenter', stop);
-      track.addEventListener('mouseleave', function(){ if (playing) play(); });
-      document.addEventListener('visibilitychange', function(){ if (document.hidden) stop(); else if (playing) play(); });
-      document.addEventListener('keydown', function(e){
-        if (e.key === 'ArrowLeft' && prev) { show(idx - 1); play(); }
-        if (e.key === 'ArrowRight' && next) { show(idx + 1); play(); }
-      });
-    }
-
-    /* ---------- 상담 접수 현황 롤링 ---------- */
-    var trackEl = document.getElementById('inqTrack');
-    if (!trackEl) return;
-    var viewEl = trackEl.parentNode;
-    var totalEl = document.getElementById('inqTotal');
-    var ridx = 0, rlen = 0, rtimer = null, paused = false;
-
-    function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-    function fmt(s){ var t = String(s||''); return t.length < 10 ? t : t.slice(0,10).replace(/-/g,'.'); }
-    function isToday(s){ return String(s||'').slice(0,10) === new Date().toISOString().slice(0,10); }
-
-    function rowHTML(r){
-      var badge = r.answered ? '<span class="badge done">답변완료</span>' : '<span class="badge">접수완료</span>';
-      var tag = r.kind === 'inquiry' ? '<span class="ktag inq">1:1</span>' : '<span class="ktag con">상담</span>';
-      var nw = isToday(r.date) ? '<span class="new">NEW</span>' : '';
-      return '<div class="roll-row">'
-        + '<span class="c-date">' + esc(fmt(r.date)) + '</span>'
-        + '<span class="c-tt">' + tag + '<span class="tt-txt">' + esc(r.title) + '</span>' + nw + '</span>'
-        + '<span class="c-who">' + esc(r.author) + '</span>'
-        + '<span class="c-st">' + badge + '</span></div>';
-    }
-    function rowH(){ var el = trackEl.querySelector('.roll-row'); return el ? Math.round(el.getBoundingClientRect().height) : 54; }
-    function snap(v){ trackEl.style.transition = 'none'; trackEl.style.transform = 'translateY(-' + (v * rowH()) + 'px)'; }
-    function step(){
-      if (paused || rlen <= 6) return;
-      ridx++;
-      trackEl.style.transition = 'transform .6s cubic-bezier(.22,.61,.36,1)';
-      trackEl.style.transform = 'translateY(-' + (ridx * rowH()) + 'px)';
-      if (ridx >= rlen) setTimeout(function(){ ridx = 0; snap(0); }, 620);
-    }
-    function start(){ if (rtimer) clearInterval(rtimer); if (rlen > 6) rtimer = setInterval(step, 3200); }
-
-    function paint(list, total){
-      if (totalEl) totalEl.textContent = total || 0;
-      if (!list.length){
-        trackEl.innerHTML = '<div class="roll-row"><span class="c-date">-</span><span class="c-tt">아직 접수된 상담 내역이 없습니다.</span><span class="c-who">-</span><span class="c-st">-</span></div>';
-        return;
-      }
-      rlen = list.length;
-      var html = list.map(rowHTML).join('');
-      trackEl.innerHTML = html + (rlen > 6 ? html : '');
-      ridx = 0; snap(0); start();
-    }
-
-    function demo(){
-      var seq = [
-        ['김*수','사무실 기업용 인터넷 1G 신규 설치 문의',0,0],
-        ['이*영','기업전화 6회선·대표번호 동시 신청 문의',0,0],
-        ['박*진','KT IPTV 2대 설치 견적 요청',0,1],
-        ['정*호','GIGA office 전용회선 개통 절차 문의',0,2],
-        ['최*미','타사 인터넷에서 KT로 이동 시 위약금 지원 문의',1,3],
-        ['한*름','사무실 이전에 따른 인터넷·전화 이전 설치 문의',0,4],
-        ['오*석','무선 인터넷 전화기 추가 구매 문의',1,5],
-        ['서*아','3인 사무실 기준 요금 안내 요청',0,6],
-        ['윤*재','기업용 인터넷 설치 가능 지역 확인 요청',0,7],
-        ['강*민','IPTV 채널 구성표 요청',0,8]
-      ];
-      var out = seq.map(function(r){
-        var d = new Date(); d.setDate(d.getDate() - r[3]);
-        var m = String(d.getMonth()+1), dd = String(d.getDate());
-        return { title:r[1], author:r[0], kind:r[2]?'inquiry':'consult', answered:r[3]%3===1,
-          date: d.getFullYear()+'-'+(m.length<2?'0'+m:m)+'-'+(dd.length<2?'0'+dd:dd)+' 10:00:00' };
-      });
-      paint(out, 200);
-    }
-
-    fetch('/api/posts?page=1&kind=all', { headers: { accept: 'application/json' } })
-      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-      .then(function(d){ if(!d||!d.ok) throw 0; paint(d.list||[], d.total||0); })
-      .catch(function(){ demo(); });
-
-    viewEl.addEventListener('mouseenter', function(){ paused = true; });
-    viewEl.addEventListener('mouseleave', function(){ paused = false; });
-    window.addEventListener('resize', function(){ snap(ridx >= rlen ? 0 : ridx); });
-  });
-})();
-</script>
-
+</style><script src="assets/home.js?v=1" defer></script>
 </head>
 <body class="home">
 
@@ -342,11 +221,11 @@
       <h2>상담 접수 현황</h2>
       <span class="live"><i aria-hidden="true"></i>실시간 접수</span>
       <span class="board-total">총 <b id="inqTotal">0</b>건</span>
-      <a href="inquiry.html" class="more">전체 보기 ›</a>
+      <button type="button" class="more" id="inqMore">전체 보기 ›</button>
     </div>
     <div class="roll" id="inqRoll">
       <div class="roll-head"><span>접수일</span><span>문의 내용</span><span>작성자</span><span>현황</span></div>
-      <div class="roll-view"><div class="roll-track" id="inqTrack">
+      <div class="roll-view" id="inqView"><div class="roll-track" id="inqTrack">
         <div class="roll-row"><span class="c-date">-</span><span class="c-tt">최근 접수 내역을 불러오는 중입니다.</span><span class="c-who">-</span><span class="c-st">-</span></div>
       </div></div>
     </div>
