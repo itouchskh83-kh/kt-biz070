@@ -1,0 +1,26 @@
+{
+  "name": "KT 공식가입센터",
+  "short_name": "KT 공식가입센터",
+  "description": "기업전화·기업용 인터넷·GIGA office·KT IPTV 상담",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f4514a",
+  "icons": [
+    {
+      "src": "/assets/fav/android-chrome-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/fav/android-chrome-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/fav/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
