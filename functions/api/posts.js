@@ -42,7 +42,9 @@ export async function onRequestGet({ request, env }) {
   return json({ ok: true, total: total || 0, page, per, pages: Math.max(1, Math.ceil((total || 0) / per)), list });
 }
 
-export async function onRequestPost({ request, env, waitUntil }) {
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  const waitUntil = context.waitUntil ? context.waitUntil.bind(context) : null;
   if (env.DB) {
     const _st = await blockState(env, clientIP(request));
     if (_st.mode === 'block') return json({ ok: false, error: 'BLOCKED', message: '비정상 접속이 감지되어 접수가 제한되었습니다.' }, 403);

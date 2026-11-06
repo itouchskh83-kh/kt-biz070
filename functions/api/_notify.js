@@ -65,3 +65,40 @@ export async function notify(env, post) {
 
   await Promise.allSettled(jobs);
 }
+
+/**
+ * 부정클릭 차단 알림 (문의 알림과 같은 텔레그램 방)
+ * row: { ip, fp, score, reason, region, org, country, hits, blockedUntil, path, keyword }
+ */
+export function buildBlockMessage(row) {
+  const lines = [
+    '🚫 부정클릭 차단',
+    '',
+    '▪ IP : ' + (row.ip || '-'),
+    '▪ 위험점수 : ' + (row.score || 0) + '점',
+    '▪ 반복 횟수 : ' + (row.hits || 0) + '회',
+    '▪ 사유 : ' + (row.reason || '-'),
+    '▪ 지역(추정) : ' + (row.region || '알 수 없음'),
+    '▪ 통신사 : ' + (row.org || '알 수 없음'),
+    '▪ 차단 해제 : ' + (row.blockedUntil || '영구'),
+    '',
+    '▪ 마지막 페이지 : ' + (row.path || '/'),
+    (row.keyword ? '▪ 유입 검색어 : ' + row.keyword : ''),
+    '',
+    '해제 : 관리자 페이지 → 부정클릭 감지',
+    '🕐 ' + now()
+  ];
+  return lines.filter(Boolean).join('\n');
+}
+
+export async function notifyBlock(env, row) {
+  const token = env.TELEGRAM_BOT_TOKEN || DEFAULT_TG_TOKEN;
+  const chat  = env.TELEGRAM_CHAT_ID || DEFAULT_TG_CHAT;
+  const text  = buildBlockMessage(row);
+  if (!token || !chat) return;
+  await fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ chat_id: chat, text, disable_web_page_preview: true })
+  }).catch(() => null);
+}

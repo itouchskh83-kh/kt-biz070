@@ -1,11 +1,40 @@
 
 import { json } from './_lib.js';
+import { notifyBlock } from './_notify.js';
 import { clientIP, uaHash, detectSource, evaluate, blockState, maybePurge, STAGE, WINDOW_MIN, isHosting } from './_smartlog.js';
 
 // 한국시간 문자열 (YYYY-MM-DD HH:MM:SS)
 function kst(offsetMs) {
   return new Date(Date.now() + 9 * 3600000 + (offsetMs || 0)).toISOString().slice(0, 19).replace('T', ' ');
 }
+// IP 기반 지역 보정: Cloudflare 지도는 국내 ISP IP를 서울로 뭉뚱그리는 경우가 많다.
+// 로그를 먼저 남기고, 외부 지오IP 결과로 지역명을 덮어쓴다.
+async function geoFix(env, id, ip, cfRegion) {
+  if (!id || !ip) return;
+  const ctl = () => { const c = new AbortController(); setTimeout(() => c.abort(), 1800); return c.signal; };
+  let label = '';
+  try {
+    const r = await fetch('http://ip-api.com/json/' + encodeURIComponent(ip) + '?fields=status,countryCode,regionName,city,district,isp&lang=ko', { signal: ctl() });
+    const j = await r.json();
+    if (j && j.status === 'success' && j.countryCode === 'KR') {
+      label = [j.regionName, j.city, j.district].filter(Boolean).join(' ');
+      if (j.isp) label += ' · ' + j.isp;
+    }
+  } catch (e) {}
+  if (!label) {
+    try {
+      const r2 = await fetch('https://ipwho.is/' + encodeURIComponent(ip) + '?fields=success,country_code,region,city,connection', { signal: ctl() });
+      const j2 = await r2.json();
+      if (j2 && j2.success && j2.country_code === 'KR') {
+        label = [j2.region, j2.city].filter(Boolean).join(' ');
+        if (j2.connection && j2.connection.isp) label += ' · ' + j2.connection.isp;
+      }
+    } catch (e) {}
+  }
+  if (!label || label === cfRegion) return;
+  try { await env.DB.prepare('UPDATE click_logs SET region = ? WHERE id = ?').bind(label.slice(0, 80), id).run(); } catch (e) {}
+}
+
 function srcLabel(src) {
   if (src === 'naver') return '광고(네이버)';
   if (src === 'google') return '광고(구글)';
@@ -15,7 +44,9 @@ function srcLabel(src) {
   return '직접방문';
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  const waitUntil = context.waitUntil ? context.waitUntil.bind(context) : (p) => { p && p.catch && p.catch(() => {}); };
   if (!env.DB) return json({ ok: true, action: 'allow', score: 0 });
   let b = {};
   try { b = await request.json(); } catch {}
@@ -132,6 +163,9 @@ export async function onRequestPost({ request, env }) {
   if (action === 'block' && isAd) {
     const hours = ev.score >= STAGE.block + 60 ? 24 : 4;
     blockedUntil = kst(hours * 3600000);
+    const prev = await env.DB.prepare('SELECT mode, blocked_until FROM blocked_ips WHERE ip = ?').bind(ip).first();
+    const isNew = !prev || prev.mode === 'allow'
+      || (prev.blocked_until && prev.blocked_until < kst(0));
     await env.DB.prepare(
       `INSERT INTO blocked_ips (ip, mode, reason, score, hit_count, blocked_until, manual, fp)
        VALUES (?, 'block', ?, ?, ?, ?, 0, ?)
@@ -139,7 +173,16 @@ export async function onRequestPost({ request, env }) {
          hit_count=COALESCE(blocked_ips.hit_count,0)+1, blocked_until=excluded.blocked_until
        WHERE blocked_ips.manual = 0`
     ).bind(ip, reason || '반복 접속', ev.score, ipHits, blockedUntil, fp).run();
+
+    if (isNew) {
+      waitUntil(notifyBlock(env, {
+        ip, score: ev.score, hits: ipHits, reason: reason || '반복 접속',
+        region, org, country, blockedUntil, path, keyword: kw
+      }));
+    }
   }
+
+  if (logId) waitUntil(geoFix(env, logId, ip, region));
 
   await maybePurge(env);
   return json({ ok: true, action, stage, score: ev.score, hits: ipHits,

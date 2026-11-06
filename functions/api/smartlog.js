@@ -1,6 +1,7 @@
 
 import { json } from './_lib.js';
 import { clientIP, evaluate, STAGE } from './_smartlog.js';
+import { notifyBlock } from './_notify.js';
 
 function csvCell(v) {
   const s = String(v == null ? '' : v).replace(/"/g, '""');
@@ -87,6 +88,8 @@ export async function onRequestPost({ request, env }) {
        ON CONFLICT(ip) DO UPDATE SET mode='block', manual=1, reason=excluded.reason,
          note=excluded.note, blocked_until=excluded.blocked_until`
     ).bind(ip, String(b.reason || '관리자 차단'), String(b.note || ''), until).run();
+    await notifyBlock(env, { ip, score: 999, hits: 0, reason: '관리자 직접 차단',
+      region: '-', org: String(b.note || ''), blockedUntil: until || '영구', path: '-', keyword: '' });
     return json({ ok: true });
   }
 
