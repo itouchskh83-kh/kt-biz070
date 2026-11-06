@@ -17,11 +17,13 @@
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#f4514a">
 <meta name="msapplication-TileColor" content="#f4514a">
-<link rel="stylesheet" href="assets/style.css?v=6">
+<link rel="stylesheet" href="assets/style.css?v=8">
 <style>
 .hero{position:relative;overflow:hidden;background:#1a1a1a}
 .hero-track{position:relative;height:clamp(480px,74vh,720px)}
-.hero-slide{position:absolute;inset:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 1s var(--ease),visibility 1s;background-size:cover;background-position:center}
+.hero-slide{position:absolute;inset:0;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 1s var(--ease),visibility 1s;background:#111}
+.hero-photo{position:absolute;inset:0;display:block;z-index:0}
+.hero-photo img{width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block}
 .hero-slide.is-active{opacity:1;visibility:visible;pointer-events:auto;z-index:2}
 .hero-slide .hero-copy{position:relative;z-index:1}
 .hero-slide::before{content:"";position:absolute;inset:0;background:linear-gradient(95deg,rgba(8,10,15,.74) 0%,rgba(8,10,15,.44) 42%,rgba(8,10,15,.1) 78%)}
@@ -45,7 +47,7 @@
 .sol-card::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(4,5,8,.9) 0%,rgba(4,5,8,.45) 35%,rgba(4,5,8,.06) 68%);transition:opacity .4s var(--ease)}
 .sol-card:hover::after{opacity:.82}
 .sol-card .label{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#fff}
-.sol-card .label span{font-size:19px;font-weight:700;letter-spacing:-.03em}
+.sol-card .label span{font-size:19px;font-weight:700;letter-spacing:-.03em;word-break:keep-all;line-height:1.28}
 .sol-card .label .arw{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.16);transition:transform .35s var(--ease),background .3s}
 .sol-card:hover img{transform:scale(1.06)}
 .sol-card:hover .label .arw{transform:translateX(4px);background:var(--red)}
@@ -55,9 +57,12 @@
 .suggest-copy{position:relative;z-index:2;color:#fff;max-width:620px}
 .suggest-copy .kicker{font-size:clamp(17px,1.7vw,24px);font-weight:600;color:rgba(255,255,255,.9);letter-spacing:-.02em}
 .suggest-copy h2{margin-top:10px;font-size:clamp(23px,2.8vw,36px);font-weight:800;letter-spacing:-.04em;line-height:1.34}
-.suggest-tel{display:flex;align-items:center;gap:12px;margin-top:24px}
-.suggest-tel svg{width:28px;height:28px;stroke:#fff;fill:none;opacity:.9}
-.suggest-tel a{font-size:clamp(25px,3vw,34px);font-weight:800;letter-spacing:-.02em;color:#fff}
+.suggest-tel{display:inline-flex;align-items:center;gap:14px;margin-top:26px;padding:9px 26px 9px 9px;border-radius:60px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(6px)}
+.suggest-tel .ic{width:44px;height:44px;border-radius:50%;background:var(--red);display:grid;place-items:center;flex:0 0 auto}
+.suggest-tel .ic svg{width:19px;height:19px;stroke:#fff}
+.suggest-tel .tx{display:flex;flex-direction:column;gap:1px}
+.suggest-tel .lbl{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.7);text-transform:uppercase}
+.suggest-tel a{font-size:clamp(21px,2.4vw,28px);font-weight:800;letter-spacing:-.01em;color:#fff;white-space:nowrap;line-height:1.15}
 .suggest-tel a:hover{text-decoration:underline;text-underline-offset:6px}
 .suggest-img{position:absolute;right:34px;bottom:-24px;width:min(38%,420px);z-index:1;filter:drop-shadow(0 22px 36px rgba(12,8,40,.4));pointer-events:none}
 .suggest-cta{display:flex;justify-content:center;margin-top:34px}
@@ -105,7 +110,14 @@
   .roll-row .c-st{justify-content:flex-end}
 }
 @media (max-width:1024px){.sol-grid{grid-template-columns:repeat(2,1fr);gap:18px}.promo-grid{grid-template-columns:1fr}.suggest-box{padding:40px 36px;min-height:auto}.suggest-img{width:34%;right:10px;bottom:-10px}}
-@media (max-width:760px){.hero-track{height:clamp(430px,70vh,540px)}.hero-copy{padding-bottom:64px}.hero-title{font-size:33px;line-height:1.2}.hero-sub{font-size:14px;margin-top:14px}.hero-actions{margin-top:22px}.hero-actions .btn{--btn-h:46px;font-size:14px;padding:0 16px}.sol-card .label{padding:16px}.sol-card .label span{font-size:16px}.sol-card .tag{display:none}.suggest-box{padding:30px 22px 36px;border-radius:16px}.suggest-copy h2{font-size:21px}.suggest-img{position:relative;right:auto;bottom:auto;width:62%;margin:24px 0 -6px auto}.promo-card{padding:34px 26px 32px;min-height:270px;border-radius:18px}.promo-card h3{font-size:23px}.promo-card .ghost-num{font-size:86px;right:16px}}
+@media (max-width:760px){
+.hero-track{height:clamp(470px,74vh,600px)}
+.hero-photo img{object-position:center 10%}
+.hero-slide::before{background:linear-gradient(180deg,rgba(8,10,15,.34) 0%,rgba(8,10,15,.14) 26%,rgba(8,10,15,.62) 58%,rgba(8,10,15,.92) 100%)}
+.hero-copy{padding-bottom:8px}
+.suggest-tel{padding:8px 20px 8px 8px;gap:11px;margin-top:22px}
+.suggest-tel .ic{width:38px;height:38px}
+.suggest-tel a{font-size:21px}.hero-copy{padding-bottom:64px}.hero-title{font-size:33px;line-height:1.2}.hero-sub{font-size:14px;margin-top:14px}.hero-actions{margin-top:22px}.hero-actions .btn{--btn-h:46px;font-size:14px;padding:0 16px}.sol-card .label{padding:16px}.sol-card .label span{font-size:16px}.sol-card .tag{display:none}.suggest-box{padding:30px 22px 36px;border-radius:16px}.suggest-copy h2{font-size:21px}.suggest-img{position:relative;right:auto;bottom:auto;width:44%;margin:16px -4px -2px auto}.promo-card{padding:34px 26px 32px;min-height:270px;border-radius:18px}.promo-card h3{font-size:23px}.promo-card .ghost-num{font-size:86px;right:16px}}
 </style><script src="assets/home.js?v=1" defer></script>
 </head>
 <body class="home">
@@ -141,7 +153,8 @@
 
 <section class="hero" aria-label="메인 배너">
   <div class="hero-track">
-    <div class="hero-slide is-active" style="background-image:url('assets/img/hero_a.webp')" role="group" aria-roledescription="slide" aria-label="1 / 2">
+    <div class="hero-slide is-active" role="group" aria-roledescription="slide" aria-label="1 / 2">
+      <picture class="hero-photo"><source media="(max-width:760px)" srcset="assets/img/hero_home1_m.webp"><img src="assets/img/hero_a.webp" alt="" loading="eager"></picture>
       <div class="wrap hero-inner">
         <div class="hero-copy">
           <p class="eyebrow">KT Business Center</p>
@@ -154,7 +167,8 @@
         </div>
       </div>
     </div>
-    <div class="hero-slide" style="background-image:url('assets/img/hero_b.webp')" role="group" aria-roledescription="slide" aria-label="2 / 2">
+    <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="2 / 2">
+      <picture class="hero-photo"><source media="(max-width:760px)" srcset="assets/img/hero_home2_m.webp"><img src="assets/img/hero_b.webp" alt="" loading="lazy"></picture>
       <div class="wrap hero-inner">
         <div class="hero-copy">
           <p class="eyebrow">Total Business Solution</p>
@@ -192,12 +206,12 @@
       <a href="corporate.html" class="sol-card">
         <span class="tag">INTERNET</span>
         <img src="assets/img/card_net.webp" alt="광케이블 네트워크" loading="lazy">
-        <div class="label"><span>기업용 인터넷</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
+        <div class="label"><span>기업용<br>인터넷</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
       </a>
       <a href="office.html" class="sol-card">
         <span class="tag">DEDICATED LINE</span>
         <img src="assets/img/card_office.webp" alt="데이터센터 서버룸" loading="lazy">
-        <div class="label"><span>전용회선(기가오피스)</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
+        <div class="label"><span>전용회선<br>(기가오피스)</span><i class="arw" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></i></div>
       </a>
       <a href="iptv.html" class="sol-card">
         <span class="tag">IPTV</span>
@@ -213,7 +227,7 @@
       <div class="suggest-copy">
         <p class="kicker">원하시는 상품이 없나요?</p>
         <h2>고객님께 딱 맞는 상품을 추천해드려요</h2>
-        <div class="suggest-tel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg><a href="tel:1644-9637">1644-9637</a></div>
+        <div class="suggest-tel"><span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg></span><span class="tx"><span class="lbl">전화 상담</span><a href="tel:1644-9637">1644-9637</a></span></div>
       </div>
       <img class="suggest-img" src="assets/img/banner_phone.webp" alt="모바일로 상품을 확인하는 모습" loading="lazy">
     </div>
@@ -334,7 +348,7 @@
     </div>
   </div>
 </div>
-<script src="assets/app.js?v=6" defer></script>
+<script src="assets/app.js?v=7" defer></script>
 
 <!-- tawk.to live chat -->
 <script type="text/javascript">

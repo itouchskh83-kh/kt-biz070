@@ -17,7 +17,7 @@
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#f4514a">
 <meta name="msapplication-TileColor" content="#f4514a">
-<link rel="stylesheet" href="assets/style.css?v=6">
+<link rel="stylesheet" href="assets/style.css?v=8">
 <style>
 .bd-board thead th{white-space:nowrap}
 .bd-board .no{width:74px;color:#9aa0b0;font-variant-numeric:tabular-nums}
@@ -38,6 +38,25 @@
 .board-sub{margin-top:6px;font-size:14px;color:var(--muted)}
 .board-sub b{color:var(--ink)}
 .bd-note{margin-top:30px}
+@media (max-width:760px){
+  .board-head{flex-direction:column;align-items:flex-start;gap:8px}
+  .board-head .search-row{display:none}
+  .board-head .board-sub{font-size:13px}
+  .bd-board thead{display:none}
+  .bd-board,.bd-board tbody{display:block;width:100%}
+  .bd-board tr{display:block;position:relative;border:1px solid var(--line);border-radius:12px;padding:14px 15px;margin-bottom:10px;background:#fff}
+  .bd-board td{border:0;padding:0;text-align:left;display:block;width:auto}
+  .bd-board td.no{display:none}
+  .bd-board td.tt{max-width:none;width:auto}
+  .bd-board td.tt a{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.5;font-size:14px;padding-right:74px;word-break:keep-all}
+  .bd-board td.who{display:inline-block;width:auto;font-size:12px;color:#8b90a0;margin-top:7px;text-align:left;white-space:normal;overflow:visible}
+  .bd-board td.dt{display:inline-block;width:auto;font-size:12px;color:#9aa0b0;margin-top:7px;text-align:left}
+  .bd-board td.dt::before{content:"·";margin:0 6px;color:#c3c7d4}
+  .bd-board td:last-child{position:absolute;right:13px;top:12px}
+  .bd-board .badge{font-size:11px;padding:3px 8px}
+  .bd-board .bd-empty{padding:34px 0}
+  .tbl-wrap{border:0}
+}
 .modal-card.wide{width:min(680px,100%)}
 .mf{display:grid;gap:14px}
 .mf label{display:block;font-size:13px;font-weight:700;color:#3b3e47;margin-bottom:7px}
@@ -104,7 +123,7 @@
 
 <section class="phero">
   <div class="bg d" style="background-image:url('assets/img/hero_b.webp')"></div>
-  <div class="bg m" style="background-image:url('assets/img/hero_b_m.webp')"></div>
+  <img class="bg-m" src="assets/img/hero_b_m.webp" alt="" aria-hidden="true">
   <div class="wrap inner"><div class="crumb"><a href="index.html">홈</a><span>/</span><a href="inquiry.html">상담문의</a><span>/</span><span class="now">상담 문의 내역</span></div><p class="eyebrow">Consultation History</p><h1>상담 문의 내역</h1><p class="lead">현재 접수된 상담 신청 내역입니다. 이름은 개인정보 보호를 위해 일부 가려서 표시됩니다.</p><div class="hero-actions"><button class="btn btn-red" data-open-modal>상담 신청하기 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><a href="tel:1644-9637" class="btn btn-ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 006.6 6.6l1.4-2 4 1.5v3a2 2 0 01-2.2 2A17.8 17.8 0 013.5 5.2 2 2 0 015.5 3z"/></svg> 1644-9637</a></div></div>
 </section>
 <section class="sec">
@@ -133,7 +152,7 @@
     <div class="bd-note"><div class="box tint"><h4>이용 안내</h4><ul><li>표시되는 이름은 개인정보 보호를 위해 가운데를 가려서 노출합니다.</li><li>상담 내용과 연락처는 공개되지 않으며 담당자만 확인합니다.</li><li>급한 문의는 고객센터 1644-9637로 전화 주시면 더 빠르게 안내해 드립니다.</li></ul></div></div>
   </div>
 </section>
-<script src="assets/board.js?v=3" defer></script>
+<script src="assets/board.js?v=4" defer></script>
 <section class="sec sec--tight"><div class="wrap"><div class="cta">
   <div><p class="t1">평일 9시 ~ 6시 상담</p><h3>전화 상담이 더 빠릅니다.</h3><p>평일 9시 ~ 6시 상담, 휴일 및 공휴일은 긴급개통문의로 연락 주세요.</p></div>
   <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;z-index:2">
@@ -216,7 +235,7 @@
     </div>
   </div>
 </div>
-<script src="assets/app.js?v=6" defer></script>
+<script src="assets/app.js?v=7" defer></script>
 
 <!-- tawk.to live chat -->
 <script type="text/javascript">
