@@ -27,6 +27,7 @@ export async function onRequestPost({ request, env }) {
          FROM click_logs
         WHERE created_at >= datetime('now','+9 hours','-${days} days')
           AND action <> 'test'
+          AND reason <> '내부 이동'
         GROUP BY ip
         HAVING hits >= 3 OR top >= 45
         ORDER BY top DESC, hits DESC

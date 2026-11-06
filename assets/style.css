@@ -21,9 +21,10 @@ ul{margin:0;padding:0;list-style:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* header */
-.site-header{position:sticky!important;top:0!important;z-index:90;background:rgba(255,255,255,.96);backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid transparent;transition:background .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease)}
-.site-header.is-stuck{background:rgba(255,255,255,.42);backdrop-filter:saturate(150%) blur(14px);border-bottom-color:rgba(233,235,243,.5);box-shadow:0 2px 10px rgba(16,17,20,.03)}
-.site-header.is-stuck{border-bottom-color:var(--line);box-shadow:0 4px 18px rgba(16,17,20,.06)}
+.site-header{position:sticky!important;top:0!important;z-index:90;background:rgba(255,255,255,.97);backdrop-filter:saturate(160%) blur(8px);border-bottom:1px solid transparent;transition:background .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease)}
+.site-header.is-stuck{background:rgba(255,255,255,.88);backdrop-filter:saturate(180%) blur(18px);border-bottom-color:rgba(233,235,243,.9);box-shadow:0 2px 10px rgba(16,17,20,.04)}
+.site-header.is-stuck{border-bottom-color:var(--line);box-shadow:0 4px 18px rgba(16,17,20,.07)}
+.site-header .logo-img,.site-header .logo-txt,.site-header .nav a{filter:none!important;opacity:1!important}
 .hd-inner{display:flex;align-items:center;gap:34px;height:88px}
 .logo{display:flex;align-items:center;gap:11px;flex:0 0 auto}
 .logo-img{height:34px;width:auto;display:block}
@@ -435,7 +436,7 @@ h1,h2,h3,h4,.head h2,.pcard .name,.pcard .sub,.reason h3,.feat h3,.mini h4,.prom
   .head h2{font-size:23px}
   .phero{min-height:0;display:block;background:#fff;overflow:hidden}
   .phero .bg.d{display:none}
-  .phero .bg-m{display:block;width:100%;height:auto;aspect-ratio:16/10;max-height:270px;object-fit:cover;object-position:center}
+  .phero .bg-m{display:block;width:100%;height:auto;aspect-ratio:16/10;max-height:270px;object-fit:cover;object-position:center top}
   .phero .bg.m{display:none}
   .phero::after{display:none}
   .phero .inner{padding-top:22px;padding-bottom:30px}
