@@ -1,3 +1,0 @@
-# 관리자 페이지: /admin 으로 접속해도 admin.html 을 그대로 보여줍니다.
-/admin            /admin.html        200
-/admin/           /admin.html        200
