@@ -316,6 +316,7 @@ h1,h2,h3,h4,.head h2,.pcard .name,.pcard .sub,.reason h3,.feat h3,.mini h4,.prom
 .mobile-bar{display:none}
 .mobile-bar{transition:transform .28s var(--ease)}
 .mobile-bar.is-down{transform:translateY(100%)}
+.mobile-bar.is-scrolled,.mobile-bar.is-down{transform:none !important}
 
 /* modal */
 .modal{position:fixed;inset:0;z-index:120;display:none;place-items:center;padding:20px}

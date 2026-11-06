@@ -17,7 +17,7 @@
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#f4514a">
 <meta name="msapplication-TileColor" content="#f4514a">
-<link rel="stylesheet" href="assets/style.css?v=8">
+<link rel="stylesheet" href="assets/style.css?v=9">
 <style>
 .hero{position:relative;overflow:hidden;background:#1a1a1a}
 .hero-track{position:relative;height:clamp(480px,74vh,720px)}
@@ -27,6 +27,13 @@
 .hero-slide.is-active{opacity:1;visibility:visible;pointer-events:auto;z-index:2}
 .hero-slide .hero-copy{position:relative;z-index:1}
 .hero-slide::before{content:"";position:absolute;inset:0;background:linear-gradient(95deg,rgba(8,10,15,.74) 0%,rgba(8,10,15,.44) 42%,rgba(8,10,15,.1) 78%)}
+.hero-slide.is-light::before{background:linear-gradient(95deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.9) 38%,rgba(255,255,255,.42) 66%,rgba(255,255,255,.04) 88%)}
+.hero-slide.is-light .hero-copy{color:#101114}
+.hero-slide.is-light .hero-copy .eyebrow{color:#5f6473}
+.hero-slide.is-light .hero-title{color:#101114;text-shadow:none}
+.hero-slide.is-light .hero-sub{color:#3b3e47}
+.hero-slide.is-light .btn-ghost{background:#fff;border-color:rgba(16,17,20,.18);color:#101114}
+.hero-slide.is-light .btn-ghost:hover{border-color:#101114}
 .hero-inner{position:relative;height:100%;display:flex;align-items:center}
 .hero-copy{max-width:760px;color:#fff;padding-bottom:20px}
 .hero-copy .eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.76);margin-bottom:20px}
@@ -111,13 +118,29 @@
 }
 @media (max-width:1024px){.sol-grid{grid-template-columns:repeat(2,1fr);gap:18px}.promo-grid{grid-template-columns:1fr}.suggest-box{padding:40px 36px;min-height:auto}.suggest-img{width:34%;right:10px;bottom:-10px}}
 @media (max-width:760px){
-.hero-track{height:clamp(470px,74vh,600px)}
-.hero-photo img{object-position:center 10%}
-.hero-slide::before{background:linear-gradient(180deg,rgba(8,10,15,.34) 0%,rgba(8,10,15,.14) 26%,rgba(8,10,15,.62) 58%,rgba(8,10,15,.92) 100%)}
+.hero{background:#fff}
+.hero-track{height:auto}
+.hero-slide{position:relative;inset:auto;display:none;background:#fff}
+.hero-slide.is-active{display:block;opacity:1;visibility:visible}
+.hero-slide::before{display:none}
+.hero-photo{position:relative;inset:auto;display:block}
+.hero-photo img{width:100%;height:auto;aspect-ratio:16/10;max-height:270px;object-fit:cover;object-position:center 30%}
+.hero-inner{height:auto;display:block}
+.hero-copy{color:#101114;max-width:none;padding:20px 0 18px}
+.hero-copy .eyebrow{color:#5f6473;margin-bottom:14px}
+.hero-title{color:#101114;text-shadow:none;font-size:27px;line-height:1.24}
+.hero-sub{margin-top:12px;font-size:14px;color:#5d6270;max-width:none}
+.hero-actions{margin-top:20px;gap:9px}
+.hero-slide.is-light .hero-copy{color:#101114}
+.hero-ui{top:14px;right:16px;left:auto;bottom:auto;transform:none;background:rgba(255,255,255,.86);color:#101114;border:1px solid rgba(16,17,20,.08);box-shadow:0 4px 14px rgba(16,17,20,.1)}
+.hero-ui button{color:#101114}
+.hero-ui button:hover{background:rgba(16,17,20,.06)}
+.hero-count span{color:#8b90a0}
+.hero-ui .divider{background:rgba(16,17,20,.14)}
 .hero-copy{padding-bottom:8px}
 .suggest-tel{padding:8px 20px 8px 8px;gap:11px;margin-top:22px}
 .suggest-tel .ic{width:38px;height:38px}
-.suggest-tel a{font-size:21px}.hero-copy{padding-bottom:64px}.hero-title{font-size:33px;line-height:1.2}.hero-sub{font-size:14px;margin-top:14px}.hero-actions{margin-top:22px}.hero-actions .btn{--btn-h:46px;font-size:14px;padding:0 16px}.sol-card .label{padding:16px}.sol-card .label span{font-size:16px}.sol-card .tag{display:none}.suggest-box{padding:30px 22px 36px;border-radius:16px}.suggest-copy h2{font-size:21px}.suggest-img{position:relative;right:auto;bottom:auto;width:44%;margin:16px -4px -2px auto}.promo-card{padding:34px 26px 32px;min-height:270px;border-radius:18px}.promo-card h3{font-size:23px}.promo-card .ghost-num{font-size:86px;right:16px}}
+.suggest-tel a{font-size:21px}.hero-title{font-size:33px;line-height:1.2}.hero-sub{font-size:14px;margin-top:14px}.hero-actions{margin-top:22px}.hero-actions .btn{--btn-h:46px;font-size:14px;padding:0 16px}.sol-card .label{padding:16px}.sol-card .label span{font-size:16px}.sol-card .tag{display:none}.suggest-box{padding:30px 22px 36px;border-radius:16px}.suggest-copy h2{font-size:21px}.suggest-img{position:relative;right:auto;bottom:auto;width:44%;margin:16px -4px -2px auto}.promo-card{padding:34px 26px 32px;min-height:270px;border-radius:18px}.promo-card h3{font-size:23px}.promo-card .ghost-num{font-size:86px;right:16px}}
 </style><script src="assets/home.js?v=1" defer></script>
 </head>
 <body class="home">
@@ -167,7 +190,7 @@
         </div>
       </div>
     </div>
-    <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="2 / 2">
+    <div class="hero-slide is-light" role="group" aria-roledescription="slide" aria-label="2 / 2">
       <picture class="hero-photo"><source media="(max-width:760px)" srcset="assets/img/hero_home2_m.webp"><img src="assets/img/hero_b.webp" alt="" loading="lazy"></picture>
       <div class="wrap hero-inner">
         <div class="hero-copy">
