@@ -60,6 +60,7 @@ export async function onRequestPost({ request, env }) {
          FROM click_logs
         WHERE created_at >= datetime('now','+9 hours','-${days} days')
           AND action <> 'test'
+          AND reason <> '내부 이동'
         ORDER BY id DESC LIMIT 100`
     ).all();
     return json({ ok: true, days, myIp: clientIP(request), stat: stat || {}, test: tstat || {}, logs: logs.results || [], suspicious: sus.results || [], blocked: blocked.results || [] });
