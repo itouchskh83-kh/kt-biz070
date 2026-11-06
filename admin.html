@@ -33,7 +33,51 @@ body{background:#f6f7fb}
   <div id="listBox" style="display:none">
     <h1>문의 관리</h1>
     <p class="sub">최근 200건까지 표시됩니다. 답변을 저장하면 사이트에 '답변완료'로 표시됩니다.</p>
-    <div id="admList"></div>
+    <div id="slPanel" style="display:none;margin-top:44px">
+      <h1 style="font-size:22px">스마트로그 · 부정클릭 감지</h1>
+      <p class="sub">광고 유입 반복 접속을 자동으로 기록·차단합니다. IP·기기지문·지역·활동 이력을 <b>365일</b> 보관합니다. 같은 기기가 IP를 바꿔도 추적됩니다.</p>
+      <div id="slStat" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center">
+        <select id="slDays" style="height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit">
+          <option value="1">최근 1일</option><option value="7" selected>최근 7일</option>
+          <option value="30">최근 30일</option><option value="365">최근 365일</option>
+        </select>
+        <button class="btn btn-red" id="slReload" type="button" style="--btn-h:42px;font-size:13px">새로고침</button>
+        <button class="btn" id="slCsv" type="button" style="--btn-h:42px;font-size:13px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 16px">네이버 제출용 CSV</button>
+      </div>
+      <div class="card" style="margin-top:16px;overflow-x:auto">
+        <div class="tt">의심 IP</div>
+        <div class="meta">10분 내 3회 이상 또는 위험점수 45점 이상</div>
+        <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;min-width:720px">
+          <thead><tr style="background:#fafbff;color:#6b7080;font-size:12px">
+            <th style="padding:9px 8px;text-align:left">IP</th><th style="padding:9px 8px">점수</th>
+            <th style="padding:9px 8px">횟수</th><th style="padding:9px 8px">광고</th>
+            <th style="padding:9px 8px;text-align:left">지역/기기</th><th style="padding:9px 8px;text-align:left">사유</th><th style="padding:9px 8px">최근</th>
+            <th style="padding:9px 8px">조치</th></tr></thead>
+          <tbody id="slBody"><tr><td colspan="8" style="padding:20px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="card" style="margin-top:16px;overflow-x:auto">
+        <div class="tt">차단·허용 목록</div>
+        <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;min-width:640px">
+          <thead><tr style="background:#fafbff;color:#6b7080;font-size:12px">
+            <th style="padding:9px 8px;text-align:left">IP</th><th style="padding:9px 8px">구분</th>
+            <th style="padding:9px 8px;text-align:left">사유</th><th style="padding:9px 8px">해제시각</th>
+            <th style="padding:9px 8px">조치</th></tr></thead>
+          <tbody id="slBlocked"><tr><td colspan="5" style="padding:20px;text-align:center;color:#9aa0b0">-</td></tr></tbody>
+        </table>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="tt">IP 직접 등록</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <input id="slIp" placeholder="예: 123.45.67.89" style="flex:1;min-width:180px;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit">
+          <input id="slHour" type="number" placeholder="차단 시간(0=영구)" value="24" style="width:170px;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit">
+          <button class="btn btn-red" id="slBlock" type="button" style="--btn-h:44px;font-size:13px">차단</button>
+          <button class="btn" id="slAllow" type="button" style="--btn-h:44px;font-size:13px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 16px">허용</button>
+        </div>
+        <p id="slMsg" style="font-size:12.5px;color:#0a9d58;font-weight:700;margin-top:10px"></p>
+      </div>
+    </div>
   </div>
 </div>
 <script>
@@ -99,6 +143,82 @@ body{background:#f6f7fb}
   });
 
   if(token) load();
+  /* ---------------- 스마트로그 ---------------- */
+  var slPanel=document.getElementById("slPanel");
+  function slApi(op,extra){
+    var body=Object.assign({password:token,op:op},extra||{});
+    return fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json();});
+  }
+  function esc(v){return String(v==null?"":v).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+  function slMsg(t,bad){var m=document.getElementById("slMsg");if(!m)return;m.textContent=t;m.style.color=bad?"#e03c35":"#0a9d58";}
+  function slLoad(){
+    if(!slPanel) return;
+    var d=document.getElementById("slDays").value;
+    slApi("list",{days:+d}).then(function(r){
+      if(!r.ok) return;
+      var st=r.stat||{};
+      document.getElementById("slStat").innerHTML=
+        [["총 접속",st.total||0,"#101114"],["차단",st.blocked||0,"#ff2d20"],["경고",st.warned||0,"#d98a00"],["광고유입",st.naver||0,"#4a5fc8"]]
+        .map(function(x){return '<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px"><div style="font-size:11.5px;color:#8b90a0;font-weight:700">'+x[0]+'</div><div style="font-size:22px;font-weight:900;letter-spacing:-.03em;color:'+x[2]+';margin-top:4px">'+x[1]+'</div></div>';}).join("");
+      var tb=document.getElementById("slBody");
+      var list=r.suspicious||[];
+      if(!list.length){tb.innerHTML='<tr><td colspan="7" style="padding:20px;text-align:center;color:#9aa0b0">의심 접속이 없습니다.</td></tr>';}
+      else{tb.innerHTML=list.map(function(x){
+        return '<tr style="border-bottom:1px solid #f2f3f8">'
+          +'<td style="padding:10px 8px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(x.ip)+'</td>'
+          +'<td style="padding:10px 8px;text-align:center;font-weight:800;color:'+(x.top>=80?"#e03c35":x.top>=45?"#d98a00":"#6b7080")+'">'+x.top+'</td>'
+          +'<td style="padding:10px 8px;text-align:center">'+x.hits+'</td>'
+          +'<td style="padding:10px 8px;text-align:center">'+(x.naver?'<span style="color:#4a5fc8;font-weight:700">광고</span>':'-')+'</td>'
+          +'<td style="padding:10px 8px;font-size:11.5px;color:#6b7080">'+esc(x.region||"-")+'<br><span style="color:#9aa0b0">기기 '+x.devices+'</span></td>'
+          +'<td style="padding:10px 8px;color:#6b7080;font-size:12px">'+esc(x.reason||"-")+'</td>'
+          +'<td style="padding:10px 8px;text-align:center;color:#9aa0b0;font-size:11.5px">'+esc((x.last||"").slice(5,16))+'</td>'
+          +'<td style="padding:10px 8px;text-align:center;white-space:nowrap">'
+          +'<button type="button" data-blk="'+esc(x.ip)+'" style="border:0;background:#e03c35;color:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:800;cursor:pointer">차단</button> '
+          +'<button type="button" data-alw="'+esc(x.ip)+'" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;margin-top:2px">허용</button>'
+          +'</td></tr>';}).join("");}
+      var bb=document.getElementById("slBlocked");
+      var bl=r.blocked||[];
+      if(!bl.length){bb.innerHTML='<tr><td colspan="5" style="padding:20px;text-align:center;color:#9aa0b0">등록된 IP가 없습니다.</td></tr>';}
+      else{bb.innerHTML=bl.map(function(x){
+        return '<tr style="border-bottom:1px solid #f2f3f8">'
+          +'<td style="padding:10px 8px;font-weight:700">'+esc(x.ip)+'</td>'
+          +'<td style="padding:10px 8px;text-align:center">'+(x.mode==="allow"?'<span class="badge" style="background:#e9f8f0;color:#0a9d58">허용</span>':'<span class="badge" style="background:#fdeceb;color:#e03c35">차단</span>')+'</td>'
+          +'<td style="padding:10px 8px;font-size:11.5px;color:#6b7080">'+esc(x.region||"-")+'<br><span style="color:#9aa0b0">기기 '+x.devices+'</span></td>'
+          +'<td style="padding:10px 8px;color:#6b7080;font-size:12px">'+esc(x.reason||"-")+'</td>'
+          +'<td style="padding:10px 8px;text-align:center;color:#9aa0b0;font-size:11.5px">'+(x.blocked_until?esc(x.blocked_until.slice(5,16)):"영구")+'</td>'
+          +'<td style="padding:10px 8px;text-align:center"><button type="button" data-del="'+esc(x.ip)+'" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;cursor:pointer">해제</button></td></tr>';}).join("");}
+    });
+  }
+  document.addEventListener("click",function(e){
+    var t=e.target;
+    if(t.dataset&&t.dataset.blk){ slApi("block",{ip:t.dataset.blk,hours:24}).then(function(){slMsg("차단했습니다: "+t.dataset.blk);slLoad();}); }
+    else if(t.dataset&&t.dataset.alw){ slApi("allow",{ip:t.dataset.alw}).then(function(){slMsg("허용 목록에 추가했습니다: "+t.dataset.alw);slLoad();}); }
+    else if(t.dataset&&t.dataset.del){ slApi("unblock",{ip:t.dataset.del}).then(function(){slMsg("해제했습니다: "+t.dataset.del);slLoad();}); }
+  });
+  var slR=document.getElementById("slReload");
+  if(slR) slR.addEventListener("click",slLoad);
+  var slD=document.getElementById("slDays");
+  if(slD) slD.addEventListener("change",slLoad);
+  var slC=document.getElementById("slCsv");
+  if(slC) slC.addEventListener("click",function(){
+    var d=document.getElementById("slDays").value;
+    fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:token,op:"export",days:+d})})
+      .then(function(r){return r.blob();}).then(function(b){
+        var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="smartlog_"+new Date().toISOString().slice(0,10)+".csv";a.click();
+      });
+  });
+  var slB=document.getElementById("slBlock");
+  if(slB) slB.addEventListener("click",function(){
+    var ip=document.getElementById("slIp").value.trim(); if(!ip) return;
+    var h=+document.getElementById("slHour").value||0;
+    slApi("block",{ip:ip,hours:h}).then(function(){slMsg("차단했습니다: "+ip+(h?" ("+h+"시간)":" (영구)"));slLoad();});
+  });
+  var slA=document.getElementById("slAllow");
+  if(slA) slA.addEventListener("click",function(){
+    var ip=document.getElementById("slIp").value.trim(); if(!ip) return;
+    slApi("allow",{ip:ip}).then(function(){slMsg("허용 등록했습니다: "+ip);slLoad();});
+  });
+
 })();
 </script>
 </body></html>

@@ -1,5 +1,6 @@
 import { hash, json, mask, digits, PER } from './_lib.js';
 import { notify } from './_notify.js';
+import { clientIP, blockState } from './_smartlog.js';
 
 export async function onRequestGet({ request, env }) {
   if (!env.DB) return json({ ok: false, error: 'DB_NOT_BOUND' }, 500);
@@ -42,6 +43,10 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env, waitUntil }) {
+  if (env.DB) {
+    const _st = await blockState(env, clientIP(request));
+    if (_st.mode === 'block') return json({ ok: false, error: 'BLOCKED', message: '비정상 접속이 감지되어 접수가 제한되었습니다.' }, 403);
+  }
   if (!env.DB) return json({ ok: false, error: 'DB_NOT_BOUND' }, 500);
   let b;
   try { b = await request.json(); } catch { return json({ ok: false, error: 'BAD_JSON' }, 400); }

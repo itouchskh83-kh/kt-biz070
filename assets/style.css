@@ -338,6 +338,67 @@ h1,h2,h3,h4,.head h2,.pcard .name,.pcard .sub,.reason h3,.feat h3,.mini h4,.prom
 .phero p.lead{animation:riseIn .8s var(--ease) .16s both}
 .phero .hero-actions{animation:riseIn .8s var(--ease) .24s both}
 
+
+/* ---------- 부정클릭방지 배지 ---------- */
+.sl-badge{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 13px 0 10px;margin-left:auto;border-radius:20px;background:#101114;border:1px solid #2a2c33;font-size:11.5px;font-weight:700;letter-spacing:-.01em;color:#e8e9ee;flex:0 0 auto;white-space:nowrap;box-shadow:0 2px 10px rgba(16,17,20,.18)}
+.sl-badge b{color:#ff6b62;font-weight:900}
+.sl-lamp{position:relative;width:9px;height:9px;flex:0 0 auto}
+.sl-lamp i{position:absolute;inset:0;border-radius:50%;background:#ff2d20;box-shadow:0 0 6px 1px rgba(255,45,32,.9);animation:slBlink 3.6s infinite}
+.sl-lamp::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(255,45,32,.55);animation:slRing 3.6s infinite}
+/* 불규칙 점멸: 짧게 2~3번 깜빡 후 긴 대기 */
+@keyframes slBlink{
+  0%,100%{opacity:1}
+  3%{opacity:.08} 5%{opacity:1}
+  7%{opacity:.1} 9%{opacity:1}
+  11%{opacity:.15} 14%{opacity:1}
+  27%{opacity:1} 29%{opacity:.05} 31%{opacity:1}
+  33%{opacity:.08} 36%{opacity:1}
+  58%{opacity:1} 60%{opacity:.06} 62%{opacity:1}
+  64%{opacity:.1} 66%{opacity:1}
+  68%{opacity:.12} 70%{opacity:1}
+  88%{opacity:1} 90%{opacity:.07} 92%{opacity:1}
+}
+@keyframes slRing{0%,100%{opacity:.55;transform:scale(1)}6%{opacity:0;transform:scale(1.9)}12%{opacity:.5;transform:scale(1)}30%{opacity:0;transform:scale(2)}36%{opacity:.55;transform:scale(1)}62%{opacity:0;transform:scale(1.9)}68%{opacity:.55;transform:scale(1)}}
+.sl-badge .sl-n{display:none;min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:#ff2d20;color:#fff;font-size:10px;line-height:17px;text-align:center;font-weight:900}
+.sl-badge.is-detect{background:#2a0f0d;border-color:#7a1e18}
+.sl-badge.is-detect .sl-lamp i{animation-duration:.9s;box-shadow:0 0 10px 2px rgba(255,45,32,1)}
+.sl-badge.is-detect .sl-lamp::after{animation-duration:.9s}
+.sl-badge.is-detect .sl-n{display:inline-block}
+.sl-badge.is-block{background:#ff2d20;border-color:#ff2d20;color:#fff}
+.sl-badge.is-block b{color:#fff}
+.sl-badge.is-block .sl-lamp i{background:#fff;animation-duration:.42s;box-shadow:0 0 10px 2px rgba(255,255,255,.95)}
+.sl-badge.is-block .sl-lamp::after{border-color:rgba(255,255,255,.7);animation-duration:.42s}
+.sl-badge.is-block .sl-n{display:inline-block;background:#fff;color:#ff2d20}
+/* ---------- 경고 오버레이 ---------- */
+.sl-ov{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(10,12,18,.6);backdrop-filter:blur(5px);animation:slFade .22s ease both}
+.sl-ov.is-out{animation:slFade .2s ease reverse both}
+.sl-ov .sl-card{width:min(430px,100%);background:#fff;border-radius:20px;padding:30px 26px 24px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.32);animation:slPop .28s cubic-bezier(.2,.9,.3,1) both}
+.sl-ov--block .sl-card{border-top:4px solid #ff2d20}
+.sl-ov .sl-ic{width:54px;height:54px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;font-size:25px;font-weight:900;background:#fff3e6;color:#d98a00}
+.sl-ov .sl-ic.danger{background:#ffe9e7;color:#ff2d20;animation:slShake 2.4s infinite}
+.sl-ov h3{font-size:18.5px;font-weight:800;letter-spacing:-.03em;color:#101114;line-height:1.35}
+.sl-ov .sl-p{margin-top:10px;font-size:13.5px;line-height:1.7;color:#5d6270}
+.sl-ov .sl-tip{margin-top:14px;font-size:12.5px;font-weight:800;color:#c81f16;background:#fff2f1;border-radius:8px;padding:10px 12px}
+.sl-ov .sl-dev{margin-top:14px;padding:10px 12px;border-radius:9px;background:#f7f8fc;font-size:11.5px;color:#6b7080;line-height:1.6}
+.sl-ov .sl-dev b{color:#2b2e37;font-weight:800}
+.sl-ov .sl-legal{margin-top:12px;font-size:11px;line-height:1.6;color:#9aa0b0;border-top:1px dashed #e9ebf3;padding-top:11px}
+.sl-ov .sl-legal b{color:#c81f16}
+.sl-ov .sl-btn{display:block;margin-top:18px;height:46px;line-height:46px;padding:0 24px;border-radius:30px;background:#ff2d20;color:#fff;font-size:14px;font-weight:800;border:0;cursor:pointer;width:100%;text-align:center}
+.sl-ov .sl-btn.ghost{background:#f4f5f9;color:#3b3e47}
+.sl-ov .sl-small{margin-top:11px;font-size:11px;color:#9aa0b0}
+@keyframes slFade{from{opacity:0}to{opacity:1}}
+@keyframes slPop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes slShake{0%,92%,100%{transform:none}94%{transform:translateX(-3px)}96%{transform:translateX(3px)}98%{transform:translateX(-2px)}}
+@media (max-width:1024px){
+  .sl-badge{height:28px;padding:0 10px 0 8px;font-size:10.5px;gap:6px}
+}
+@media (max-width:760px){
+  .sl-badge{height:26px;padding:0 8px 0 7px;font-size:9.5px;letter-spacing:-.03em}
+  .sl-badge .sl-txt b{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .sl-lamp i,.sl-lamp::after,.sl-ov .sl-ic.danger{animation:none !important}
+}
 @media (max-width:1180px){
   .nav{gap:16px}.nav>li>a{font-size:14.5px}
   .quick{display:none}
