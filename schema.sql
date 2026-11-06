@@ -1,4 +1,3 @@
--- [안전] posts 테이블은 절대 지우지 않습니다. 없을 때만 생성합니다.
 CREATE TABLE IF NOT EXISTS posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
@@ -16,8 +15,8 @@ CREATE TABLE IF NOT EXISTS posts (
   created_at TEXT NOT NULL DEFAULT (datetime('now','+9 hours')),
   updated_at TEXT
 );
-CREATE INDEX idx_posts_created ON posts (created_at DESC);
-CREATE INDEX idx_posts_owner ON posts (author, phone);
+CREATE INDEX IF NOT EXISTS idx_posts_created ON posts (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_posts_owner ON posts (author, phone);
 
 CREATE TABLE IF NOT EXISTS click_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
