@@ -1,5 +1,6 @@
 
 import { json } from './_lib.js';
+import { clientIP, evaluate, STAGE } from './_smartlog.js';
 
 function csvCell(v) {
   const s = String(v == null ? '' : v).replace(/"/g, '""');
@@ -40,7 +41,7 @@ export async function onRequestPost({ request, env }) {
               COUNT(DISTINCT ip) AS ips, COUNT(DISTINCT fp) AS devices
          FROM click_logs WHERE created_at >= datetime('now','+9 hours','-${days} days')`
     ).first();
-    return json({ ok: true, days, stat: stat || {}, suspicious: sus.results || [], blocked: blocked.results || [] });
+    return json({ ok: true, days, myIp: clientIP(request), stat: stat || {}, suspicious: sus.results || [], blocked: blocked.results || [] });
   }
 
   if (op === 'block') {
@@ -94,6 +95,32 @@ export async function onRequestPost({ request, env }) {
       headers: { 'content-type': 'text/csv; charset=utf-8',
                  'content-disposition': 'attachment; filename="smartlog.csv"' }
     });
+  }
+
+  if (op === 'simulate') {
+    // 현재 접속 환경 그대로, 광고 클릭 횟수만 늘려가며 판정 변화를 계산
+    const ua = request.headers.get('user-agent') || '';
+    const org = String((request.cf && request.cf.asOrganization) || '');
+    const rows = [];
+    for (let n = 1; n <= 10; n++) {
+      const ev = evaluate({
+        ipHits: n, fpHits: n, fpIps: Math.min(n, 3), ua, org,
+        isAd: true, dwell: 8, moved: 1, depth: 3, isKnown: 1
+      });
+      rows.push({ clicks: n, score: ev.score, action: ev.action, stage: ev.stage,
+                  reasons: ev.reasons.join(' / ') });
+    }
+    // 같은 기기 + IP 변경 시나리오
+    const ipChange = evaluate({
+      ipHits: 3, fpHits: 4, fpIps: 4, ua, org,
+      isAd: true, dwell: 5, moved: 1, depth: 2, isKnown: 0
+    });
+    return json({ ok: true, thresholds: STAGE, org, rows, ipChange });
+  }
+
+  if (op === 'clearTest') {
+    await env.DB.prepare("DELETE FROM click_logs WHERE path LIKE '%sl_test%'").run();
+    return json({ ok: true });
   }
 
   return json({ ok: false, error: 'UNKNOWN_OP' }, 400);

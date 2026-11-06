@@ -1,13 +1,13 @@
 
-// 부정클릭방지시스템 — 다중 신호 정밀 판정
+// 부정클릭방지 — 광고 유입 전용 정밀 판정
+// 원칙: 광고를 경유하지 않은 방문은 절대 경고/차단하지 않는다.
 
 export const RETENTION_DAYS = 365;
 export const WINDOW_MIN = 30;
 
-// 3단계 임계
-export const STAGE = { watch: 40, warn: 65, block: 100 };
+// 3단계 임계 (광고 유입만 적용)
+export const STAGE = { watch: 55, warn: 75, block: 105 };
 
-// 호스팅·VPN (광고 부정클릭 고위험 대역)
 const HOSTING = [
   'google','amazon','aws','digitalocean','vultr','ovh','hetzner','microsoft','azure',
   'oracle','alibaba','aliyun','tencent','contabo','linode','m247','leaseweb','colocrossing',
@@ -16,24 +16,33 @@ const HOSTING = [
   'mullvad','nordvpn','expressvpn','surfshark','cyberghost','private internet','proxy','vpn'
 ];
 
-// 모바일 통신사 (정상 방문자 판별에 사용)
-const CARRIER = ['skt','kt','lgu','lg u+','samsung','korea telecom','sk broadband','hello'];
+const CARRIER = ['skt','kt','lgu','lg u+','samsung','korea telecom','sk broadband','hello','sk telink'];
 
 const BOT_UA = /(bot|crawl|spider|headless|phantom|selenium|puppeteer|playwright|curl|wget|python-requests|okhttp|scrapy|httpclient|java\/)/i;
 
-export const REASON_TEXT = {
-  ipRepeat: (n) => `동일 IP ${n}회 반복`,
-  fpRepeat: (n) => `동일 기기 ${n}회 반복`,
-  ipChange: (n) => `IP 변경 ${n}회 (기기 동일)`,
-  bot: '자동화 프로그램',
-  hosting: '호스팅/VPN 대역',
-  noRef: '유입경로 없음',
-  bounce: '즉시 이탈',
-  noActivity: '사람 활동 없음',
-  cookieWipe: '쿠키·저장소 삭제 후 재유입',
-  adRepeat: '광고 경유 반복',
-  noDepth: '단일 페이지만 열람'
-};
+/**
+ * 유입 판별
+ * 네이버 자동 추적 URL 파라미터(n_media, n_query, n_rank, n_ad, n_keyword ...)가
+ * 실제로 붙어 있어야 '광고 클릭'으로 인정한다.
+ * 레퍼러만 search.naver.com 인 경우는 자연검색(organic)이므로 채점하지 않는다.
+ */
+export const NAVER_AD_PARAMS = ['n_media','n_query','n_rank','n_ad','n_ad_group','n_keyword','n_keyword_id','n_match','n_campaign_type','n_ad_group_type'];
+
+export function detectSource(ref, kw, qs) {
+  let host = '';
+  try { host = new URL(ref).hostname.toLowerCase(); } catch {}
+  const q = String(qs || '');
+  const hasNaverAd = NAVER_AD_PARAMS.some(k => new RegExp('[?&]' + k + '=').test(q));
+
+  if (hasNaverAd) return 'naver';
+  if (/[?&]gclid=|gbraid=|wbraid=/.test(q)) return 'google';
+  if (/[?&]utm_source=naver/i.test(q)) return 'naver';
+
+  if (host.includes('search.naver') || host === 'naver.com' || host.endsWith('.naver.com')) return 'organic-naver';
+  if (host.includes('google')) return 'organic-google';
+  if (host.includes('daum') || host.includes('kakao')) return 'organic-daum';
+  return '';
+}
 
 export function clientIP(request) {
   const h = request.headers;
@@ -43,13 +52,6 @@ export function clientIP(request) {
 export async function uaHash(ua) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ua || ''));
   return [...new Uint8Array(buf)].slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-export function isNaverRef(ref) {
-  try {
-    const h = new URL(ref).hostname;
-    return h === 'search.naver.com' || h === 'm.search.naver.com' || h.endsWith('.naver.com');
-  } catch { return false; }
 }
 
 export function isHosting(org) {
@@ -81,41 +83,55 @@ export async function maybePurge(env) {
   } catch (e) {}
 }
 
-// 정밀 점수 계산
+/**
+ * 채점
+ * - ad=false(직접/검색엔진/내부이동) → 항상 allow. 기록만 남긴다.
+ * - ad=true(광고 경유) → 아래 신호로 채점.
+ */
 export function evaluate(c) {
-  let s = 0;
   const why = [];
 
-  // 1) IP 반복
-  if (c.ipHits >= 10) { s += 110; why.push(REASON_TEXT.ipRepeat(c.ipHits)); }
-  else if (c.ipHits >= 6) { s += 85; why.push(REASON_TEXT.ipRepeat(c.ipHits)); }
-  else if (c.ipHits >= 4) { s += 60; why.push(REASON_TEXT.ipRepeat(c.ipHits)); }
-  else if (c.ipHits >= 2) { s += 32; why.push(REASON_TEXT.ipRepeat(c.ipHits)); }
+  // ── 광고 유입이 아니면 무조건 통과 (기록만)
+  if (!c.isAd) {
+    // 단, 명백한 봇 + 호스팅 대역이면 로그에만 'suspicious' 표시
+    const bad = (BOT_UA.test(c.ua || '') && isHosting(c.org)) ? 1 : 0;
+    return { score: bad ? 60 : 0, reasons: bad ? ['봇+호스팅'] : [], action: 'allow', stage: 0 };
+  }
 
-  // 2) 기기 지문 반복 (IP 바꿔도 잡힘 — 핵심)
-  if (c.fpHits >= 8) { s += 120; why.push(REASON_TEXT.fpRepeat(c.fpHits)); }
-  else if (c.fpHits >= 5) { s += 90; why.push(REASON_TEXT.fpRepeat(c.fpHits)); }
-  else if (c.fpHits >= 3) { s += 60; why.push(REASON_TEXT.fpRepeat(c.fpHits)); }
-  else if (c.fpHits >= 2) { s += 30; why.push(REASON_TEXT.fpRepeat(c.fpHits)); }
+  let s = 0;
 
-  // 3) IP 변경 검출 (같은 기기, 다른 IP) — 악성 부정클릭의 대표 패턴
-  if (c.fpIps >= 3) { s += 90; why.push(REASON_TEXT.ipChange(c.fpIps)); }
-  else if (c.fpIps >= 2) { s += 45; why.push(REASON_TEXT.ipChange(c.fpIps)); }
+  // 1) 같은 IP가 광고로 반복 클릭
+  if (c.ipHits >= 10) { s += 100; why.push(`동일 IP ${c.ipHits}회 광고 클릭`); }
+  else if (c.ipHits >= 6) { s += 75; why.push(`동일 IP ${c.ipHits}회 광고 클릭`); }
+  else if (c.ipHits >= 4) { s += 55; why.push(`동일 IP ${c.ipHits}회 광고 클릭`); }
+  else if (c.ipHits >= 3) { s += 35; why.push(`동일 IP ${c.ipHits}회 광고 클릭`); }
 
-  // 4) 자동화
-  if (BOT_UA.test(c.ua || '')) { s += 70; why.push(REASON_TEXT.bot); }
+  // 2) 같은 기기가 광고로 반복 클릭 (쿠키 삭제 우회 대응)
+  if (c.fpHits >= 8) { s += 110; why.push(`동일 기기 ${c.fpHits}회`); }
+  else if (c.fpHits >= 5) { s += 80; why.push(`동일 기기 ${c.fpHits}회`); }
+  else if (c.fpHits >= 4) { s += 55; why.push(`동일 기기 ${c.fpHits}회`); }
+  else if (c.fpHits >= 3) { s += 35; why.push(`동일 기기 ${c.fpHits}회`); }
 
-  // 5) 호스팅/VPN — 통신사면 감점 (정상 사용자 보호)
-  if (isHosting(c.org)) { s += 65; why.push(REASON_TEXT.hosting); }
-  else if (isCarrier(c.org)) { s -= 15; }
+  // 3) IP 변경 (같은 기기, 다른 IP) — 악성 부정클릭 핵심 패턴
+  if (c.fpIps >= 3) { s += 80; why.push(`IP 변경 ${c.fpIps}회`); }
+  else if (c.fpIps >= 2) { s += 45; why.push(`IP 변경 ${c.fpIps}회`); }
 
-  // 6) 유입·활동
-  if (!c.hasRef && c.ipHits >= 2) { s += 18; why.push(REASON_TEXT.noRef); }
-  if (c.isNaver && c.ipHits >= 2) { s += 22; why.push(REASON_TEXT.adRepeat); }
-  if (c.dwell !== null && c.dwell < 3 && c.ipHits >= 2) { s += 25; why.push(REASON_TEXT.bounce); }
-  if (c.moved === 0 && c.ipHits >= 2) { s += 20; why.push(REASON_TEXT.noActivity); }
-  if (c.depth === 1 && c.ipHits >= 3) { s += 15; why.push(REASON_TEXT.noDepth); }
-  if (c.isKnown === 0) { s += 22; why.push(REASON_TEXT.cookieWipe); }
+  // 4) 자동화 / 호스팅
+  if (BOT_UA.test(c.ua || '')) { s += 60; why.push('자동화 프로그램'); }
+  if (isHosting(c.org)) { s += 50; why.push('호스팅/VPN 대역'); }
+  else if (isCarrier(c.org)) { s -= 25; why.push('국내 통신사(감점)'); }
 
-  return { score: Math.max(0, s), reasons: why };
+  // 5) 비정상 활동 (광고 클릭인데 사람 활동이 없음)
+  if (c.dwell !== null && c.dwell < 2) { s += 20; why.push('즉시 이탈'); }
+  if (c.moved === 0) { s += 15; why.push('사람 활동 없음'); }
+  if (c.depth === 1 && c.ipHits >= 3) { s += 10; why.push('단일 페이지만 열람'); }
+  if (c.isKnown === 0 && c.ipHits >= 3) { s += 15; why.push('쿠키 삭제 후 재유입'); }
+
+  s = Math.max(0, s);
+  let action = 'allow', stage = 0;
+  if (s >= STAGE.block) { action = 'block'; stage = 3; }
+  else if (s >= STAGE.warn) { action = 'warn'; stage = 2; }
+  else if (s >= STAGE.watch) { action = 'warn'; stage = 1; }
+
+  return { score: s, reasons: why, action, stage };
 }

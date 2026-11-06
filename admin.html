@@ -68,6 +68,14 @@ body{background:#f6f7fb}
         </table>
       </div>
       <div class="card" style="margin-top:16px">
+        <div class="tt">판정 시뮬레이션</div>
+        <div class="meta">광고 클릭이 반복될 때 어느 지점에서 경고·차단이 되는지 미리 확인합니다. 실제 데이터는 건드리지 않습니다.</div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn btn-red" id="slSim" type="button" style="--btn-h:42px;font-size:13px">시뮬레이션 실행</button>
+        </div>
+        <div id="slSimOut" style="margin-top:14px"></div>
+      </div>
+      <div class="card" style="margin-top:16px">
         <div class="tt">IP 직접 등록</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
           <input id="slIp" placeholder="예: 123.45.67.89" style="flex:1;min-width:180px;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit">
@@ -157,6 +165,7 @@ body{background:#f6f7fb}
     slApi("list",{days:+d}).then(function(r){
       if(!r.ok) return;
       var st=r.stat||{};
+      var mi=document.getElementById('slMyIp'); if(mi&&r.myIp) mi.textContent=r.myIp;
       document.getElementById("slStat").innerHTML=
         [["총 접속",st.total||0,"#101114"],["차단",st.blocked||0,"#ff2d20"],["경고",st.warned||0,"#d98a00"],["광고유입",st.naver||0,"#4a5fc8"]]
         .map(function(x){return '<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px"><div style="font-size:11.5px;color:#8b90a0;font-weight:700">'+x[0]+'</div><div style="font-size:22px;font-weight:900;letter-spacing:-.03em;color:'+x[2]+';margin-top:4px">'+x[1]+'</div></div>';}).join("");
@@ -217,6 +226,28 @@ body{background:#f6f7fb}
   if(slA) slA.addEventListener("click",function(){
     var ip=document.getElementById("slIp").value.trim(); if(!ip) return;
     slApi("allow",{ip:ip}).then(function(){slMsg("허용 등록했습니다: "+ip);slLoad();});
+  });
+
+  var slSimBtn=document.getElementById("slSim");
+  if(slSimBtn) slSimBtn.addEventListener("click",function(){
+    var out=document.getElementById("slSimOut");
+    out.innerHTML='<p style="color:#8b90a0;font-size:13px">계산 중…</p>';
+    slApi("simulate",{}).then(function(r){
+      if(!r.ok){out.innerHTML='<p style="color:#e03c35;font-size:13px">실패</p>';return;}
+      var cols=["광고클릭","점수","판정","사유"];
+      var head='<tr style="background:#fafbff;color:#6b7080;font-size:11.5px">'+cols.map(function(c){return '<th style="padding:7px 8px;text-align:left">'+c+'</th>';}).join("")+'</tr>';
+      var body=r.rows.map(function(x){
+        var col=x.action==="block"?"#ff2d20":x.action==="warn"?"#d98a00":"#0a9d58";
+        var lbl=x.action==="block"?"차단":x.action==="warn"?(x.stage===2?"경고2":"경고1"):"통과";
+        return '<tr style="border-bottom:1px solid #f2f3f8"><td style="padding:7px 8px;font-weight:700">'+x.clicks+'회</td>'
+          +'<td style="padding:7px 8px;font-weight:800;color:'+col+'">'+x.score+'</td>'
+          +'<td style="padding:7px 8px;font-weight:800;color:'+col+'">'+lbl+'</td>'
+          +'<td style="padding:7px 8px;font-size:11.5px;color:#6b7080">'+(x.reasons||"-")+'</td></tr>';
+      }).join("");
+      out.innerHTML='<p style="font-size:12px;color:#8b90a0;margin-bottom:8px">접속 대역: '+(r.org||"알수없음")+' · 경고1 '+r.thresholds.watch+'점 / 경고2 '+r.thresholds.warn+'점 / 차단 '+r.thresholds.block+'점</p>'
+        +'<table style="width:100%;border-collapse:collapse;font-size:12.5px"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>'
+        +'<p style="margin-top:12px;font-size:12px;color:#6b7080;background:#f7f8fc;border-radius:8px;padding:10px">IP 변경 시나리오(3회 클릭 + 기기4회 + IP4개): <b style="color:'+(r.ipChange.action==="block"?"#ff2d20":"#d98a00")+'">'+r.ipChange.score+'점 · '+(r.ipChange.action==="block"?"차단":"경고")+'</b> — '+r.ipChange.reasons.join(', ')+'</p>';
+    });
   });
 
 })();

@@ -139,7 +139,7 @@
 
   function send(beacon){
     var body = JSON.stringify({
-      p: path, r: ref, q: kw, f: fp, n: known && known !== fp ? 0 : 1,
+      p: path, r: ref, q: kw, qs: location.search.slice(0,300), f: fp, n: known && known !== fp ? 0 : 1,
       d: Math.round((Date.now() - t0) / 1000), v: depth,
       m: moved ? 1 : 0, s: scrolled, w: screen.width, h: screen.height
     });
