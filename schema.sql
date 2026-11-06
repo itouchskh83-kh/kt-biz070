@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS posts;
-CREATE TABLE posts (
+-- [안전] posts 테이블은 절대 지우지 않습니다. 없을 때만 생성합니다.
+CREATE TABLE IF NOT EXISTS posts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
   content TEXT NOT NULL,

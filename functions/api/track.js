@@ -73,7 +73,7 @@ export async function onRequestPost({ request, env }) {
 
   // 3) 판정
   const ev = evaluate({ ipHits, fpHits, fpIps, ua, org, isAd, dwell, moved, depth, isKnown });
-  const action = ev.action, stage = ev.stage;
+  let action = ev.action, stage = ev.stage;
 
   // 4) 실제 상담 완료 IP 는 보호
   if (action === 'block') {
