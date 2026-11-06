@@ -54,6 +54,7 @@ body{background:#f6f7fb}
       <h1 style="font-size:22px">부정클릭 감지 현황</h1>
       <p class="sub">광고 유입 반복 접속을 자동으로 기록·차단합니다. IP·기기지문·지역·활동 이력을 <b>365일</b> 보관합니다. 같은 기기가 IP를 바꿔도 추적됩니다.</p>
       <div id="slStat" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px"></div>
+      <p id="slTestInfo" style="font-size:11.5px;color:#9aa0b0;font-weight:700;margin-top:8px"></p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center">
         <select id="slDays" style="height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit">
           <option value="1">최근 1일</option><option value="7" selected>최근 7일</option>
@@ -61,10 +62,27 @@ body{background:#f6f7fb}
         </select>
         <button class="btn btn-red" id="slReload" type="button" style="--btn-h:42px;font-size:13px">새로고침</button>
         <button class="btn" id="slCsv" type="button" style="--btn-h:42px;font-size:13px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 16px">네이버 제출용 CSV</button>
+        <button class="btn" id="slReset" type="button" style="--btn-h:42px;font-size:13px;border:1px solid #f3c7c4;border-radius:10px;background:#fff;color:#e03c35;padding:0 16px;font-weight:800">기록 전체 삭제</button>
+      </div>
+      <div class="card" style="margin-top:16px;overflow-x:auto">
+        <div class="tt">전체 접속 기록</div>
+        <div class="meta">광고·자연검색·직접방문·내부이동을 모두 표시합니다. 최근 100건.</div>
+        <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px;min-width:820px">
+          <thead><tr style="background:#fafbff;color:#6b7080;font-size:11.5px">
+            <th style="padding:9px 8px;text-align:left">시각</th>
+            <th style="padding:9px 8px;text-align:left">IP</th>
+            <th style="padding:9px 8px;text-align:left">유입경로</th>
+            <th style="padding:9px 8px;text-align:left">검색어</th>
+            <th style="padding:9px 8px;text-align:left">페이지</th>
+            <th style="padding:9px 8px">점수</th>
+            <th style="padding:9px 8px">체류</th>
+            <th style="padding:9px 8px;text-align:left">지역</th></tr></thead>
+          <tbody id="slLogs"><tr><td colspan="8" style="padding:20px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody>
+        </table>
       </div>
       <div class="card" style="margin-top:16px;overflow-x:auto">
         <div class="tt">의심 IP</div>
-        <div class="meta">10분 내 3회 이상 또는 위험점수 45점 이상</div>
+        <div class="meta">광고 유입 반복 접속만 집계합니다. 3회 이상 또는 위험점수 45점 이상.</div>
         <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;min-width:720px">
           <thead><tr style="background:#fafbff;color:#6b7080;font-size:12px">
             <th style="padding:9px 8px;text-align:left">IP</th><th style="padding:9px 8px">점수</th>
@@ -223,12 +241,16 @@ body{background:#f6f7fb}
       if(!r.ok) return;
       var st=r.stat||{};
       var mi=document.getElementById('slMyIp'); if(mi&&r.myIp) mi.textContent=r.myIp;
+      function card(lbl,val,col){return '<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px"><div style="font-size:11.5px;color:#8b90a0;font-weight:700">'+lbl+'</div><div style="font-size:22px;font-weight:900;letter-spacing:-.03em;color:'+col+';margin-top:4px">'+(val||0)+'</div></div>';}
       document.getElementById("slStat").innerHTML=
-        [["총 접속",st.total||0,"#101114"],["차단",st.blocked||0,"#ff2d20"],["경고",st.warned||0,"#d98a00"],["광고유입",st.naver||0,"#4a5fc8"]]
-        .map(function(x){return '<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px"><div style="font-size:11.5px;color:#8b90a0;font-weight:700">'+x[0]+'</div><div style="font-size:22px;font-weight:900;letter-spacing:-.03em;color:'+x[2]+';margin-top:4px">'+x[1]+'</div></div>';}).join("");
+        card("총 접속",st.total,"#101114")+card("광고 유입",st.ad,"#4a5fc8")
+        +card("자연검색",st.organic,"#0a9d58")+card("직접방문",st.direct,"#6b7080")
+        +card("내부 이동",st.internal,"#9aa0b0")+card("차단",st.blocked,"#ff2d20")+card("경고",st.warned,"#d98a00");
+      var tt=r.test||{}, mi2=document.getElementById("slTestInfo");
+      if(mi2){ mi2.textContent = tt.n ? ("테스트 기록 "+tt.n+"건 (통계 제외 · 마지막 "+String(tt.last||"").slice(5,16)+")") : ""; }
       var tb=document.getElementById("slBody");
       var list=r.suspicious||[];
-      if(!list.length){tb.innerHTML='<tr><td colspan="7" style="padding:20px;text-align:center;color:#9aa0b0">의심 접속이 없습니다.</td></tr>';}
+      if(!list.length){tb.innerHTML='<tr><td colspan="8" style="padding:20px;text-align:center;color:#9aa0b0">의심 접속이 없습니다.</td></tr>';}
       else{tb.innerHTML=list.map(function(x){
         return '<tr style="border-bottom:1px solid #f2f3f8">'
           +'<td style="padding:10px 8px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(x.ip)+'</td>'
@@ -242,6 +264,28 @@ body{background:#f6f7fb}
           +'<button type="button" data-blk="'+esc(x.ip)+'" style="border:0;background:#e03c35;color:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:800;cursor:pointer">차단</button> '
           +'<button type="button" data-alw="'+esc(x.ip)+'" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;margin-top:2px">허용</button>'
           +'</td></tr>';}).join("");}
+      var lb=document.getElementById("slLogs"), lg=r.logs||[];
+      function srcTag(x){
+        if(x.is_naver) return '<span style="color:#4a5fc8;font-weight:800">광고</span>';
+        if(x.reason==="자연검색") return '<span style="color:#0a9d58;font-weight:700">자연검색</span>';
+        if(x.reason==="내부 이동") return '<span style="color:#9aa0b0">내부이동</span>';
+        return '<span style="color:#6b7080">직접방문</span>';
+      }
+      if(lb){
+        if(!lg.length){ lb.innerHTML='<tr><td colspan="8" style="padding:20px;text-align:center;color:#9aa0b0">기록이 없습니다.</td></tr>'; }
+        else lb.innerHTML=lg.map(function(x){
+          var pc = x.action==="block"?"#e03c35":x.action==="warn"?"#d98a00":"#9aa0b0";
+          return '<tr style="border-bottom:1px solid #f2f3f8">'
+            +'<td style="padding:8px;color:#9aa0b0;font-size:11.5px;white-space:nowrap">'+esc(String(x.created_at||"").slice(5,16))+'</td>'
+            +'<td style="padding:8px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(x.ip)+'</td>'
+            +'<td style="padding:8px">'+srcTag(x)+'</td>'
+            +'<td style="padding:8px;color:#6b7080">'+esc(x.keyword||"-")+'</td>'
+            +'<td style="padding:8px;color:#6b7080;font-size:11.5px">'+esc(x.path||"/")+'</td>'
+            +'<td style="padding:8px;text-align:center;font-weight:800;color:'+pc+'">'+(x.score||0)+'</td>'
+            +'<td style="padding:8px;text-align:center;color:#9aa0b0">'+(x.dwell==null?"-":x.dwell+"초")+'</td>'
+            +'<td style="padding:8px;font-size:11.5px;color:#6b7080">'+esc(x.region||"-")+'</td></tr>';
+        }).join("");
+      }
       var bb=document.getElementById("slBlocked");
       var bl=r.blocked||[];
       if(!bl.length){bb.innerHTML='<tr><td colspan="5" style="padding:20px;text-align:center;color:#9aa0b0">등록된 IP가 없습니다.</td></tr>';}
@@ -272,6 +316,11 @@ body{background:#f6f7fb}
       .then(function(r){return r.blob();}).then(function(b){
         var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="smartlog_"+new Date().toISOString().slice(0,10)+".csv";a.click();
       });
+  });
+  var slRs=document.getElementById("slReset");
+  if(slRs) slRs.addEventListener("click",function(){
+    if(!confirm("접속 기록과 자동 차단을 모두 삭제할까요?\n상담 문의 내역은 삭제되지 않습니다.")) return;
+    slApi("reset",{target:"all"}).then(function(){ slMsg("접속 기록과 자동 차단을 초기화했습니다."); slLoad(); });
   });
   var slB=document.getElementById("slBlock");
   if(slB) slB.addEventListener("click",function(){

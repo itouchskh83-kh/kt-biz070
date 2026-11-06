@@ -25,6 +25,7 @@ export async function onRequestPost({ request, env }) {
               ROUND(AVG(dwell),1) AS dwell, MAX(depth) AS depth
          FROM click_logs
         WHERE created_at >= datetime('now','+9 hours','-${days} days')
+          AND action <> 'test'
         GROUP BY ip
         HAVING hits >= 3 OR top >= 45
         ORDER BY top DESC, hits DESC
@@ -37,11 +38,40 @@ export async function onRequestPost({ request, env }) {
       `SELECT COUNT(*) AS total,
               SUM(CASE WHEN action='block' THEN 1 ELSE 0 END) AS blocked,
               SUM(CASE WHEN action='warn'  THEN 1 ELSE 0 END) AS warned,
-              SUM(is_naver) AS naver,
+              SUM(CASE WHEN is_naver=1 THEN 1 ELSE 0 END) AS ad,
+              SUM(CASE WHEN is_naver=0 AND reason='자연검색' THEN 1 ELSE 0 END) AS organic,
+              SUM(CASE WHEN is_naver=0 AND reason='직접방문' THEN 1 ELSE 0 END) AS direct,
+              SUM(CASE WHEN is_naver=0 AND reason='내부 이동' THEN 1 ELSE 0 END) AS internal,
+              SUM(CASE WHEN is_naver=1 AND keyword IS NOT NULL AND keyword<>'' THEN 1 ELSE 0 END) AS kword,
               COUNT(DISTINCT ip) AS ips, COUNT(DISTINCT fp) AS devices
-         FROM click_logs WHERE created_at >= datetime('now','+9 hours','-${days} days')`
+         FROM click_logs
+        WHERE created_at >= datetime('now','+9 hours','-${days} days')
+          AND action <> 'test'`
     ).first();
-    return json({ ok: true, days, myIp: clientIP(request), stat: stat || {}, suspicious: sus.results || [], blocked: blocked.results || [] });
+    const tstat = await env.DB.prepare(
+      `SELECT COUNT(*) AS n, MAX(created_at) AS last FROM click_logs
+        WHERE action='test' AND created_at >= datetime('now','+9 hours','-${days} days')`
+    ).first();
+    const logs = await env.DB.prepare(
+      `SELECT id, ip, fp, ref, keyword, path, is_naver, score, action, reason, region, org, country,
+              dwell, depth, created_at
+         FROM click_logs
+        WHERE created_at >= datetime('now','+9 hours','-${days} days')
+          AND action <> 'test'
+        ORDER BY id DESC LIMIT 100`
+    ).all();
+    return json({ ok: true, days, myIp: clientIP(request), stat: stat || {}, test: tstat || {}, logs: logs.results || [], suspicious: sus.results || [], blocked: blocked.results || [] });
+  }
+
+  if (op === 'reset') {
+    const what = String(b.target || 'logs');
+    if (what === 'all') {
+      await env.DB.prepare('DELETE FROM click_logs').run();
+      await env.DB.prepare("DELETE FROM blocked_ips WHERE manual = 0").run();
+    } else {
+      await env.DB.prepare('DELETE FROM click_logs').run();
+    }
+    return json({ ok: true, reset: what });
   }
 
   if (op === 'block') {
@@ -49,7 +79,7 @@ export async function onRequestPost({ request, env }) {
     if (!ip) return json({ ok: false, error: 'NO_IP' }, 400);
     const hours = parseInt(b.hours || '0', 10); // 0 = 영구
     const until = hours > 0
-      ? new Date(Date.now() + hours * 3600 * 1000).toISOString().slice(0, 19).replace('T', ' ')
+      ? new Date(Date.now() + 9 * 3600000 + hours * 3600000).toISOString().slice(0, 19).replace('T', ' ')
       : null;
     await env.DB.prepare(
       `INSERT INTO blocked_ips (ip, mode, reason, score, manual, note, blocked_until)

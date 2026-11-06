@@ -139,7 +139,15 @@
     kw = sp.get('n_query') || sp.get('query') || sp.get('q') || sp.get('keyword') || '';
   }catch(e){}
 
-  function send(beacon){
+  var lastId = null, sentOnce = false;
+
+  function send(beacon, isExit){
+    if (isExit && lastId) {
+      var ub = JSON.stringify({ op:'upd', id:lastId, d:Math.round((Date.now()-t0)/1000), v:depth, m:moved?1:0 });
+      if (navigator.sendBeacon) { try{ navigator.sendBeacon('/api/track', new Blob([ub],{type:'application/json'})); return; }catch(e){} }
+      fetch('/api/track',{method:'POST',headers:{'content-type':'application/json'},body:ub,keepalive:true}).catch(function(){});
+      return;
+    }
     var body = JSON.stringify({
       p: path, r: ref, q: kw, qs: location.search.slice(0,300), f: fp, n: known && known !== fp ? 0 : 1,
       d: Math.round((Date.now() - t0) / 1000), v: depth,
@@ -153,6 +161,9 @@
       .then(function(r){ return r.json(); })
       .then(function(d){
         if(!d || !d.ok) return;
+        if(d.id) lastId = d.id;
+        if(sentOnce) return;
+        sentOnce = true;
         if(d.action === 'block'){ setState('block', d.hits); overlay(3, d); }
         else if(d.action === 'warn'){ setState('warn', d.hits); overlay(d.stage || 1, d); }
       }).catch(function(){});
@@ -165,5 +176,5 @@
   if(document.readyState === 'complete') boot();
   else window.addEventListener('load', boot);
 
-  window.addEventListener('pagehide', function(){ send(true); });
+  window.addEventListener('pagehide', function(){ send(true, true); });
 })();

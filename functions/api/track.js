@@ -2,6 +2,19 @@
 import { json } from './_lib.js';
 import { clientIP, uaHash, detectSource, evaluate, blockState, maybePurge, STAGE, WINDOW_MIN, isHosting } from './_smartlog.js';
 
+// 한국시간 문자열 (YYYY-MM-DD HH:MM:SS)
+function kst(offsetMs) {
+  return new Date(Date.now() + 9 * 3600000 + (offsetMs || 0)).toISOString().slice(0, 19).replace('T', ' ');
+}
+function srcLabel(src) {
+  if (src === 'naver') return '광고(네이버)';
+  if (src === 'google') return '광고(구글)';
+  if (src === 'organic-naver') return '자연검색';
+  if (src === 'organic-google') return '자연검색';
+  if (src === 'organic-daum') return '자연검색';
+  return '직접방문';
+}
+
 export async function onRequestPost({ request, env }) {
   if (!env.DB) return json({ ok: true, action: 'allow', score: 0 });
   let b = {};
@@ -15,6 +28,16 @@ export async function onRequestPost({ request, env }) {
   const path = String(b.p || '/').slice(0, 200);
   const fp = String(b.f || '').slice(0, 40);
   const isKnown = b.n === 1 ? 1 : 0;
+
+  // 페이지 이탈 시에는 '새 접속'이 아니라 체류시간만 갱신한다 (중복 집계 방지)
+  if (b.op === 'upd' && b.id) {
+    try {
+      await env.DB.prepare(
+        'UPDATE click_logs SET dwell = ?, depth = MAX(COALESCE(depth,1), ?), moved = MAX(COALESCE(moved,0), ?) WHERE id = ? AND ip = ?'
+      ).bind(dwell, depth, moved, b.id, ip).run();
+    } catch (e) {}
+    return json({ ok: true, action: 'allow', stage: 0, updated: true });
+  }
   const dwell = typeof b.d === 'number' ? b.d : null;
   const depth = typeof b.v === 'number' ? b.v : 1;
   const moved = b.m === 1 ? 1 : 0;
@@ -37,13 +60,14 @@ export async function onRequestPost({ request, env }) {
   const org = String(cf.asOrganization || '');
   const country = String(cf.country || '');
 
-  // [테스트 모드] ?sl_test=1 은 채점·차단 없이 기록만 남깁니다.
+  // [테스트 모드] 채점·차단·집계에서 완전히 제외하고 별도 기록만 남깁니다.
   if (testMode) {
-    await env.DB.prepare(
+    const r = await env.DB.prepare(
       `INSERT INTO click_logs (ip, fp, ua, ua_hash, ref, keyword, path, is_naver, score, action, reason, asn, org, country, region, dwell, depth, moved, is_known)
-       VALUES (?,?,?,?,?,?,?,1,0,'test','테스트 모드',?,?,?,?,?,?,?,?)`
-    ).bind(ip, fp, ua.slice(0,300), uh, ref, kw, path + '?sl_test=1', String(cf.asn||''), org, country, region, dwell, depth, moved, isKnown).run();
-    return json({ ok: true, action: 'allow', stage: 0, score: 0, src, testMode: true });
+       VALUES (?,?,?,?,?,?,?,0,0,'test','테스트',?,?,?,?,?,?,?,?)`
+    ).bind(ip, fp, ua.slice(0,300), uh, ref, kw, path, String(cf.asn||''), org, country, region, dwell, depth, moved, isKnown).run();
+    return json({ ok: true, action: 'allow', stage: 0, score: 0, src: 'naver', testMode: true,
+                  id: r.meta ? r.meta.last_row_id : null });
   }
 
   // 1) 수동 차단/허용
@@ -62,7 +86,7 @@ export async function onRequestPost({ request, env }) {
        VALUES (?,?,?,?,?,?,?,0,0,'allow','내부 이동',?,?,?,?,?,?,?,?)`
     ).bind(ip, fp, ua.slice(0,300), uh, ref, kw, path, String(cf.asn||''), org, country, region,
            dwell, depth, moved, isKnown).run();
-    return json({ ok: true, action: 'allow', stage: 0, score: 0, internal: true, src });
+    return json({ ok: true, action: 'allow', stage: 0, score: 0, internal: true, src, lastId: null });
   }
 
   // 2) 집계 — '광고 유입' 기록만 센다 (직접 방문은 카운트 제외)
@@ -94,19 +118,20 @@ export async function onRequestPost({ request, env }) {
   }
 
   // 5) 로그 (365일 보관)
-  const reason = ev.reasons.join(' / ');
-  await env.DB.prepare(
+  const reason = isAd ? ev.reasons.join(' / ') : srcLabel(src);
+  const ins = await env.DB.prepare(
     `INSERT INTO click_logs (ip, fp, ua, ua_hash, ref, keyword, path, is_naver, score, action, reason, asn, org, country, region, dwell, depth, moved, is_known)
      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
   ).bind(ip, fp, ua.slice(0, 300), uh, ref, kw, path, isNaver ? 1 : 0, ev.score, action,
          reason, String(cf.asn || ''), org, country, region,
          dwell, depth, moved, isKnown).run();
+  const logId = ins && ins.meta ? ins.meta.last_row_id : null;
 
   // 6) 차단 등록
   let blockedUntil = null;
   if (action === 'block' && isAd) {
     const hours = ev.score >= STAGE.block + 60 ? 24 : 4;
-    blockedUntil = new Date(Date.now() + hours * 3600 * 1000).toISOString().slice(0, 19).replace('T', ' ');
+    blockedUntil = kst(hours * 3600000);
     await env.DB.prepare(
       `INSERT INTO blocked_ips (ip, mode, reason, score, hit_count, blocked_until, manual, fp)
        VALUES (?, 'block', ?, ?, ?, ?, 0, ?)
@@ -118,5 +143,5 @@ export async function onRequestPost({ request, env }) {
 
   await maybePurge(env);
   return json({ ok: true, action, stage, score: ev.score, hits: ipHits,
-                reason, blockedUntil, region, org, fpDetected: fpHits > 1, fpIps, src, testMode });
+                reason, blockedUntil, region, org, fpDetected: fpHits > 1, fpIps, src, testMode, id: logId });
 }
