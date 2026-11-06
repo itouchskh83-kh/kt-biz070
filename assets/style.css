@@ -399,6 +399,18 @@ ul{margin:0;padding:0;list-style:none}
   .search-row{width:100%}
   .search-row input{width:100%}
 }
+/* --- mobile stability: 페이지 고정, 표만 가로 스크롤 --- */
+html,body{max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}
+img,svg,video{max-width:100%}
+.wrap{max-width:min(var(--max),100%)}
+.tbl-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.hd-inner .menu-btn{margin-left:auto;margin-right:0}
+@media (max-width:760px){
+  .tbl-wrap{overflow-x:auto;overflow-y:hidden}
+  .dt{min-width:560px}
+  .phero{overflow:hidden}
+  .phero .bg.m{background-size:cover;background-position:center top}
+}
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001ms !important;transition-duration:.001ms !important}
   html{scroll-behavior:auto}
