@@ -1,5 +1,6 @@
 
 (function(){
+  /* ADMIN_SKIP */ if (/\/admin(\.html)?$/i.test(location.pathname)) return;
   "use strict";
   var K = 'slf', K2 = 'sl_fp';
 

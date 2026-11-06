@@ -36,6 +36,15 @@ export async function onRequestPost({ request, env }) {
   const org = String(cf.asOrganization || '');
   const country = String(cf.country || '');
 
+  // [테스트 모드] ?sl_test=1 은 채점·차단 없이 기록만 남깁니다.
+  if (testMode) {
+    await env.DB.prepare(
+      `INSERT INTO click_logs (ip, fp, ua, ua_hash, ref, keyword, path, is_naver, score, action, reason, asn, org, country, region, dwell, depth, moved, is_known)
+       VALUES (?,?,?,?,?,?,?,1,0,'test','테스트 모드',?,?,?,?,?,?,?,?)`
+    ).bind(ip, fp, ua.slice(0,300), uh, ref, kw, path + '?sl_test=1', String(cf.asn||''), org, country, region, dwell, depth, moved, isKnown).run();
+    return json({ ok: true, action: 'allow', stage: 0, score: 0, src, testMode: true });
+  }
+
   // 1) 수동 차단/허용
   const st = await blockState(env, ip);
   if (st.mode === 'allow') return json({ ok: true, action: 'allow', score: 0, whitelisted: true });
