@@ -44,6 +44,13 @@ export function detectSource(ref, kw, qs) {
   return '';
 }
 
+export function srcLabel(src) {
+  if (src === 'naver' || src === 'google') return '광고';
+  if (String(src || '').startsWith('organic')) return '자연검색';
+  if (!src) return '직접방문';
+  return '직접방문';
+}
+
 export function clientIP(request) {
   const h = request.headers;
   return h.get('cf-connecting-ip') || (h.get('x-forwarded-for') || '').split(',')[0].trim() || '0.0.0.0';

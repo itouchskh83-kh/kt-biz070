@@ -21,7 +21,7 @@ ul{margin:0;padding:0;list-style:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* header */
-.site-header{position:sticky!important;top:0!important;z-index:80;background:rgba(255,255,255,.96);backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid transparent;transition:background .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease)}
+.site-header{position:sticky!important;top:0!important;z-index:90;background:rgba(255,255,255,.96);backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid transparent;transition:background .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease)}
 .site-header.is-stuck{background:rgba(255,255,255,.42);backdrop-filter:saturate(150%) blur(14px);border-bottom-color:rgba(233,235,243,.5);box-shadow:0 2px 10px rgba(16,17,20,.03)}
 .site-header.is-stuck{border-bottom-color:var(--line);box-shadow:0 4px 18px rgba(16,17,20,.06)}
 .hd-inner{display:flex;align-items:center;gap:34px;height:88px}
@@ -435,10 +435,10 @@ h1,h2,h3,h4,.head h2,.pcard .name,.pcard .sub,.reason h3,.feat h3,.mini h4,.prom
   .head h2{font-size:23px}
   .phero{min-height:0;display:block;background:#fff;overflow:hidden}
   .phero .bg.d{display:none}
-  .phero .bg-m{display:block;width:100%;height:auto}
+  .phero .bg-m{display:block;width:100%;height:auto;aspect-ratio:16/10;max-height:270px;object-fit:cover;object-position:center}
   .phero .bg.m{display:none}
   .phero::after{display:none}
-  .phero .inner{padding-top:24px;padding-bottom:34px}
+  .phero .inner{padding-top:22px;padding-bottom:30px}
   .crumb{margin-bottom:14px}
   .phero .hero-actions .btn{--btn-h:46px;font-size:14px}
   .phero h1{font-size:28px}
@@ -473,7 +473,9 @@ h1,h2,h3,h4,.head h2,.pcard .name,.pcard .sub,.reason h3,.feat h3,.mini h4,.prom
   .search-row input{width:100%}
 }
 /* --- mobile stability: 페이지 고정, 표만 가로 스크롤 --- */
-html,body{max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}
+/* sticky 유지: overflow-x:hidden 은 스크롤 컨테이너를 만들어 sticky 를 깨뜨린다 → clip 사용 */
+html{max-width:100%;overflow-x:clip;overscroll-behavior-x:none}
+body{max-width:100%;overflow-x:clip;overscroll-behavior-x:none}
 img,svg,video{max-width:100%}
 .wrap{max-width:min(var(--max),100%)}
 .tbl-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
