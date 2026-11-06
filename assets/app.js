@@ -2,8 +2,13 @@
 (function(){
   "use strict";
   var header=document.getElementById('header');
-  var onScroll=function(){ if(header) header.classList.toggle('is-stuck', window.scrollY>8); };
-  onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
+  if(header){
+    header.style.position='relative';
+    header.style.top='auto';
+    header.classList.remove('is-stuck');
+    var hadSticky=getComputedStyle(header).position==='sticky'||getComputedStyle(header).position==='fixed';
+    if(hadSticky){ header.style.setProperty('position','relative','important'); header.style.setProperty('top','auto','important'); }
+  }
 
   /* 모바일 하단바: 아래로 스크롤하면 숨기고 위로 올리면 표시 */
   var mbar=document.querySelector('.mobile-bar');
