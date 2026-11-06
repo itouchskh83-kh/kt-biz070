@@ -8,7 +8,7 @@
       var slides = Array.prototype.slice.call(track.querySelectorAll('.hero-slide'));
       var curNum = document.getElementById('curNum');
       var idx = Math.max(0, slides.findIndex(function(s){ return s.classList.contains('is-active'); }));
-      var timer = null, playing = true, DELAY = 5500;
+      var timer = null, playing = true, DELAY = 3000;
       function show(n){
         if (!slides.length) return;
         idx = (n + slides.length) % slides.length;
@@ -76,7 +76,7 @@
       trackEl.style.transform = 'translateY(-' + (ridx * rowH()) + 'px)';
       if (ridx >= rlen) setTimeout(function(){ ridx = 0; snap(0); }, 620);
     }
-    function start(){ if (rtimer) clearInterval(rtimer); rtimer = null; if (rlen > VISIBLE && !expanded) rtimer = setInterval(step, 3200); }
+    function start(){ if (rtimer) clearInterval(rtimer); rtimer = null; if (rlen > VISIBLE && !expanded) rtimer = setInterval(step, 3000); }
     function stopRoll(){ if (rtimer) { clearInterval(rtimer); rtimer = null; } }
 
     function paint(list, total){
