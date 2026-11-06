@@ -101,6 +101,7 @@ body{background:#f6f7fb}
     var box = $("admList"); if(!box){ return; }
     $("loginBox").style.display = "none";
     $("listBox").style.display = "";
+    var _p = $("slPanel"); if(_p){ _p.style.display = ""; if(window.slBoot) window.slBoot(); }
     if(!list.length){ var _b=$("admList"); if(!_b) return; _b.innerHTML = '<div class="card">등록된 문의가 없습니다.</div>'; return; }
     $("admList").innerHTML = list.map(function(p){
       return '<div class="card" data-id="'+p.id+'">'
@@ -121,6 +122,7 @@ body{background:#f6f7fb}
       .then(function(j){
         if(!j.ok){ sessionStorage.removeItem("adm"); $("admErr").textContent = "비밀번호가 올바르지 않습니다."; return; }
         render(j.list||[]);
+        var _sp=$("slPanel"); if(_sp&&_sp.style.display==="none"){ _sp.style.display=""; try{ slLoad(); }catch(e){} }
       })
       .catch(function(){ $("admErr").textContent = "서버에 연결할 수 없습니다. 배포 상태를 확인해 주세요."; });
   }
@@ -155,11 +157,12 @@ body{background:#f6f7fb}
   if(token) load();
   /* ---------------- 스마트로그 ---------------- */
   var slPanel=document.getElementById("slPanel");
+  window.slBoot=function(){ try{ slLoad(); }catch(e){} };
   function slApi(op,extra){
     var body=Object.assign({password:token,op:op},extra||{});
     return fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json();});
   }
-  function esc(v){return String(v==null?"":v).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
   function slMsg(t,bad){var m=document.getElementById("slMsg");if(!m)return;m.textContent=t;m.style.color=bad?"#e03c35":"#0a9d58";}
   function slLoad(){
     if(!slPanel) return;
