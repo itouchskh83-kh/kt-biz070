@@ -24,10 +24,11 @@ export async function onRequestPost({ request, env }) {
   try { refHost = ref ? new URL(ref).host : ''; } catch {}
   const isEntry = !ref || refHost !== selfHost;
   let src = detectSource(ref, kw, b.qs);
-  let testMode = false;
+  let testMode = b.t === 1;
   try {
-    if (new URL(request.url).searchParams.get('sl_test') === '1') { src = 'naver'; testMode = true; }
+    if (new URL(request.url).searchParams.get('sl_test') === '1') testMode = true;
   } catch {}
+  if (testMode) src = 'naver';
   const isNaver = src === 'naver';
   const isAd = src === 'naver' || src === 'google';
   const uh = await uaHash(ua);

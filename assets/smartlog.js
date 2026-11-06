@@ -132,6 +132,7 @@
   /* ---------- 6. 전송 ---------- */
   var path = location.pathname || '/';
   if(/\/(admin|_)/.test(path)) return;
+  var TEST = /[?&]sl_test=1/.test(location.search) ? 1 : 0;
   var ref = document.referrer || '', kw = '';
   try{
     var sp = new URLSearchParams(location.search);
@@ -142,7 +143,7 @@
     var body = JSON.stringify({
       p: path, r: ref, q: kw, qs: location.search.slice(0,300), f: fp, n: known && known !== fp ? 0 : 1,
       d: Math.round((Date.now() - t0) / 1000), v: depth,
-      m: moved ? 1 : 0, s: scrolled, w: screen.width, h: screen.height
+      m: moved ? 1 : 0, s: scrolled, w: screen.width, h: screen.height, t: TEST
     });
     if(beacon && navigator.sendBeacon){
       try{ navigator.sendBeacon('/api/track', new Blob([body], {type:'application/json'})); return; }catch(e){}

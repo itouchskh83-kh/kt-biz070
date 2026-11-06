@@ -20,6 +20,14 @@ body{background:#f6f7fb}
 .badge{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#f1f2f7;color:#6b7080}
 .badge.done{background:#e9f8f0;color:#0a9d58}
 .badge.kind{background:#eef2ff;color:#4a5fc8;margin-right:2px}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:26px}
+.tab{border:0;background:none;font:inherit;font-size:14.5px;font-weight:800;color:#8b90a0;padding:12px 18px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.is-on{color:#101114;border-bottom-color:#f4514a}
+.pager{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;margin:26px 0 10px}
+.pager button{min-width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:9px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:#4a4f60}
+.pager button.is-on{background:#f4514a;border-color:#f4514a;color:#fff}
+.pager button:disabled{opacity:.4;cursor:default}
+.pager .pv{font-size:12.5px;color:#8b90a0;margin:0 8px}
 </style></head>
 <body>
 <div class="adm">
@@ -31,11 +39,19 @@ body{background:#f6f7fb}
     <p id="admErr" style="color:#e03c35;font-size:13px;margin-top:10px"></p>
   </div>
   <div id="listBox" style="display:none">
+    <div class="tabs">
+      <button type="button" class="tab is-on" data-tab="list">문의 관리</button>
+      <button type="button" class="tab" data-tab="sl">부정클릭 감지</button>
+    </div>
+    <div id="tabList">
     <h1>문의 관리</h1>
-    <p class="sub">최근 200건까지 표시됩니다. 답변을 저장하면 사이트에 '답변완료'로 표시됩니다.</p>
+    <p class="sub">10건씩 표시됩니다. 답변을 저장하면 사이트에 '답변완료'로 표시됩니다.</p>
     <div id="admList" style="margin-top:20px"></div>
-    <div id="slPanel" style="display:none;margin-top:44px">
-      <h1 style="font-size:22px">스마트로그 · 부정클릭 감지</h1>
+    <div id="admPager" class="pager"></div>
+    </div>
+    <div id="tabSl" style="display:none">
+    <div id="slPanel" style="margin-top:4px">
+      <h1 style="font-size:22px">부정클릭 감지 현황</h1>
       <p class="sub">광고 유입 반복 접속을 자동으로 기록·차단합니다. IP·기기지문·지역·활동 이력을 <b>365일</b> 보관합니다. 같은 기기가 IP를 바꿔도 추적됩니다.</p>
       <div id="slStat" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center">
@@ -79,13 +95,16 @@ body{background:#f6f7fb}
       <div class="card" style="margin-top:16px">
         <div class="tt">IP 직접 등록</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <input id="slIp" placeholder="예: 123.45.67.89" style="flex:1;min-width:180px;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit">
-          <input id="slHour" type="number" placeholder="차단 시간(0=영구)" value="24" style="width:170px;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit">
+          <label style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px"><span style="font-size:11.5px;font-weight:700;color:#8b90a0">IP 주소</span>
+            <input id="slIp" placeholder="예: 123.45.67.89" style="height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit"></label>
+          <label style="display:flex;flex-direction:column;gap:5px;width:190px"><span style="font-size:11.5px;font-weight:700;color:#8b90a0">차단 시간 · 0 = 영구</span>
+            <input id="slHour" type="number" min="0" value="24" style="height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit"></label>
           <button class="btn btn-red" id="slBlock" type="button" style="--btn-h:44px;font-size:13px">차단</button>
           <button class="btn" id="slAllow" type="button" style="--btn-h:44px;font-size:13px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 16px">허용</button>
         </div>
         <p id="slMsg" style="font-size:12.5px;color:#0a9d58;font-weight:700;margin-top:10px"></p>
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -97,12 +116,25 @@ body{background:#f6f7fb}
   function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
   function dt(s){ return String(s||"").slice(0,16); }
 
-  function render(list){
+  var ST = { page:1, pages:1, total:0 };
+  function pager(){
+    var el = $("admPager"); if(!el) return;
+    var p = ST.page, n = ST.pages;
+    if(n <= 1 && !ST.total){ el.innerHTML = ""; return; }
+    var out = "";
+    out += '<button type="button" data-pg="'+(p-1)+'"'+(p<=1?' disabled':'')+'>이전</button>';
+    var from = Math.max(1, p - 2), to = Math.min(n, from + 4); from = Math.max(1, to - 4);
+    for(var i=from; i<=to; i++){ out += '<button type="button" data-pg="'+i+'"'+(i===p?' class="is-on"':'')+'>'+i+'</button>'; }
+    out += '<button type="button" data-pg="'+(p+1)+'"'+(p>=n?' disabled':'')+'>다음</button>';
+    out += '<span class="pv">'+p+' / '+n+' 페이지 · 전체 '+ST.total+'건</span>';
+    el.innerHTML = out;
+  }
+  function render(list, total, page, pages){
     var box = $("admList"); if(!box){ return; }
     $("loginBox").style.display = "none";
     $("listBox").style.display = "";
-    var _p = $("slPanel"); if(_p){ _p.style.display = ""; if(window.slBoot) window.slBoot(); }
-    if(!list.length){ var _b=$("admList"); if(!_b) return; _b.innerHTML = '<div class="card">등록된 문의가 없습니다.</div>'; return; }
+    ST.total = total || 0; ST.page = page || 1; ST.pages = pages || 1;
+    if(!list.length){ box.innerHTML = '<div class="card">등록된 문의가 없습니다.</div>'; pager(); return; }
     $("admList").innerHTML = list.map(function(p){
       return '<div class="card" data-id="'+p.id+'">'
         + '<div class="hd"><span class="badge kind">'+(p.kind==='inquiry'?'1:1문의':'상담신청')+'</span><span class="tt">'+esc(p.title)+'</span>'
@@ -114,15 +146,16 @@ body{background:#f6f7fb}
         + '<button class="btn btn-red" type="button" data-save>답변 저장</button></div>'
         + '</div>';
     }).join("");
+    pager();
   }
 
-  function load(){
-    fetch(base + "/admin", { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({ password: token }) })
+  function load(pg){
+    var _t=$("admList"); if(_t && !ST.total) _t.innerHTML='<div class="card" style="color:#8b90a0">불러오는 중입니다…</div>';
+    fetch(base + "/admin", { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({ password: token, page: pg || 1, per: 10 }) })
       .then(function(r){ return r.json(); })
       .then(function(j){
         if(!j.ok){ sessionStorage.removeItem("adm"); $("admErr").textContent = "비밀번호가 올바르지 않습니다."; return; }
-        render(j.list||[]);
-        var _sp=$("slPanel"); if(_sp&&_sp.style.display==="none"){ _sp.style.display=""; try{ slLoad(); }catch(e){} }
+        render(j.list||[], j.total, j.page, j.pages);
       })
       .catch(function(){ $("admErr").textContent = "서버에 연결할 수 없습니다. 배포 상태를 확인해 주세요."; });
   }
@@ -154,7 +187,26 @@ body{background:#f6f7fb}
     }).catch(function(){ b.disabled = false; b.textContent = "답변 저장"; alert("저장 실패: 네트워크 오류"); });
   });
 
-  if(token) load();
+  var _pg=document.getElementById("admPager");
+  if(_pg) _pg.addEventListener("click",function(e){
+    var b=e.target.closest("[data-pg]"); if(!b||b.disabled) return;
+    var n=+b.dataset.pg; if(n<1||n>ST.pages||n===ST.page) return;
+    load(n); window.scrollTo({top:0,behavior:"smooth"});
+  });
+
+  /* 탭 */
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.addEventListener("click",function(){
+      document.querySelectorAll(".tab").forEach(function(x){ x.classList.remove("is-on"); });
+      t.classList.add("is-on");
+      var k=t.dataset.tab;
+      $("tabList").style.display = k==="list" ? "" : "none";
+      $("tabSl").style.display   = k==="sl"   ? "" : "none";
+      if(k==="sl" && window.slBoot) window.slBoot();
+    });
+  });
+
+  if(token) load(1);
   /* ---------------- 스마트로그 ---------------- */
   var slPanel=document.getElementById("slPanel");
   window.slBoot=function(){ try{ slLoad(); }catch(e){} };
