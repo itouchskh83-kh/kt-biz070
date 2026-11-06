@@ -21,7 +21,8 @@ ul{margin:0;padding:0;list-style:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* header */
-.site-header{position:relative!important;top:auto!important;z-index:80;background:rgba(255,255,255,.96);backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid transparent;transition:box-shadow .25s var(--ease),border-color .25s var(--ease)}
+.site-header{position:sticky!important;top:0!important;z-index:80;background:rgba(255,255,255,.96);backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid transparent;transition:background .3s var(--ease),box-shadow .3s var(--ease),border-color .3s var(--ease)}
+.site-header.is-stuck{background:rgba(255,255,255,.42);backdrop-filter:saturate(150%) blur(14px);border-bottom-color:rgba(233,235,243,.5);box-shadow:0 2px 10px rgba(16,17,20,.03)}
 .site-header.is-stuck{border-bottom-color:var(--line);box-shadow:0 4px 18px rgba(16,17,20,.06)}
 .hd-inner{display:flex;align-items:center;gap:34px;height:88px}
 .logo{display:flex;align-items:center;gap:11px;flex:0 0 auto}

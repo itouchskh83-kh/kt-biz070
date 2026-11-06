@@ -3,11 +3,10 @@
   "use strict";
   var header=document.getElementById('header');
   if(header){
-    header.style.position='relative';
-    header.style.top='auto';
-    header.classList.remove('is-stuck');
-    var hadSticky=getComputedStyle(header).position==='sticky'||getComputedStyle(header).position==='fixed';
-    if(hadSticky){ header.style.setProperty('position','relative','important'); header.style.setProperty('top','auto','important'); }
+    header.style.setProperty('position','sticky','important');
+    header.style.setProperty('top','0','important');
+    var onScroll=function(){ header.classList.toggle('is-stuck', window.scrollY>10); };
+    onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
   }
 
   /* 모바일 하단바: 아래로 스크롤하면 숨기고 위로 올리면 표시 */
