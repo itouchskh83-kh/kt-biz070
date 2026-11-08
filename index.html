@@ -17,7 +17,7 @@
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#f4514a">
 <meta name="msapplication-TileColor" content="#f4514a">
-<link rel="stylesheet" href="assets/style.css?v=18">
+<link rel="stylesheet" href="assets/style.css?v=20261109-0115">
 <style>
 .hero{position:relative;overflow:hidden;background:#1a1a1a}
 .hero-track{position:relative;height:clamp(480px,74vh,720px)}
@@ -147,8 +147,8 @@
       <span class="logo-txt">공식가입센터</span>
     </a>
     <ul class="nav"><li><a href="corporate.html">기업용 인터넷</a></li><li><a href="tel.html">기업전화</a></li><li><a href="office.html">GIGA office</a></li><li><a href="iptv.html">KT IPTV</a></li><li><a href="inquiry.html">상담문의</a></li></ul>
-    <span class="sl-badge" id="slBadge" title="부정클릭방지시스템이 실시간으로 작동 중입니다" aria-label="부정클릭방지시스템 작동중">
-      <span class="sl-lamp" aria-hidden="true"><i></i></span><span class="sl-txt">부정클릭방지시스템 <b>작동중</b></span><span class="sl-n" aria-hidden="true"></span>
+    <span class="sl-badge" id="slBadge" title="부정클릭방지시스템이 실시간으로 모니터링 중입니다" aria-label="부정클릭 모니터링 작동중">
+      <span class="sl-lamp" aria-hidden="true"><i></i></span><span class="sl-txt">모니터링 <b>ON</b></span><span class="sl-n" aria-hidden="true"></span>
     </span>
     <button class="menu-btn" id="menuBtn" aria-label="전체 메뉴 열기" aria-expanded="false" aria-controls="drawer"><i></i><i></i><i></i></button>
   </div>
@@ -247,22 +247,38 @@
 </section>
 
 
-<section class="sec sec--soft" style="padding:64px 0">
+<section class="sec sec--soft kb-sec">
   <div class="wrap">
-    <div class="board-head">
-      <h2>상담 접수 현황</h2>
-      <span class="live"><i aria-hidden="true"></i>실시간 접수</span>
-      <span class="board-total">총 <b id="inqTotal">0</b>건</span>
-      <button type="button" class="more" id="inqMore">전체 보기 ›</button>
+    <div class="kb-head">
+      <p class="kb-eyebrow">Consultation Board</p>
+      <h2 class="kb-title">상담 접수 현황<span>.</span></h2>
+      <p class="kb-sub">상담 접수 내역을 확인하세요.</p>
     </div>
-    <div class="roll" id="inqRoll">
-      <div class="roll-head"><span>접수일</span><span>문의 내용</span><span>작성자</span><span>현황</span></div>
-      <div class="roll-view" id="inqView"><div class="roll-track" id="inqTrack">
-        <div class="roll-row"><span class="c-date">-</span><span class="c-tt">최근 접수 내역을 불러오는 중입니다.</span><span class="c-who">-</span><span class="c-st">-</span></div>
-      </div></div>
+    <div class="kb-board">
+      <div class="kb-board-head"><b>최근 상담 내역</b><a href="inquiry.html">전체 보기 ›</a></div>
+      <div id="kbList"><div class="kb-row"><span class="d">-</span><span class="t">최근 접수 내역을 불러오는 중입니다.</span><span class="w">-</span><span class="s">-</span></div></div>
     </div>
   </div>
 </section>
+<script>
+(function(){
+  var host=document.getElementById('kbList'); if(!host) return;
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function notice(text){host.innerHTML='<div class="kb-row"><span class="d">-</span><span class="t">'+esc(text)+'</span><span class="w">-</span><span class="s">-</span></div>';}
+  fetch('/api/posts?page=1&per=8',{headers:{accept:'application/json'}})
+    .then(function(r){if(!r.ok || !(r.headers.get('content-type')||'').includes('application/json')) throw new Error('API');return r.json();})
+    .then(function(j){
+      if(!j || j.ok!==true || !Array.isArray(j.list)) throw new Error('SCHEMA');
+      if(!j.list.length){notice('등록된 상담 내역이 없습니다.');return;}
+      host.innerHTML=j.list.map(function(p){
+        return '<div class="kb-row"><span class="d">'+esc(String(p.date||'').slice(2,10).replace(/-/g,'.'))+'</span>'
+          +'<span class="t">'+esc(String(p.title||'상담 문의').slice(0,42))+'</span>'
+          +'<span class="w">'+esc(p.author||'-')+'</span>'
+          +'<span class="s">'+(p.answered?'답변완료':'접수완료')+'</span></div>';
+      }).join('');
+    }).catch(function(){notice('상담 내역을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요.');});
+})();
+</script>
 
 <section class="sec" style="padding:76px 0 92px">
   <div class="wrap">
