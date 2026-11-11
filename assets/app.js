@@ -81,7 +81,7 @@
     var g=function(n){ var el=form.querySelector('[name="'+n+'"]'); return el?el.value:''; };
     var digits=function(v){ return String(v||'').replace(/\D/g,''); };
     var v=function(n){var el=form&&form.querySelector('[name="'+n+'"]');return el?el.value:(g(n)||'');};
-    var product=v('product')||'기타 문의';
+    var product=(v('product')||'').trim()||'기타 문의';
     var msg=(v('message')||'').trim();
     var title=(v('title')||'').trim() || ('[상담신청] ' + product);
     var content = msg || ('상담 신청 상품: ' + product);

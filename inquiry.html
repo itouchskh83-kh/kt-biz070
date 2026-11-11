@@ -17,7 +17,7 @@
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#f4514a">
 <meta name="msapplication-TileColor" content="#f4514a">
-<link rel="stylesheet" href="assets/style.css?v=20261111-1213">
+<link rel="stylesheet" href="assets/style.css?v=20261111-1230">
 <style>
 .bd-board thead th{white-space:nowrap}
 .bd-board .no{width:74px;color:#9aa0b0;font-variant-numeric:tabular-nums}
@@ -155,7 +155,7 @@
     <div class="bd-note"><div class="box tint"><h4>이용 안내</h4><ul><li>표시되는 이름은 개인정보 보호를 위해 가운데를 가려서 노출합니다.</li><li>상담 내용과 연락처는 공개되지 않으며 담당자만 확인합니다.</li><li>급한 문의는 고객센터 1644-9637로 전화 주시면 더 빠르게 안내해 드립니다.</li></ul></div></div>
   </div>
 </section>
-<script src="assets/board.js?v=20261111-1213" defer></script>
+<script src="assets/board.js?v=20261111-1230" defer></script>
 <section class="sec sec--tight"><div class="wrap"><div class="cta">
   <div><p class="t1">평일 9시 ~ 6시 상담</p><h3>전화 상담이 더 빠릅니다.</h3><p>평일 9시 ~ 6시 상담, 휴일 및 공휴일은 긴급개통문의로 연락 주세요.</p></div>
   <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;z-index:2">
@@ -222,7 +222,9 @@
       <div class="field" style="margin-top:14px"><label for="mTel">연락처 <span class="req">*</span></label>
         <input id="mTel" name="tel" type="tel" placeholder="010-0000-0000" autocomplete="tel" inputmode="numeric" data-req data-type="tel"><span class="msg">연락 가능한 전화번호를 입력해 주세요.</span></div>
       <div class="field" style="margin-top:14px"><label for="mProduct">관심 상품</label>
-        <select id="mProduct" name="product"><option>KT 기업인터넷 전화</option><option>KT 기업용 인터넷</option><option>GIGA office</option><option>KT IPTV</option><option>기타 문의</option></select></div>
+        <select id="mProduct" name="product"><option value="">관심 상품을 선택해 주세요 (선택)</option><option>KT 기업인터넷 전화</option><option>KT 기업용 인터넷</option><option>GIGA office</option><option>KT IPTV</option><option>기타 문의</option></select></div>
+      <div class="field" style="margin-top:14px"><label for="mTitle">제목</label>
+        <input id="mTitle" name="title" type="text" maxlength="80" placeholder="예) 사무실 인터넷·전화 5회선 설치 문의"><span class="msg">제목을 입력해 주세요.</span></div>
       <div class="field" style="margin-top:14px"><label for="mMsg">문의 내용 <span style="color:#a0a4b0;font-weight:500">(선택)</span></label>
         <textarea id="mMsg" name="message" style="height:84px" placeholder="설치 지역, 회선 수 등 알려주시면 더 정확한 상담이 가능합니다."></textarea></div>
       <div class="agree-wrap" style="margin-top:16px"><label class="agree"><input type="checkbox" id="mAgree" data-req><span>개인정보 수집·이용에 동의합니다. <b style="color:#8b90a0;font-weight:500">(필수)</b></span></label>
@@ -238,8 +240,8 @@
     </div>
   </div>
 </div>
-<script src="assets/app.js?v=20261111-1213" defer></script>
-<script src="assets/smartlog.js?v=20261111-1213" defer></script>
+<script src="assets/app.js?v=20261111-1230" defer></script>
+<script src="assets/smartlog.js?v=20261111-1230" defer></script>
 
 <!-- tawk.to live chat -->
 <script type="text/javascript">
