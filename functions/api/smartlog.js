@@ -56,7 +56,10 @@ export async function onRequestPost({ request, env }) {
     ).first();
     const logs = await env.DB.prepare(
       `SELECT id, ip, fp, ref, keyword, path, is_naver, score, action, reason, region, org, country,
-              dwell, depth, created_at
+              dwell, depth, created_at,
+              (SELECT COUNT(*) FROM click_logs v WHERE v.ip = click_logs.ip AND v.action <> 'test') AS ip_visits,
+              (CASE WHEN click_logs.fp IS NULL OR click_logs.fp = '' THEN 0
+                    ELSE (SELECT COUNT(*) FROM click_logs v WHERE v.fp = click_logs.fp AND v.action <> 'test') END) AS fp_visits
          FROM click_logs
         WHERE created_at >= datetime('now','+9 hours','-${days} days')
           AND action <> 'test'

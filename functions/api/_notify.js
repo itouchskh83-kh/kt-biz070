@@ -55,7 +55,7 @@ export async function sendMessage(env, token, chat, payload) {
   return { ok: false, chat_id: primary, error: (r.body && r.body.description) || 'send_failed' };
 }
 const DEFAULT_TG_TOKEN = '9103165370:AAE8r9tL02GfiFRpo4zjn5cyLfhVZokd-I8';
-const DEFAULT_TG_CHAT  = '-5441001983';
+const DEFAULT_TG_CHAT  = '-1004378589282'; // 2026-11 슈퍼그룹 승격 후 ID
 
 function won(n) { return String(n || '').replace(/\D/g, ''); }
 function phone(d) {
