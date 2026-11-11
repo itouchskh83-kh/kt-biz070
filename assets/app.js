@@ -62,7 +62,15 @@
   });
 
   var modal=document.getElementById('modal');
-  function openModal(){ if(!modal) return; modal.classList.add('is-open'); document.body.style.overflow='hidden'; var f=document.getElementById('fName'); if(f) setTimeout(function(){f.focus();},60); }
+  function openModal(){
+    if(!modal) return;
+    modal.classList.add('is-open'); document.body.style.overflow='hidden';
+    var mf=document.getElementById('consultFormModal');
+    if(mf){ mf.style.display=''; }
+    var dn=modal.querySelector('.done'); if(dn) dn.classList.remove('is-on');
+    var mt=document.getElementById('modalTitle'); if(mt) mt.textContent='가입 상담 신청';
+    var f=document.getElementById('mName'); if(f) setTimeout(function(){f.focus();},60);
+  }
   function closeModal(){ if(!modal) return; modal.classList.remove('is-open'); document.body.style.overflow=''; }
   document.querySelectorAll('[data-open-modal]').forEach(function(b){ b.addEventListener('click',function(e){ e.preventDefault(); openModal(); }); });
   document.querySelectorAll('[data-close-modal]').forEach(function(b){ b.addEventListener('click',closeModal); });
