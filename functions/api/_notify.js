@@ -1,5 +1,6 @@
 // 상담신청 접수 시 알림 발송
 // 우선순위: Cloudflare 환경변수 > 아래 기본값
+import { sendMessage } from './_tg.js';
 const DEFAULT_TG_TOKEN = '9103165370:AAE8r9tL02GfiFRpo4zjn5cyLfhVZokd-I8';
 const DEFAULT_TG_CHAT  = '-5441001983';
 
@@ -42,11 +43,7 @@ export async function notify(env, post) {
   const jobs = [];
 
   if (token && chat) {
-    jobs.push(fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chat_id: chat, text, disable_web_page_preview: true })
-    }).catch(() => null));
+    jobs.push(sendMessage(env, token, chat, { text, disable_web_page_preview: true }));
   }
   if (env.DISCORD_WEBHOOK) {
     jobs.push(fetch(env.DISCORD_WEBHOOK, { method: 'POST', headers: { 'content-type': 'application/json' },
@@ -96,9 +93,5 @@ export async function notifyBlock(env, row) {
   const chat  = env.TELEGRAM_CHAT_ID || DEFAULT_TG_CHAT;
   const text  = buildBlockMessage(row);
   if (!token || !chat) return;
-  await fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ chat_id: chat, text, disable_web_page_preview: true })
-  }).catch(() => null);
+  await sendMessage(env, token, chat, { text, disable_web_page_preview: true });
 }

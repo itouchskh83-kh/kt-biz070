@@ -72,23 +72,23 @@
   function postConsult(form){
     var g=function(n){ var el=form.querySelector('[name="'+n+'"]'); return el?el.value:''; };
     var digits=function(v){ return String(v||'').replace(/\D/g,''); };
-    var product=g('product')||'기타 문의';
-    var msg=(g('message')||'').trim();
-    var title=(g('title')||'').trim() || ('[상담신청] ' + product);
+    var v=function(n){var el=form&&form.querySelector('[name="'+n+'"]');return el?el.value:(g(n)||'');};
+    var product=v('product')||'기타 문의';
+    var msg=(v('message')||'').trim();
+    var title=(v('title')||'').trim() || ('[상담신청] ' + product);
     var content = msg || ('상담 신청 상품: ' + product);
-    var company=(g('company')||'').trim();
+    var company=(v('company')||'').trim();
     if(company) content = '회사명: ' + company + '\n' + content;
-    var email=(g('email')||'').trim();
+    var email=(v('email')||'').trim();
     if(email) content += '\n이메일: ' + email;
 
     return fetch('/api/posts',{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({kind:'consult',title:title,content:content,author:g('name'),
-        phone:g('tel'),product:product,password:g('password')})})
+      body:JSON.stringify({kind:'consult',title:title,content:content,author:v('name'),
+        phone:v('tel'),product:product,password:v('password')})})
       .then(function(r){ return r.json(); });
   }
 
-  var form=document.getElementById('consultForm');
-  if(form){
+  [].slice.call(document.querySelectorAll('form#consultForm, form#consultFormModal')).forEach(function(form){
     form.addEventListener('submit',function(e){
       e.preventDefault();
       var ok=true;
@@ -119,7 +119,7 @@
           return;
         }
         form.style.display='none';
-        var done=document.getElementById('done'); if(done) done.classList.add('is-on');
+        var done=form.parentNode.querySelector('.done'); if(done) done.classList.add('is-on');
         var t=document.getElementById('modalTitle'); if(t) t.textContent='접수 완료';
       }).catch(function(){
         if(btn){ btn.disabled=false; btn.textContent=label; }
@@ -127,7 +127,7 @@
         else alert('네트워크 오류가 발생했습니다. 1644-9637로 연락 주세요.');
       });
     });
-  }
+  });
 
   var goTop=document.getElementById('goTop');
   if(goTop) goTop.addEventListener('click',function(){ window.scrollTo({top:0,behavior:'smooth'}); });
