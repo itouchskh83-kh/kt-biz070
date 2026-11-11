@@ -1,6 +1,59 @@
 // 상담신청 접수 시 알림 발송
 // 우선순위: Cloudflare 환경변수 > 아래 기본값
-import { sendMessage } from './_tg.js';
+/* ---------- 텔레그램 전송 (슈퍼그룹 승격 자동 대응) ---------- */
+// 그룹이 슈퍼그룹으로 승격되면 chat_id가 -100... 형태로 바뀌어 기존 ID 발송이 실패합니다.
+// Telegram이 400 + parameters.migrate_to_chat_id 로 새 ID를 알려주므로 자동 재발송 후 DB에 저장합니다.
+const TG_API = 'https://api.telegram.org/bot';
+
+async function tgRead(env) {
+  if (!env || !env.DB) return null;
+  try {
+    const row = await env.DB.prepare("SELECT val FROM app_settings WHERE key = 'tg_chat_id'").first();
+    return row && row.val ? String(row.val) : null;
+  } catch (e) { return null; }
+}
+async function tgSave(env, id) {
+  if (!env || !env.DB) return false;
+  try {
+    await env.DB.prepare('CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, val TEXT, updated_at TEXT)').run();
+    await env.DB.prepare('INSERT INTO app_settings (key, val, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET val = excluded.val, updated_at = excluded.updated_at')
+      .bind('tg_chat_id', String(id), new Date().toISOString()).run();
+    return true;
+  } catch (e) { return false; }
+}
+async function tgPost(token, chat, payload) {
+  try {
+    const res = await fetch(TG_API + token + '/sendMessage', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(Object.assign({ chat_id: chat }, payload))
+    });
+    let body = null;
+    try { body = await res.json(); } catch (e) { body = null; }
+    return { status: res.status, ok: !!(body && body.ok), body };
+  } catch (e) {
+    return { status: 0, ok: false, body: { description: String((e && e.message) || e) } };
+  }
+}
+export async function sendMessage(env, token, chat, payload) {
+  if (!token || !chat) return { ok: false, error: 'missing_credentials' };
+  const saved = await tgRead(env);
+  const primary = saved || String(chat);
+  const r = await tgPost(token, primary, payload);
+  const migrated = r.body && r.body.parameters && r.body.parameters.migrate_to_chat_id;
+  if (migrated) {
+    const next = String(migrated);
+    const r2 = await tgPost(token, next, payload);
+    if (r2.ok) { await tgSave(env, next); return { ok: true, chat_id: next, migrated: true }; }
+    return { ok: false, chat_id: next, migrated: true, error: (r2.body && r2.body.description) || 'send_failed' };
+  }
+  if (r.ok) return { ok: true, chat_id: primary };
+  if (saved && String(saved) !== String(chat)) {
+    const r3 = await tgPost(token, String(chat), payload);
+    if (r3.ok) return { ok: true, chat_id: String(chat) };
+  }
+  return { ok: false, chat_id: primary, error: (r.body && r.body.description) || 'send_failed' };
+}
 const DEFAULT_TG_TOKEN = '9103165370:AAE8r9tL02GfiFRpo4zjn5cyLfhVZokd-I8';
 const DEFAULT_TG_CHAT  = '-5441001983';
 
