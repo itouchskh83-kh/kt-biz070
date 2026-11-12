@@ -223,3 +223,18 @@ export async function ensureSchema(env) {
     _schemaReady = true;
   } catch (e) {}
 }
+
+/* ── app_settings 읽기/쓰기 ── */
+export async function getSet(env, key, dflt) {
+  try {
+    const r = await env.DB.prepare('SELECT val FROM app_settings WHERE key = ?').bind(key).first();
+    return r && r.val != null ? r.val : dflt;
+  } catch (e) { return dflt; }
+}
+export async function setSet(env, key, val) {
+  try {
+    await env.DB.prepare('CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, val TEXT, updated_at TEXT)').run();
+    await env.DB.prepare('INSERT INTO app_settings (key,val,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET val=excluded.val, updated_at=excluded.updated_at')
+      .bind(key, String(val), new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 19).replace('T', ' ')).run();
+  } catch (e) {}
+}

@@ -1,6 +1,6 @@
 
 import { json } from './_lib.js';
-import { clientIP, ensureSchema } from './_smartlog.js';
+import { clientIP, ensureSchema, getSet, setSet } from './_smartlog.js';
 
 const clampDays = (v) => Math.min(365, Math.max(1, parseInt(v || '7', 10) || 7));
 const clampPage = (v) => Math.max(1, parseInt(v || '1', 10) || 1);
@@ -8,120 +8,20 @@ const clampPer  = (v) => Math.min(100, Math.max(5, parseInt(v || '20', 10) || 20
 
 function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
 
-export async function onRequestPost({ request, env }) {
-  if (!env.ADMIN_PASSWORD) return json({ ok: false, error: 'ADMIN_NOT_CONFIGURED' }, 500);
-  if (!env.DB) return json({ ok: false, error: 'DB_NOT_BOUND' }, 500);
-  let b = {};
-  try { b = await request.json(); } catch { return json({ ok: false, error: 'BAD_JSON' }, 400); }
-  if (String(b.password || '') !== env.ADMIN_PASSWORD) return json({ ok: false, error: 'UNAUTHORIZED' }, 401);
+async function rxStatus(env) {
+  const wm = await getSet(env, 'reindex_from', '');
+  const mnRow = await env.DB.prepare("SELECT MIN(created_at) AS m FROM click_logs WHERE action <> 'test'").first();
+  const cutRow = await env.DB.prepare("SELECT MIN(started_at) AS m FROM visits WHERE sid NOT LIKE 'b%'").first();
+  const now = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 19).replace('T', ' ');
+  const mn = (mnRow || {}).m;
+  const end = (cutRow || {}).m || now;
+  if (!mn) return { need: false, done: true, from: '', end, msg: '재집계할 원본 기록이 없습니다.' };
+  const from = wm || mn;
+  return { need: from < end, done: from >= end, from, end, wm };
+}
 
-  await ensureSchema(env);
-  const op = String(b.op || 'summary');
-  const days = clampDays(b.days);
-  const win = `datetime('now','+9 hours','-${days} days')`;
-
-  /* ── 요약 ── */
-  if (op === 'summary') {
-    const s = await env.DB.prepare(
-      `SELECT COUNT(*) AS visits,
-              SUM(CASE WHEN is_ad = 1 THEN 1 ELSE 0 END) AS ad,
-              SUM(CASE WHEN is_ad = 0 THEN 1 ELSE 0 END) AS nonad,
-              SUM(CASE WHEN is_ad = 1 THEN total_ms ELSE 0 END) AS ad_ms,
-              SUM(CASE WHEN is_ad = 1 AND total_ms < 3000 THEN 1 ELSE 0 END) AS bounce,
-              SUM(CASE WHEN verdict = 'block' THEN 1 ELSE 0 END) AS blocked,
-              SUM(CASE WHEN verdict = 'warn' THEN 1 ELSE 0 END) AS warned,
-              SUM(CASE WHEN verdict = 'watch' THEN 1 ELSE 0 END) AS watched,
-              ROUND(AVG(pages), 1) AS avg_pages,
-              COUNT(DISTINCT ip) AS ips, COUNT(DISTINCT fp) AS devices
-         FROM visits WHERE started_at >= ${win}`).first();
-    const s2 = await env.DB.prepare(
-      `SELECT COUNT(*) AS pv, SUM(CASE WHEN reason = '내부 이동' THEN 1 ELSE 0 END) AS internal
-         FROM click_logs WHERE created_at >= ${win} AND action <> 'test'`).first();
-    const bl = await env.DB.prepare('SELECT COUNT(*) AS c FROM blocked_ips WHERE mode = \'block\'').first();
-    return json({ ok: true, days, myIp: clientIP(request), stat: s || {}, pv: s2 || {}, blockedNow: (bl || {}).c || 0 });
-  }
-
-  /* ── 방문 목록 (세션) ── */
-  if (op === 'visits') {
-    const page = clampPage(b.page), per = clampPer(b.per);
-    const src = String(b.src || 'all'), verdict = String(b.verdict || 'all'), q = String(b.q || '').trim();
-    let where = `WHERE started_at >= ${win}`;
-    const binds = [];
-    if (src === 'ad') where += ' AND is_ad = 1';
-    if (src === 'nonad') where += ' AND is_ad = 0';
-    if (verdict !== 'all') { where += ' AND verdict = ?'; binds.push(verdict); }
-    if (q) { where += ' AND (ip LIKE ? OR fp LIKE ? OR org LIKE ? OR kw LIKE ?)'; binds.push('%' + q + '%', '%' + q + '%', '%' + q + '%', '%' + q + '%'); }
-    const total = await env.DB.prepare('SELECT COUNT(*) AS c FROM visits ' + where).bind(...binds).first('c');
-    const rows = await env.DB.prepare(
-      'SELECT * FROM visits ' + where + ' ORDER BY started_at DESC LIMIT ? OFFSET ?'
-    ).bind(...binds, per, (page - 1) * per).all();
-    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list: rows.results || [] });
-  }
-
-  /* ── 한 세션의 페이지 타임라인 ── */
-  if (op === 'detail') {
-    const sid = String(b.sid || '');
-    const v = await env.DB.prepare('SELECT * FROM visits WHERE sid = ?').bind(sid).first();
-    const l = await env.DB.prepare(
-      `SELECT id, path, ref, keyword, created_at, dwell, act_ms, moved, reason
-         FROM click_logs WHERE sid = ? ORDER BY id ASC LIMIT 60`).bind(sid).all();
-    return json({ ok: true, visit: v || null, logs: l.results || [] });
-  }
-
-  /* ── 의심 IP: 광고 유입 또는 고위험 점수만 (직접방문 다수는 제외) ── */
-  if (op === 'suspicious') {
-    const page = clampPage(b.page), per = clampPer(b.per);
-    const base = `FROM visits WHERE started_at >= ${win} AND (is_ad = 1 OR score >= 60)`;
-    const total = await env.DB.prepare('SELECT COUNT(DISTINCT ip) AS c ' + base).first('c');
-    const rows = await env.DB.prepare(
-      `SELECT ip, COUNT(*) AS sessions, SUM(is_ad) AS ad_sessions, MAX(score) AS top,
-              COUNT(DISTINCT fp) AS devices, SUM(total_ms) AS ms, MAX(region) AS region,
-              MAX(org) AS org, MAX(last_at) AS last, MAX(reasons) AS reason
-         ${base}
-        GROUP BY ip
-        HAVING SUM(is_ad) >= 1 OR MAX(score) >= 60
-        ORDER BY top DESC, sessions DESC LIMIT ? OFFSET ?`
-    ).bind(per, (page - 1) * per).all();
-    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list: rows.results || [] });
-  }
-
-  /* ── IP 대역(ASN) 반복 — 여러 IP로 나눠 들어와도 같은 회선이면 잡힌다 ── */
-  if (op === 'asn') {
-    const rows = await env.DB.prepare(
-      `SELECT asn, MAX(org) AS org, COUNT(*) AS sessions, SUM(is_ad) AS ad_sessions,
-              COUNT(DISTINCT ip) AS ips, COUNT(DISTINCT fp) AS devices,
-              MAX(score) AS top, SUM(total_ms) AS ms, MAX(region) AS region, MAX(last_at) AS last
-         FROM visits
-        WHERE started_at >= ${win} AND asn IS NOT NULL AND asn <> ''
-          AND (is_ad = 1 OR score >= 60)
-        GROUP BY asn
-        HAVING SUM(is_ad) >= 2 AND COUNT(DISTINCT ip) >= 2
-        ORDER BY ad_sessions DESC, top DESC LIMIT 30`).all();
-    return json({ ok: true, list: rows.results || [] });
-  }
-
-  /* ── 차단 목록 ── */
-  if (op === 'blocked') {
-    const rows = await env.DB.prepare('SELECT * FROM blocked_ips ORDER BY created_at DESC LIMIT 300').all();
-    return json({ ok: true, list: rows.results || [] });
-  }
-
-  /* ── 원본 페이지뷰 (페이지네이션) ── */
-  if (op === 'logs') {
-    const page = clampPage(b.page), per = clampPer(b.per, 30);
-    const total = await env.DB.prepare(
-      `SELECT COUNT(*) AS c FROM click_logs WHERE created_at >= ${win} AND action <> 'test'`).first('c');
-    const rows = await env.DB.prepare(
-      `SELECT id, ip, fp, sid, path, ref, keyword, is_naver, score, action, reason, region,
-              dwell, act_ms, created_at
-         FROM click_logs WHERE created_at >= ${win} AND action <> 'test'
-        ORDER BY id DESC LIMIT ? OFFSET ?`).bind(per, (page - 1) * per).all();
-    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list: rows.results || [] });
-  }
-
-  /* ── 기존 데이터 재집계 (배치) ── */
-  if (op === 'reindex') {
-    let from = String(b.from || '').trim();
+async function reindexBatch(env, fromIn) {
+    let from = String(fromIn || '').trim();
     if (!from) {
       const mn = await env.DB.prepare("SELECT MIN(created_at) AS m FROM click_logs WHERE action <> 'test'").first('m');
       if (!mn) return json({ ok: true, done: true, inserted: 0, msg: '기록이 없습니다.' });
@@ -201,11 +101,138 @@ export async function onRequestPost({ request, env }) {
              r.region || '', r.org || '', r.country || '', String(r.ua || '').slice(0, 200), String(r.kw || ''), score, verdict,
              isAd ? '재집계' : ''));
     }
-    await env.DB.prepare('DELETE FROM visits WHERE started_at >= ? AND started_at < ?').bind(from, to).run();
+    await env.DB.prepare("DELETE FROM visits WHERE sid LIKE 'b%' AND started_at >= ? AND started_at < ?").bind(from, to).run();
     for (let i = 0; i < stmts.length; i += 50) await env.DB.batch(stmts.slice(i, i + 50));
-    const done = !list.length || to > new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 19).replace('T', ' ');
+    const nowK = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 19).replace('T', ' ');
+    const done = !list.length || to > nowK;
+    await setSet(env, 'reindex_from', done ? nowK : to);
     return json({ ok: true, done, from, to, inserted: list.length, next: done ? null : to });
   }
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  const WA = context.waitUntil ? context.waitUntil.bind(context) : (p) => { p && p.catch && p.catch(() => {}); };
+  if (!env.ADMIN_PASSWORD) return json({ ok: false, error: 'ADMIN_NOT_CONFIGURED' }, 500);
+  if (!env.DB) return json({ ok: false, error: 'DB_NOT_BOUND' }, 500);
+  let b = {};
+  try { b = await request.json(); } catch { return json({ ok: false, error: 'BAD_JSON' }, 400); }
+  if (String(b.password || '') !== env.ADMIN_PASSWORD) return json({ ok: false, error: 'UNAUTHORIZED' }, 401);
+
+  await ensureSchema(env);
+  const op = String(b.op || 'summary');
+  const days = clampDays(b.days);
+  const win = `datetime('now','+9 hours','-${days} days')`;
+
+  /* ── 요약 ── */
+  if (op === 'summary') {
+    const s = await env.DB.prepare(
+      `SELECT COUNT(*) AS visits,
+              SUM(CASE WHEN is_ad = 1 THEN 1 ELSE 0 END) AS ad,
+              SUM(CASE WHEN is_ad = 0 THEN 1 ELSE 0 END) AS nonad,
+              SUM(CASE WHEN is_ad = 1 THEN total_ms ELSE 0 END) AS ad_ms,
+              SUM(CASE WHEN is_ad = 1 AND total_ms < 3000 THEN 1 ELSE 0 END) AS bounce,
+              SUM(CASE WHEN verdict = 'block' THEN 1 ELSE 0 END) AS blocked,
+              SUM(CASE WHEN verdict = 'warn' THEN 1 ELSE 0 END) AS warned,
+              SUM(CASE WHEN verdict = 'watch' THEN 1 ELSE 0 END) AS watched,
+              ROUND(AVG(pages), 1) AS avg_pages,
+              COUNT(DISTINCT ip) AS ips, COUNT(DISTINCT fp) AS devices
+         FROM visits WHERE started_at >= ${win}`).first();
+    const s2 = await env.DB.prepare(
+      `SELECT COUNT(*) AS pv, SUM(CASE WHEN reason = '내부 이동' THEN 1 ELSE 0 END) AS internal
+         FROM click_logs WHERE created_at >= ${win} AND action <> 'test'`).first();
+    const bl = await env.DB.prepare('SELECT COUNT(*) AS c FROM blocked_ips WHERE mode = \'block\'').first();
+    const rx = await rxStatus(env);
+    if (rx.need) WA(reindexBatch(env).catch(() => null));
+    return json({ ok: true, days, myIp: clientIP(request), stat: s || {}, pv: s2 || {}, blockedNow: (bl || {}).c || 0, rx });
+  }
+
+  /* ── 방문 목록 (세션) ── */
+  if (op === 'visits') {
+    const page = clampPage(b.page), per = clampPer(b.per);
+    const src = String(b.src || 'all'), verdict = String(b.verdict || 'all'), q = String(b.q || '').trim();
+    let where = `WHERE started_at >= ${win}`;
+    const binds = [];
+    if (src === 'ad') where += ' AND is_ad = 1';
+    if (src === 'nonad') where += ' AND is_ad = 0';
+    if (verdict !== 'all') { where += ' AND verdict = ?'; binds.push(verdict); }
+    if (q) { where += ' AND (ip LIKE ? OR fp LIKE ? OR org LIKE ? OR kw LIKE ?)'; binds.push('%' + q + '%', '%' + q + '%', '%' + q + '%', '%' + q + '%'); }
+    const total = await env.DB.prepare('SELECT COUNT(*) AS c FROM visits ' + where).bind(...binds).first('c');
+    const rows = await env.DB.prepare(
+      'SELECT * FROM visits ' + where + ' ORDER BY started_at DESC LIMIT ? OFFSET ?'
+    ).bind(...binds, per, (page - 1) * per).all();
+    const rx = await rxStatus(env);
+    if (rx.need) WA(reindexBatch(env).catch(() => null));
+    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list: rows.results || [], rx });
+  }
+
+  /* ── 한 세션의 페이지 타임라인 ── */
+  if (op === 'detail') {
+    const sid = String(b.sid || '');
+    const v = await env.DB.prepare('SELECT * FROM visits WHERE sid = ?').bind(sid).first();
+    const l = await env.DB.prepare(
+      `SELECT id, path, ref, keyword, created_at, dwell, act_ms, moved, reason
+         FROM click_logs WHERE sid = ? ORDER BY id ASC LIMIT 60`).bind(sid).all();
+    return json({ ok: true, visit: v || null, logs: l.results || [] });
+  }
+
+  /* ── 의심 IP: 광고 유입 또는 고위험 점수만 (직접방문 다수는 제외) ── */
+  if (op === 'suspicious') {
+    const page = clampPage(b.page), per = clampPer(b.per);
+    const base = `FROM visits WHERE started_at >= ${win} AND (is_ad = 1 OR score >= 60)`;
+    const total = await env.DB.prepare('SELECT COUNT(DISTINCT ip) AS c ' + base).first('c');
+    const rows = await env.DB.prepare(
+      `SELECT ip, COUNT(*) AS sessions, SUM(is_ad) AS ad_sessions, MAX(score) AS top,
+              COUNT(DISTINCT fp) AS devices, SUM(total_ms) AS ms, MAX(region) AS region,
+              MAX(org) AS org, MAX(last_at) AS last, MAX(reasons) AS reason
+         ${base}
+        GROUP BY ip
+        HAVING SUM(is_ad) >= 1 OR MAX(score) >= 60
+        ORDER BY top DESC, sessions DESC LIMIT ? OFFSET ?`
+    ).bind(per, (page - 1) * per).all();
+    const rx = await rxStatus(env);
+    if (rx.need) WA(reindexBatch(env).catch(() => null));
+    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list: rows.results || [], rx });
+  }
+
+  /* ── IP 대역(ASN) 반복 — 여러 IP로 나눠 들어와도 같은 회선이면 잡힌다 ── */
+  if (op === 'asn') {
+    const rows = await env.DB.prepare(
+      `SELECT asn, MAX(org) AS org, COUNT(*) AS sessions, SUM(is_ad) AS ad_sessions,
+              COUNT(DISTINCT ip) AS ips, COUNT(DISTINCT fp) AS devices,
+              MAX(score) AS top, SUM(total_ms) AS ms, MAX(region) AS region, MAX(last_at) AS last
+         FROM visits
+        WHERE started_at >= ${win} AND asn IS NOT NULL AND asn <> ''
+          AND (is_ad = 1 OR score >= 60)
+        GROUP BY asn
+        HAVING SUM(is_ad) >= 2 AND COUNT(DISTINCT ip) >= 2
+        ORDER BY ad_sessions DESC, top DESC LIMIT 30`).all();
+    return json({ ok: true, list: rows.results || [] });
+  }
+
+  /* ── 차단 목록 ── */
+  if (op === 'blocked') {
+    const rows = await env.DB.prepare('SELECT * FROM blocked_ips ORDER BY created_at DESC LIMIT 300').all();
+    return json({ ok: true, list: rows.results || [] });
+  }
+
+  /* ── 원본 페이지뷰 (페이지네이션) ── */
+  if (op === 'logs') {
+    const page = clampPage(b.page), per = clampPer(b.per, 30);
+    const total = await env.DB.prepare(
+      `SELECT COUNT(*) AS c FROM click_logs WHERE created_at >= ${win} AND action <> 'test'`).first('c');
+    const rows = await env.DB.prepare(
+      `SELECT id, ip, fp, sid, path, ref, keyword, is_naver, score, action, reason, region,
+              dwell, act_ms, created_at
+         FROM click_logs WHERE created_at >= ${win} AND action <> 'test'
+        ORDER BY id DESC LIMIT ? OFFSET ?`).bind(per, (page - 1) * per).all();
+    const rx = await rxStatus(env);
+    if (rx.need) WA(reindexBatch(env).catch(() => null));
+    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list: rows.results || [], rx });
+  }
+
+  /* ── 기존 데이터 재집계 (배치) ── */
+  /* ── 재집계: 수동 실행 ── */
+  if (op === 'reindex') return json(await reindexBatch(env, b.from));
 
   /* ── CSV (네이버 제출용) ── */
   if (op === 'export') {

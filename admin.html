@@ -217,12 +217,12 @@ body.kt .post:hover{border-left-color:var(--kt)}
     </div>
     <div class="cards" id="sumCards"></div>
     <div class="card" style="margin-top:16px">
-      <b style="font-size:14px">기존 기록 재집계</b>
-      <p class="hint">페이지 이동을 방문으로 세던 기존 데이터를 새 규칙(세션 단위)으로 다시 묶습니다. 10일 단위로 처리하며, 여러 번 눌러 끝까지 진행하세요.</p>
+      <b style="font-size:14px">자동 재집계 <span class="badge b-ok" style="vertical-align:1px">AUTO</span></b>
+      <p class="hint">새 규칙(방문 1회 = 세션 1건)이 적용되지 않은 <b>과거 기록</b>을 관리자 페이지를 열 때마다 10일씩 자동으로 다시 계산합니다. 버튼을 누를 필요가 없습니다. 실시간으로 쌓이는 방문은 건드리지 않습니다.</p>
       <div class="bar"><i id="rxBar"></i></div>
       <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
-        <button class="btn btn-red" id="rxStart" type="button">재집계 시작</button>
-        <span id="rxMsg" style="font-size:12.5px;color:var(--mut);font-weight:700"></span>
+        <button class="btn btn-red" id="rxStart" type="button">지금 강제 재계산</button>
+        <span id="rxMsg" style="font-size:12.5px;color:var(--mut);font-weight:700">확인 중…</span>
       </div>
     </div>
   </section>
@@ -350,6 +350,7 @@ body.kt .post:hover{border-left-color:var(--kt)}
         if(!j.ok){ sessionStorage.removeItem("adm"); $("loginBox").style.display=""; $("admErr").textContent="비밀번호가 올바르지 않습니다."; return; }
         $("loginBox").style.display="none";
         var _sb=$("listBox"); if(_sb){ _sb.style.display="flex"; _sb.classList.add("is-on"); }
+        $("loginBox").style.display="none";
         ST.post={page:j.page||1,pages:j.pages||1,total:j.total||0};
         $("admList").innerHTML = (j.list||[]).length ? j.list.map(postCard).join("") : '<div class="card">등록된 문의가 없습니다.</div>';
         pager($("admPager"),ST.post,loadPosts);
@@ -396,6 +397,7 @@ body.kt .post:hover{border-left-color:var(--kt)}
         var avg = ad ? (adMs/ad/1000) : 0;
         var bounce = ad ? Math.round((s.bounce||0)/ad*100) : 0;
         function card(l,v,h){ return '<div class="stat"><div class="l">'+l+'</div><div class="v">'+v+'</div>'+(h?'<div class="h">'+h+'</div>':'')+'</div>'; }
+        rxPaint(j.rx);
         $("sumCards").innerHTML =
             card("방문 수", (s.visits||0)+"회", "페이지 이동 제외")
           + card("광고 방문", ad+"회", "전체의 "+(s.visits?Math.round(ad/s.visits*100):0)+"%")
@@ -443,11 +445,19 @@ body.kt .post:hover{border-left-color:var(--kt)}
     if(v==="watch") return '<span class="badge b-watch">주의</span>';
     return '<span class="badge b-ok">정상</span>';
   }
+  function rxPaint(rx){
+    var m=$("rxMsg"), b=$("rxBar"); if(!m||!b||!rx) return;
+    if(rx.msg){ m.textContent = rx.msg; b.style.width="100%"; return; }
+    if(rx.done){ m.textContent = "자동 재집계 완료 · " + String(rx.end||"").slice(0,16) + " 까지 반영"; b.style.width="100%"; return; }
+    m.textContent = "자동 재집계 중 · " + String(rx.from||"").slice(0,10) + " ~ " + String(rx.end||"").slice(0,10) + " (페이지를 열 때마다 이어서 처리)";
+    b.style.width="55%";
+  }
   function loadVisits(pg){
     var body={password:token,op:"visits",days:+$("vDays").value,src:$("vSrc").value,verdict:$("vVd").value,q:$("vQ").value.trim(),page:pg||1,per:20};
     fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)})
       .then(function(r){return r.json();}).then(function(j){
         if(!j.ok) return;
+        rxPaint(j.rx);
         ST.visit={page:j.page||1,pages:j.pages||1,total:j.total||0};
         var l=j.list||[];
         $("vBody").innerHTML = l.length ? l.map(function(x){

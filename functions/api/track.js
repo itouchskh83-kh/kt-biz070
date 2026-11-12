@@ -26,7 +26,12 @@ export async function onRequestPost(context) {
   const kw = String(b.q || '').slice(0, 80);
   const path = String(b.p || '/').slice(0, 200);
   const fp = String(b.f || '').slice(0, 40);
-  const sid = String(b.s || '').slice(0, 48);
+  let sid = String(b.s || '').slice(0, 48);
+  // 클라이언트 세션ID가 없으면(구버전 JS 캐시 등) 서버가 IP+기기+30분 버킷으로 대체 ID를 만든다
+  if (!sid) {
+    const bucket = Math.floor((Date.now() + 9 * 3600000) / (30 * 60 * 1000));
+    sid = ('srv' + bucket.toString(36) + ':' + (fp || ip || 'x')).slice(0, 48);
+  }
   const isKnown = b.n === 1 ? 1 : 0;
   const actMs = Math.max(0, Math.min(MAX_ACT, Number(b.a) || 0));
 
@@ -144,7 +149,8 @@ export async function onRequestPost(context) {
     bot: BOT_UA.test(ua), hosting: isHosting(org), carrier: isCarrier(org), converted: false
   });
 
-  if (sid) {
+  let dbErr = null;
+  try {
     await env.DB.prepare(
       `INSERT INTO visits (sid, fp, ip, src, is_ad, started_at, last_at, total_ms, pages, moved, depth, asn, region, org, country, ua, kw, score, verdict, reasons)
        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
@@ -153,7 +159,9 @@ export async function onRequestPost(context) {
          verdict = excluded.verdict, reasons = excluded.reasons,
          kw = CASE WHEN visits.kw IS NULL OR visits.kw = '' THEN excluded.kw ELSE visits.kw END`
     ).bind(sid, fp, ip, src, isAd ? 1 : 0, kst(0), kst(0), actMs, moved, depth, asn,
-           region, org, country, ua.slice(0, 200), kw, ev.score, ev.verdict, ev.reasons.join(' / ')).run().catch(() => null);
+           region, org, country, ua.slice(0, 200), kw, ev.score, ev.verdict, ev.reasons.join(' / ')).run();
+  } catch (e) {
+    dbErr = String(e && e.message || e).slice(0, 200);
   }
 
   /* ── 7) 차단 등록 (광고 유입 + 차단 판정만) */
@@ -184,5 +192,6 @@ export async function onRequestPost(context) {
 
   await maybePurge(env);
   return json({ ok: true, action, stage, score: ev.score, hits: ipAd, verdict: ev.verdict,
-                reason: ev.reasons.join(' / '), blockedUntil, region, org, src, id: logId });
+                reason: ev.reasons.join(' / '), blockedUntil, region, org, src, id: logId,
+                sid, kw, dbErr });
 }
