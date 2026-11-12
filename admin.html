@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>관리자 — LG U+ 기업가입센터</title>
+<title>관리자 — soonycompany KT 공식가입센터</title>
 <style>
+:root{--brand:#f4514a;--brand2:#d93a33}
+
 :root{--brand:#7935F8;--brand2:#5B1FD1;--line:#e8e9f2;--ink:#101114;--mut:#8b90a0;--soft:#f8f9ff}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:var(--soft);color:var(--ink);-webkit-text-size-adjust:100%}
@@ -60,11 +62,88 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
 .bar{height:8px;background:#eef0f7;border-radius:6px;overflow:hidden;margin-top:8px}
 .bar i{display:block;height:100%;background:var(--brand);width:0}
 @media(max-width:760px){.wrap{padding:18px 12px 70px}.stat .v{font-size:19px}}
+
+
+/* ══════ KT 관리자 — 전용 테마 ══════ */
+body.kt{background:#f3f3f4;--kt:#f4514a;--kt-d:#d93a33;--ink2:#191919}
+body.kt .wrap{display:none}
+body.kt .login{max-width:380px;margin:14vh auto 0;border-radius:4px;border:1px solid #e2e2e4;box-shadow:none;padding:34px 30px}
+body.kt .login h1{font-size:20px;letter-spacing:-.03em}
+body.kt .login h1::before{content:"kt";display:inline-block;background:var(--kt);color:#fff;font-weight:900;font-size:14px;letter-spacing:-.06em;padding:3px 8px;border-radius:3px;margin-right:9px;vertical-align:2px}
+.shell{display:none;min-height:100vh}
+
+/* 사이드바 */
+.side{width:250px;flex:0 0 250px;background:#fff;border-right:1px solid #e4e4e6;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{background:#191919;color:#fff;padding:20px 20px 18px;display:flex;align-items:center;gap:11px}
+.brand .mark{background:var(--kt);color:#fff;font-weight:900;font-size:19px;letter-spacing:-.08em;line-height:1;padding:7px 9px 8px;border-radius:3px}
+.brand b{display:block;font-size:13.5px;font-weight:800;letter-spacing:-.02em}
+.brand i{display:block;font-style:normal;font-size:11px;color:#9b9b9e;font-weight:700;margin-top:3px;letter-spacing:.02em}
+.side nav{padding:12px 0;flex:1;overflow:auto}
+.side .tab{display:block;width:100%;border:0;background:transparent;text-align:left;padding:13px 20px;font-size:13.5px;font-weight:700;color:#6b6b70;border-left:3px solid transparent;border-radius:0;letter-spacing:-.02em}
+.side .tab em{font-style:normal;font-weight:900;font-size:10.5px;color:#c3c3c6;margin-right:9px;letter-spacing:.06em}
+.side .tab:hover{background:#fafafa;color:#191919}
+.side .tab.is-on{background:#f6f6f7;color:var(--kt);border-left-color:var(--kt);font-weight:900}
+.side .tab.is-on em{color:var(--kt)}
+.side-foot{padding:14px 20px 18px;border-top:1px solid #ededee;font-size:10.5px;color:#a8a8ac;font-weight:700;line-height:1.7}
+
+/* 본문 */
+.main{flex:1;min-width:0;padding:0 0 70px}
+.topbar{background:#fff;border-bottom:1px solid #e4e4e6;padding:22px 34px 20px;display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.topbar h1{font-size:21px;font-weight:900;letter-spacing:-.045em}
+.topbar h1::after{content:"";display:block;width:26px;height:3px;background:var(--kt);margin-top:9px;border-radius:2px}
+.topbar .sub{font-size:12px;color:#8e8e93;font-weight:700;margin:0 0 4px}
+.topbar .chip{font-size:10.5px;font-weight:900;color:#fff;background:#191919;padding:6px 10px;border-radius:3px;letter-spacing:.02em}
+.main > section{padding:22px 34px 0;margin-top:0!important}
+
+/* 카드·표 */
+body.kt .card{border-radius:4px;border:1px solid #e4e4e6;box-shadow:none;padding:20px}
+body.kt .cards{gap:8px;grid-template-columns:repeat(auto-fit,minmax(158px,1fr))}
+body.kt .stat{border-radius:4px;border:1px solid #e4e4e6;padding:15px 16px 14px;position:relative;overflow:hidden}
+body.kt .stat::before{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:var(--kt)}
+body.kt .stat .l{font-size:10.5px;letter-spacing:.03em;color:#8e8e93;font-weight:900}
+body.kt .stat .v{font-size:24px;font-weight:900;letter-spacing:-.05em;margin-top:6px;color:#191919}
+body.kt .stat .h{font-size:10.5px;color:#a8a8ac;font-weight:700;margin-top:3px}
+body.kt .tw{border-radius:4px;border:1px solid #e4e4e6}
+body.kt th{background:#fff;border-bottom:2px solid #191919;color:#191919;font-size:11px;font-weight:900;letter-spacing:.02em;padding:11px 9px}
+body.kt td{border-bottom:1px solid #f0f0f1;padding:11px 9px}
+body.kt tr:hover td{background:#fbfbfb}
+body.kt .badge{border-radius:3px;font-size:10.5px;font-weight:900}
+body.kt .b-ad{background:#fdeceb;color:var(--kt-d)}
+body.kt .b-ok{background:#eef7f0;color:#1f8a4c}
+body.kt .b-watch{background:#fff6e5;color:#b87400}
+body.kt .b-warn{background:var(--kt);color:#fff}
+body.kt .btn{border-radius:3px;font-size:13px;font-weight:900}
+body.kt .btn-red{background:var(--kt)}
+body.kt .btn-red:hover{background:var(--kt-d)}
+body.kt .btn-line{border-color:#d8d8db}
+body.kt .pager button{border-radius:3px}
+body.kt .pager button.is-on{background:#191919;border-color:#191919;color:#fff}
+body.kt .toolbar select,body.kt .toolbar input{height:40px;border-radius:3px;border-color:#dcdcdf;font-size:12.5px}
+body.kt .hint{font-size:11.5px;color:#9a9aa0}
+body.kt .detail .body{border-left:3px solid var(--kt)}
+body.kt .tl{border-left-color:#e0e0e2}
+body.kt .tl li::before{background:var(--kt)}
+body.kt textarea{border-radius:3px}
+body.kt .post{border-left:3px solid transparent}
+body.kt .post:hover{border-left-color:var(--kt)}
+
+@media(max-width:900px){
+  .shell{display:block}
+  .side{width:auto;flex:none;position:static;height:auto;border-right:0;border-bottom:1px solid #e4e4e6}
+  .brand{padding:14px 16px}
+  .side nav{display:flex;overflow-x:auto;padding:0;gap:0}
+  .side .tab{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:12px 14px;font-size:12.5px}
+  .side .tab em{display:none}
+  .side .tab.is-on{border-left:0;border-bottom-color:var(--kt);background:#fff}
+  .side-foot{display:none}
+  .topbar{padding:16px 16px 14px}
+  .topbar h1{font-size:18px}
+  .main > section{padding:16px 16px 0}
+}
+
 </style>
 </head>
-<body>
-<div class="wrap">
-
+<body class="kt">
 <div class="login" id="loginBox">
   <h1>관리자</h1>
   <p class="sub">LG U+ 기업가입센터 상담·부정클릭 관리</p>
@@ -72,19 +151,24 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
   <button class="btn btn-red" id="admLogin" style="width:100%;margin-top:14px" type="button">로그인</button>
   <p id="admErr" style="color:#e03c35;font-size:13px;margin-top:10px;font-weight:700"></p>
 </div>
-
-<div id="listBox" style="display:none">
-  <h1>관리자</h1>
-  <p class="sub">LG U+ 기업가입센터 · 상담 접수 및 부정클릭 관리</p>
-  <div class="tabs">
-    <button class="tab is-on" data-tab="post">상담 문의</button>
-    <button class="tab" data-tab="sum">요약</button>
-    <button class="tab" data-tab="visit">방문 목록</button>
-    <button class="tab" data-tab="sus">의심 IP</button>
-    <button class="tab" data-tab="block">차단 관리</button>
-    <button class="tab" data-tab="raw">원본 로그</button>
-  </div>
-
+<div class="shell" id="listBox">
+    <aside class="side">
+      <div class="brand"><span class="mark">kt</span><div><b>KT 공식가입센터</b><i>ADMIN CONSOLE</i></div></div>
+      <nav>
+        <button class="tab is-on" data-tab="post" data-label="상담 문의"><em>01</em>상담 문의</button>
+        <button class="tab" data-tab="sum" data-label="요약"><em>02</em>요약</button>
+        <button class="tab" data-tab="visit" data-label="방문 목록"><em>03</em>방문 목록</button>
+        <button class="tab" data-tab="sus" data-label="의심 IP"><em>04</em>의심 IP</button>
+        <button class="tab" data-tab="block" data-label="차단 관리"><em>05</em>차단 관리</button>
+        <button class="tab" data-tab="raw" data-label="원본 로그"><em>06</em>원본 로그</button>
+      </nav>
+      <div class="side-foot">KT 공식가입센터<br>상담·부정클릭 관리 콘솔</div>
+    </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><h1 id="pageTitle">상담 문의</h1></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="chip">KT BIZ</span><span class="sub" style="margin:0">soonycompany KT 공식가입센터</span></div>
+    </header>
   <section id="tabPost" style="margin-top:18px">
     <div id="admList"></div>
     <div class="pager" id="admPager"></div>
@@ -118,7 +202,7 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
     </div>
     <div class="tw">
       <table><thead><tr>
-        <th>시작</th><th>유입</th><th>IP</th><th>IP 대역</th><th>기기지문</th><th>페이지</th><th>총 체류</th><th>판정</th><th>점수</th>
+        <th>시작</th><th>유입</th><th>IP</th><th>회선</th><th>기기지문</th><th>페이지</th><th>총 체류</th><th>판정</th><th>점수</th>
       </tr></thead><tbody id="vBody"><tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody></table>
     </div>
     <div class="pager" id="vPager"></div>
@@ -137,11 +221,11 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
     </div>
     <div class="pager" id="sPager"></div>
     <div class="tw" style="margin-top:22px">
-      <div style="padding:14px 16px 0"><b style="font-size:14px">IP 대역(ASN) 반복</b>
-        <p class="hint" style="margin-top:6px">IP를 바꿔가며 접속해도 같은 회선·같은 대역이면 여기에 묶입니다. 통신사(ISP) 대역은 채점에서 제외합니다.</p></div>
+      <div style="padding:14px 16px 0"><b style="font-size:14px">회선(IP 대역) 반복</b>
+        <p class="hint" style="margin-top:6px">IP를 바꿔가며 접속해도 같은 회선이면 여기에 묶입니다. 통신사(ISP) 회선은 채점에서 제외합니다.</p></div>
       <table style="margin-top:8px"><thead><tr>
-        <th>대역</th><th>회선명</th><th>광고 방문</th><th>고유 IP</th><th>기기</th><th>최고점수</th><th>지역</th><th>최근</th>
-      </tr></thead><tbody id="asBody"><tr><td colspan="8" style="padding:22px;text-align:center;color:#9aa0b0">-</td></tr></tbody></table>
+        <th>회선명</th><th>광고 방문</th><th>고유 IP</th><th>기기</th><th>최고점수</th><th>지역</th><th>최근</th>
+      </tr></thead><tbody id="asBody"><tr><td colspan="7" style="padding:22px;text-align:center;color:#9aa0b0">-</td></tr></tbody></table>
     </div>
     <p class="hint">광고로 유입된 접속과 위험점수 60점 이상만 표시합니다. 직접방문이 많은 IP는 여기에 올리지 않습니다.</p>
   </section>
@@ -175,7 +259,8 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
     <p class="hint">페이지뷰 원본입니다. 방문 집계에는 쓰이지 않고, 문제 세션을 들여다볼 때만 사용합니다.</p>
   </section>
 </div>
-
+  </main>
+</div>
 <div class="detail" id="detail">
   <div class="veil" data-close-detail></div>
   <div class="body">
@@ -186,7 +271,6 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
     <div id="detailBody" style="margin-top:14px"></div>
   </div>
 </div>
-
 <script>
 (function(){
   var token = sessionStorage.getItem("adm") || "";
@@ -335,7 +419,7 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
             +'<td style="color:#8b90a0;font-size:12px;white-space:nowrap">'+esc(dt(x.started_at))+'</td>'
             +'<td>'+(x.is_ad?'<span class="badge b-ad">광고</span>':'<span class="badge">직접</span>')+'</td>'
             +'<td class="mono">'+esc(x.ip)+'</td>'
-            +'<td style="font-size:11.5px;color:#6b7080" title="'+esc((x.asn||"")+" "+(x.org||""))+'">'+esc(x.asn?("AS"+x.asn):"-")+'</td>'
+            +'<td style="font-size:11.5px;color:#6b7080;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(x.org||"")+'">'+esc(x.org||"-")+'</td>'
             +'<td class="mono" style="color:#9aa0b0">'+esc(String(x.fp||"").slice(0,10)||"-")+'</td>'
             +'<td style="text-align:center;font-weight:800">'+(x.pages||1)+'</td>'
             +'<td style="font-weight:800;color:'+((x.total_ms||0)<3000?"#e03c35":"#3b3e47")+'">'+dur(x.total_ms)+'</td>'
@@ -405,15 +489,14 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
         var l=j.list||[];
         $("asBody").innerHTML = l.length ? l.map(function(x){
           var col = x.top>=75?"#e03c35":x.top>=45?"#c47f00":"#6b7080";
-          return '<tr><td class="mono" style="font-weight:800">AS'+esc(String(x.asn||""))+'</td>'
-            +'<td style="font-size:11.5px;color:#6b7080;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.org||"-")+'</td>'
+          return '<tr><td style="font-weight:800;font-size:12.5px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(x.org||"")+'">'+esc(x.org||"확인 불가")+'</td>'
             +'<td style="text-align:center;font-weight:900;color:#4a5fc8">'+(x.ad_sessions||0)+'</td>'
             +'<td style="text-align:center;font-weight:800">'+(x.ips||0)+'</td>'
             +'<td style="text-align:center">'+(x.devices||0)+'</td>'
             +'<td style="text-align:center;font-weight:900;color:'+col+'">'+(x.top||0)+'</td>'
             +'<td style="font-size:12px;color:#8b90a0">'+esc(x.region||"-")+'</td>'
             +'<td style="font-size:11.5px;color:#9aa0b0">'+esc(String(x.last||"").slice(5,16))+'</td></tr>';
-        }).join("") : '<tr><td colspan="8" style="padding:22px;text-align:center;color:#9aa0b0">대역 반복이 없습니다.</td></tr>';
+        }).join("") : '<tr><td colspan="7" style="padding:22px;text-align:center;color:#9aa0b0">회선 반복이 없습니다.</td></tr>';
       });
   }
   $("sGo") && $("sGo").addEventListener("click", function(){ loadSus(1); loadAsn(); });
@@ -484,6 +567,8 @@ textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:1
     t.addEventListener("click", function(){
       document.querySelectorAll(".tab").forEach(function(x){ x.classList.remove("is-on"); });
       t.classList.add("is-on");
+      var pt=document.getElementById("pageTitle");
+      if(pt){ pt.textContent=(t.getAttribute("data-label")||t.textContent).trim(); }
       var k=t.dataset.tab;
       [["post","tabPost"],["sum","tabSum"],["visit","tabVisit"],["sus","tabSus"],["block","tabBlock"],["raw","tabRaw"]].forEach(function(p){
         var el=$(p[1]); if(el) el.style.display = (p[0]===k?"":"none");
