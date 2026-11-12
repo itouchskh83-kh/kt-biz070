@@ -313,7 +313,8 @@ body.kt .post:hover{border-left-color:var(--kt)}
     fetch(base+"/admin",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:token,page:pg||1,per:10})})
       .then(function(r){return r.json();}).then(function(j){
         if(!j.ok){ sessionStorage.removeItem("adm"); $("listBox").style.display="none"; $("loginBox").style.display=""; $("admErr").textContent="비밀번호가 올바르지 않습니다."; return; }
-        $("loginBox").style.display="none"; $("listBox").style.display="";
+        $("loginBox").style.display="none";
+        $("listBox").style.display = document.body.classList.contains("kt") ? "flex" : "";
         ST.post={page:j.page||1,pages:j.pages||1,total:j.total||0};
         $("admList").innerHTML = (j.list||[]).length ? j.list.map(postCard).join("") : '<div class="card">등록된 문의가 없습니다.</div>';
         pager($("admPager"),ST.post,loadPosts);

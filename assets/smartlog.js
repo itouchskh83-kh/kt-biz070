@@ -44,6 +44,30 @@
   }
   var known = recall();
 
+  /* ---------- 1-b. 방문 세션 ID (탭 단위, 30분 무활동이면 갱신) ---------- */
+  function rnd(){
+    try{ var a=new Uint8Array(8); crypto.getRandomValues(a); return Array.prototype.map.call(a,function(x){return ('0'+x.toString(16)).slice(-2);}).join(''); }
+    catch(e){ return Math.random().toString(36).slice(2,14); }
+  }
+  function getSid(){
+    try{
+      var s=sessionStorage.getItem('sl_sid'), t=+(sessionStorage.getItem('sl_sid_t')||0), now=Date.now();
+      if(!s || now-t > 30*60*1000){ s='S'+rnd(); sessionStorage.setItem('sl_sid', s); }
+      sessionStorage.setItem('sl_sid_t', String(now));
+      return s;
+    }catch(e){ return ''; }
+  }
+  var sid = getSid();
+
+  /* ---------- 1-c. 활성 체류시간 (탭이 숨겨진 구간 제외) ---------- */
+  var actMs=0, lastT=Date.now(), hidden=false;
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ actMs += Date.now()-lastT; hidden=true; }
+    else { lastT=Date.now(); hidden=false; }
+  });
+  window.addEventListener('pagehide', function(){ if(!hidden){ actMs += Date.now()-lastT; lastT=Date.now(); } });
+  function actNow(){ return Math.max(0, Math.round(actMs + (hidden?0:(Date.now()-lastT)))); }
+
   /* ---------- 2. 활동 분석 ---------- */
   var t0 = Date.now(), depth = 1, moved = false, scrolled = 0;
   try{
@@ -143,13 +167,14 @@
 
   function send(beacon, isExit){
     if (isExit && lastId) {
-      var ub = JSON.stringify({ op:'upd', id:lastId, d:Math.round((Date.now()-t0)/1000), v:depth, m:moved?1:0 });
+      var ub = JSON.stringify({ op:'upd', id:lastId, s:sid, a:actNow(), d:Math.round((Date.now()-t0)/1000), v:depth, m:moved?1:0 });
       if (navigator.sendBeacon) { try{ navigator.sendBeacon('/api/track', new Blob([ub],{type:'application/json'})); return; }catch(e){} }
       fetch('/api/track',{method:'POST',headers:{'content-type':'application/json'},body:ub,keepalive:true}).catch(function(){});
       return;
     }
     var body = JSON.stringify({
       p: path, r: ref, q: kw, qs: location.search.slice(0,300), f: fp, n: known && known !== fp ? 0 : 1,
+      s: sid, a: actNow(),
       d: Math.round((Date.now() - t0) / 1000), v: depth,
       m: moved ? 1 : 0, s: scrolled, w: screen.width, h: screen.height, t: TEST
     });
