@@ -210,7 +210,7 @@ export async function ensureSchema(env) {
       sid TEXT PRIMARY KEY, fp TEXT, ip TEXT, src TEXT, is_ad INTEGER NOT NULL DEFAULT 0,
       started_at TEXT NOT NULL, last_at TEXT, total_ms INTEGER NOT NULL DEFAULT 0,
       pages INTEGER NOT NULL DEFAULT 1, moved INTEGER NOT NULL DEFAULT 0,
-      depth INTEGER NOT NULL DEFAULT 1, asn TEXT, region TEXT, org TEXT, country TEXT, ua TEXT,
+      depth INTEGER NOT NULL DEFAULT 1, asn TEXT, region TEXT, org TEXT, country TEXT, ua TEXT, kw TEXT,
       score INTEGER NOT NULL DEFAULT 0, verdict TEXT NOT NULL DEFAULT 'normal', reasons TEXT)`).run();
     await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_time ON visits (started_at DESC)').run();
     await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_ip ON visits (ip, started_at DESC)').run();
@@ -219,6 +219,7 @@ export async function ensureSchema(env) {
     try { await env.DB.prepare('ALTER TABLE click_logs ADD COLUMN sid TEXT').run(); } catch (e) {}
     try { await env.DB.prepare('ALTER TABLE click_logs ADD COLUMN act_ms INTEGER').run(); } catch (e) {}
     try { await env.DB.prepare('ALTER TABLE visits ADD COLUMN asn TEXT').run(); } catch (e) {}
+    try { await env.DB.prepare('ALTER TABLE visits ADD COLUMN kw TEXT').run(); } catch (e) {}
     _schemaReady = true;
   } catch (e) {}
 }

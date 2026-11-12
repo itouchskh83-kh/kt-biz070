@@ -87,7 +87,7 @@ export async function onRequestPost(context) {
 
   /* ── 3) 수동 차단/허용 */
   const st = await blockState(env, ip);
-  if (st.mode === 'allow') return json({ ok: true, action: 'allow', score: 0, whitelisted: true });
+  const whitelisted = st.mode === 'allow'; // 허용 IP도 기록은 남긴다(자동 차단만 건너뜀)
   if (st.mode === 'block') {
     return json({ ok: true, action: 'block', stage: 3, score: st.row.score || 100,
       reason: st.row.reason || '차단된 접속', blockedUntil: st.row.blocked_until,
@@ -146,17 +146,18 @@ export async function onRequestPost(context) {
 
   if (sid) {
     await env.DB.prepare(
-      `INSERT INTO visits (sid, fp, ip, src, is_ad, started_at, last_at, total_ms, pages, moved, depth, asn, region, org, country, ua, score, verdict, reasons)
-       VALUES (?,?,?,?,?,?,?,?,1,?,?,?,?,?,?,?,?,?,?)
+      `INSERT INTO visits (sid, fp, ip, src, is_ad, started_at, last_at, total_ms, pages, moved, depth, asn, region, org, country, ua, kw, score, verdict, reasons)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
        ON CONFLICT(sid) DO UPDATE SET last_at = excluded.last_at, pages = pages + 1,
          moved = MAX(COALESCE(visits.moved,0), excluded.moved), score = excluded.score,
-         verdict = excluded.verdict, reasons = excluded.reasons`
+         verdict = excluded.verdict, reasons = excluded.reasons,
+         kw = CASE WHEN visits.kw IS NULL OR visits.kw = '' THEN excluded.kw ELSE visits.kw END`
     ).bind(sid, fp, ip, src, isAd ? 1 : 0, kst(0), kst(0), actMs, moved, depth, asn,
-           region, org, country, ua.slice(0, 200), ev.score, ev.verdict, ev.reasons.join(' / ')).run().catch(() => null);
+           region, org, country, ua.slice(0, 200), kw, ev.score, ev.verdict, ev.reasons.join(' / ')).run().catch(() => null);
   }
 
   /* ── 7) 차단 등록 (광고 유입 + 차단 판정만) */
-  let action = ev.verdict === 'block' ? 'block' : ev.verdict === 'warn' ? 'warn' : 'allow';
+  let action = whitelisted ? 'allow' : (ev.verdict === 'block' ? 'block' : ev.verdict === 'warn' ? 'warn' : 'allow');
   let stage = ev.verdict === 'block' ? 3 : ev.verdict === 'warn' ? 2 : ev.verdict === 'watch' ? 1 : 0;
   let blockedUntil = null;
 

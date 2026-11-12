@@ -50,7 +50,7 @@ export async function onRequestPost({ request, env }) {
     if (src === 'ad') where += ' AND is_ad = 1';
     if (src === 'nonad') where += ' AND is_ad = 0';
     if (verdict !== 'all') { where += ' AND verdict = ?'; binds.push(verdict); }
-    if (q) { where += ' AND (ip LIKE ? OR fp LIKE ?)'; binds.push('%' + q + '%', '%' + q + '%'); }
+    if (q) { where += ' AND (ip LIKE ? OR fp LIKE ? OR org LIKE ? OR kw LIKE ?)'; binds.push('%' + q + '%', '%' + q + '%', '%' + q + '%', '%' + q + '%'); }
     const total = await env.DB.prepare('SELECT COUNT(*) AS c FROM visits ' + where).bind(...binds).first('c');
     const rows = await env.DB.prepare(
       'SELECT * FROM visits ' + where + ' ORDER BY started_at DESC LIMIT ? OFFSET ?'
@@ -132,7 +132,7 @@ export async function onRequestPost({ request, env }) {
     const rows = await env.DB.prepare(
       `WITH base AS (
          SELECT id, ip, COALESCE(NULLIF(fp,''), 'ip:' || ip) AS k, is_naver, created_at,
-                COALESCE(dwell, 0) AS dwell, COALESCE(moved, 0) AS moved, asn, region, org, country, ua,
+                COALESCE(dwell, 0) AS dwell, COALESCE(moved, 0) AS moved, asn, region, org, country, ua, keyword,
                 julianday(created_at) AS jd
            FROM click_logs
           WHERE action <> 'test' AND created_at >= ? AND created_at < ?
@@ -142,7 +142,7 @@ export async function onRequestPost({ request, env }) {
        SELECT k, seg, MIN(id) AS first_id, MAX(id) AS last_id, MAX(ip) AS ip, MAX(is_naver) AS is_ad,
               COUNT(*) AS pages, SUM(dwell) AS sec, MAX(moved) AS moved,
               MIN(created_at) AS started_at, MAX(created_at) AS last_at,
-              MAX(asn) AS asn, MAX(region) AS region, MAX(org) AS org, MAX(country) AS country, MAX(ua) AS ua
+              MAX(asn) AS asn, MAX(region) AS region, MAX(org) AS org, MAX(country) AS country, MAX(ua) AS ua, MAX(keyword) AS kw
          FROM s GROUP BY k, seg ORDER BY MIN(created_at) ASC`
     ).bind(from, to).all();
 
@@ -194,11 +194,11 @@ export async function onRequestPost({ request, env }) {
       if (score >= 105) verdict = 'block'; else if (score >= 75) verdict = 'warn'; else if (score >= 55) verdict = 'watch';
       const sid = ('b' + r.k + ':' + r.seg + ':' + r.started_at).slice(0, 48);
       stmts.push(env.DB.prepare(
-        `INSERT OR REPLACE INTO visits (sid, fp, ip, src, is_ad, started_at, last_at, total_ms, pages, moved, depth, asn, region, org, country, ua, score, verdict, reasons)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+        `INSERT OR REPLACE INTO visits (sid, fp, ip, src, is_ad, started_at, last_at, total_ms, pages, moved, depth, asn, region, org, country, ua, kw, score, verdict, reasons)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
       ).bind(sid, r.k && !String(r.k).startsWith('ip:') ? r.k : '', r.ip, isAd ? 'naver' : '', isAd ? 1 : 0,
              r.started_at, r.last_at, sec * 1000, pages, r.moved || 0, pages, String(r.asn || ''),
-             r.region || '', r.org || '', r.country || '', String(r.ua || '').slice(0, 200), score, verdict,
+             r.region || '', r.org || '', r.country || '', String(r.ua || '').slice(0, 200), String(r.kw || ''), score, verdict,
              isAd ? '재집계' : ''));
     }
     await env.DB.prepare('DELETE FROM visits WHERE started_at >= ? AND started_at < ?').bind(from, to).run();
