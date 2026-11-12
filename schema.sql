@@ -59,3 +59,16 @@ CREATE TABLE IF NOT EXISTS blocked_ips (
   created_at TEXT NOT NULL DEFAULT (datetime('now','+9 hours'))
 );
 CREATE INDEX IF NOT EXISTS idx_block_mode ON blocked_ips (mode, blocked_until);
+
+
+CREATE TABLE IF NOT EXISTS visits (
+  sid TEXT PRIMARY KEY, fp TEXT, ip TEXT, src TEXT, is_ad INTEGER NOT NULL DEFAULT 0,
+  started_at TEXT NOT NULL, last_at TEXT, total_ms INTEGER NOT NULL DEFAULT 0,
+  pages INTEGER NOT NULL DEFAULT 1, moved INTEGER NOT NULL DEFAULT 0,
+  depth INTEGER NOT NULL DEFAULT 1, asn TEXT, region TEXT, org TEXT, country TEXT, ua TEXT,
+  score INTEGER NOT NULL DEFAULT 0, verdict TEXT NOT NULL DEFAULT 'normal', reasons TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_visits_time ON visits (started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_visits_ip ON visits (ip, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_visits_fp ON visits (fp, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_visits_ad ON visits (is_ad, started_at DESC);

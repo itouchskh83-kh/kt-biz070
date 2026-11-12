@@ -1,378 +1,509 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>문의 관리자 | KT 공식가입센터</title>
-<link rel="stylesheet" href="assets/style.css">
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>관리자 — LG U+ 기업가입센터</title>
 <style>
-body{background:#f6f7fb}
-.adm{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
-.adm h1{font-size:26px;font-weight:800;letter-spacing:-.03em}
-.adm .sub{color:#8b90a0;font-size:14px;margin-top:8px}
-.login{max-width:380px;margin:80px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:var(--shadow-md)}
-.login input{width:100%;height:48px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font:inherit;margin-top:14px}
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-top:16px}
-.card .hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.card .tt{font-size:16px;font-weight:800;letter-spacing:-.02em}
-.card .meta{font-size:12.5px;color:#8b90a0;margin-top:6px}
-.card .ct{white-space:pre-wrap;margin-top:14px;font-size:14px;color:#3b3e47;background:#fafbff;border-radius:10px;padding:14px;line-height:1.7}
-.card textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-size:14px;margin-top:12px;resize:vertical}
-.card .row{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
-.card .ok{font-size:12.5px;color:#0a9d58;font-weight:700;margin-right:auto;align-self:center}
-.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#f1f2f7;color:#6b7080}
-.badge.done{background:#e9f8f0;color:#0a9d58}
-.badge.kind{background:#eef2ff;color:#4a5fc8;margin-right:2px}
-.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:26px}
-.tab{border:0;background:none;font:inherit;font-size:14.5px;font-weight:800;color:#8b90a0;padding:12px 18px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tab.is-on{color:#101114;border-bottom-color:#f4514a}
-.pager{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;margin:26px 0 10px}
-.pager button{min-width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:9px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:#4a4f60}
-.pager button.is-on{background:#f4514a;border-color:#f4514a;color:#fff}
+:root{--brand:#7935F8;--brand2:#5B1FD1;--line:#e8e9f2;--ink:#101114;--mut:#8b90a0;--soft:#f8f9ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:var(--soft);color:var(--ink);-webkit-text-size-adjust:100%}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 18px 80px}
+h1{font-size:22px;font-weight:900;letter-spacing:-.04em;margin:0}
+.sub{font-size:13px;color:var(--mut);font-weight:600;margin-top:6px}
+.login{max-width:360px;margin:12vh auto 0;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 24px;box-shadow:0 12px 40px rgba(16,17,20,.07)}
+.login input{width:100%;height:46px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font:inherit;margin-top:14px}
+.btn{height:44px;border-radius:10px;border:0;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer;padding:0 16px}
+.btn-red{background:var(--brand);color:#fff}
+.btn-line{background:#fff;border:1px solid var(--line);color:#3b3e47}
+.btn-danger{background:#fff;border:1px solid #f3c7c4;color:#e03c35}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:22px 0 0}
+.tab{border:1px solid var(--line);background:#fff;color:#6b7080;border-radius:999px;padding:9px 16px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.tab.is-on{background:var(--brand);border-color:var(--brand);color:#fff}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stat .l{font-size:11.5px;color:var(--mut);font-weight:800}
+.stat .v{font-size:23px;font-weight:900;letter-spacing:-.03em;margin-top:4px}
+.stat .h{font-size:11px;color:#a0a4b0;font-weight:600;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#fafbff;color:#6b7080;font-size:11.5px;font-weight:800;padding:10px 8px;text-align:left;white-space:nowrap}
+td{padding:10px 8px;border-bottom:1px solid #f2f3f8;vertical-align:middle}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff;margin-top:14px}
+.badge{display:inline-block;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:800;background:#f1f2f7;color:#6b7080}
+.b-ad{background:#eef2ff;color:#4a5fc8}.b-warn{background:#fdeceb;color:#e03c35}.b-watch{background:#fff6e5;color:#c47f00}.b-ok{background:#e9f8f0;color:#0a9d58}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px}
+select,input[type=text]{height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit;font-size:13px;background:#fff}
+.pager{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.pager button{min-width:36px;height:34px;border:1px solid var(--line);background:#fff;border-radius:8px;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer;color:#3b3e47}
+.pager button.is-on{background:var(--brand);border-color:var(--brand);color:#fff}
 .pager button:disabled{opacity:.4;cursor:default}
-.pager .pv{font-size:12.5px;color:#8b90a0;margin:0 8px}
-</style></head>
+.pv{font-size:12px;color:var(--mut);font-weight:700;margin-left:6px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px}
+.ct{white-space:pre-wrap;background:#fafbff;border:1px solid #f0f1f7;border-radius:10px;padding:12px;font-size:13px;margin-top:10px;line-height:1.6}
+textarea{width:100%;min-height:64px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:13px;margin-top:10px;resize:vertical}
+.post .hd{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.post .tt{font-weight:800;font-size:14px}
+.post .meta{font-size:12px;color:var(--mut);font-weight:600;margin-top:6px}
+.post .row{display:flex;gap:8px;align-items:center;margin-top:10px}
+.detail{position:fixed;inset:0;z-index:60;display:none}
+.detail.is-on{display:block}
+.detail .veil{position:absolute;inset:0;background:rgba(9,10,14,.5)}
+.detail .body{position:absolute;right:0;top:0;bottom:0;width:min(560px,100%);background:#fff;padding:22px;overflow:auto}
+.tl{border-left:2px solid var(--brand);margin-left:6px;padding-left:14px;margin-top:14px}
+.tl li{list-style:none;margin-bottom:12px;position:relative}
+.tl li::before{content:"";position:absolute;left:-20px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--brand)}
+.tl .p{font-weight:700;font-size:12.5px}
+.tl .m{font-size:11.5px;color:var(--mut);margin-top:2px}
+.hint{font-size:12px;color:var(--mut);font-weight:600;margin-top:10px;line-height:1.6}
+.bar{height:8px;background:#eef0f7;border-radius:6px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--brand);width:0}
+@media(max-width:760px){.wrap{padding:18px 12px 70px}.stat .v{font-size:19px}}
+</style>
+</head>
 <body>
-<div class="adm">
-  <div id="loginBox" class="login">
-    <h1>문의 관리자</h1>
-    <p class="sub">관리자 비밀번호를 입력해 주세요.</p>
-    <input type="password" id="admPw" placeholder="관리자 비밀번호" autocomplete="current-password">
-    <button class="btn btn-red" id="admLogin" style="width:100%;margin-top:14px" type="button">로그인</button>
-    <p id="admErr" style="color:#e03c35;font-size:13px;margin-top:10px"></p>
+<div class="wrap">
+
+<div class="login" id="loginBox">
+  <h1>관리자</h1>
+  <p class="sub">LG U+ 기업가입센터 상담·부정클릭 관리</p>
+  <input type="password" id="admPw" placeholder="관리자 비밀번호" autocomplete="current-password">
+  <button class="btn btn-red" id="admLogin" style="width:100%;margin-top:14px" type="button">로그인</button>
+  <p id="admErr" style="color:#e03c35;font-size:13px;margin-top:10px;font-weight:700"></p>
+</div>
+
+<div id="listBox" style="display:none">
+  <h1>관리자</h1>
+  <p class="sub">LG U+ 기업가입센터 · 상담 접수 및 부정클릭 관리</p>
+  <div class="tabs">
+    <button class="tab is-on" data-tab="post">상담 문의</button>
+    <button class="tab" data-tab="sum">요약</button>
+    <button class="tab" data-tab="visit">방문 목록</button>
+    <button class="tab" data-tab="sus">의심 IP</button>
+    <button class="tab" data-tab="block">차단 관리</button>
+    <button class="tab" data-tab="raw">원본 로그</button>
   </div>
-  <div id="listBox" style="display:none">
-    <div class="tabs">
-      <button type="button" class="tab is-on" data-tab="list">문의 관리</button>
-      <button type="button" class="tab" data-tab="sl">부정클릭 감지</button>
+
+  <section id="tabPost" style="margin-top:18px">
+    <div id="admList"></div>
+    <div class="pager" id="admPager"></div>
+  </section>
+
+  <section id="tabSum" style="display:none;margin-top:18px">
+    <div class="toolbar">
+      <select id="sumDays"><option value="1">오늘</option><option value="7" selected>최근 7일</option><option value="30">최근 30일</option><option value="90">최근 90일</option></select>
+      <button class="btn btn-red" id="sumReload" type="button">새로고침</button>
+      <button class="btn btn-line" id="sumCsv" type="button">CSV 내려받기</button>
     </div>
-    <div id="tabList">
-    <h1>문의 관리</h1>
-    <p class="sub">10건씩 표시됩니다. 답변을 저장하면 사이트에 '답변완료'로 표시됩니다.</p>
-    <div id="admList" style="margin-top:20px"></div>
-    <div id="admPager" class="pager"></div>
-    </div>
-    <div id="tabSl" style="display:none">
-    <div id="slPanel" style="margin-top:4px">
-      <h1 style="font-size:22px">부정클릭 감지 현황</h1>
-      <p class="sub">광고 유입 반복 접속을 자동으로 기록·차단합니다. IP·기기지문·지역·활동 이력을 <b>365일</b> 보관합니다. 같은 기기가 IP를 바꿔도 추적됩니다.</p>
-      <div id="slStat" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px"></div>
-      <p id="slTestInfo" style="font-size:11.5px;color:#9aa0b0;font-weight:700;margin-top:8px"></p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center">
-        <select id="slDays" style="height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit">
-          <option value="1">최근 1일</option><option value="7" selected>최근 7일</option>
-          <option value="30">최근 30일</option><option value="365">최근 365일</option>
-        </select>
-        <button class="btn btn-red" id="slReload" type="button" style="--btn-h:42px;font-size:13px">새로고침</button>
-        <button class="btn" id="slCsv" type="button" style="--btn-h:42px;font-size:13px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 16px">네이버 제출용 CSV</button>
-        <button class="btn" id="slReset" type="button" style="--btn-h:42px;font-size:13px;border:1px solid #f3c7c4;border-radius:10px;background:#fff;color:#e03c35;padding:0 16px;font-weight:800">기록 전체 삭제</button>
-      </div>
-      <div class="card" style="margin-top:16px;overflow-x:auto">
-        <div class="tt">전체 접속 기록</div>
-        <div class="meta">광고·자연검색·직접방문·내부이동을 모두 표시합니다. 최근 100건.</div>
-        <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px;min-width:820px">
-          <thead><tr><th>시각</th><th>IP</th><th>기기지문</th><th>유입</th><th>검색어</th><th>페이지</th><th>점수</th><th>누적 방문</th><th>체류</th><th>지역</th></tr></thead>
-          <tbody id="slLogs"><tr><td colspan="10" style="padding:20px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody>
-        </table>
-      </div>
-      <div class="card" style="margin-top:16px;overflow-x:auto">
-        <div class="tt">의심 IP</div>
-        <div class="meta">광고 유입 반복 접속만 집계합니다. 내부 이동(페이지 간 이동)은 제외 · 3회 이상 또는 위험점수 45점 이상.</div>
-        <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;min-width:720px">
-          <thead><tr style="background:#fafbff;color:#6b7080;font-size:12px">
-            <th style="padding:9px 8px;text-align:left">IP</th><th style="padding:9px 8px">점수</th>
-            <th style="padding:9px 8px">횟수</th><th style="padding:9px 8px">광고</th>
-            <th style="padding:9px 8px;text-align:left">지역/기기</th><th style="padding:9px 8px;text-align:left">사유</th><th style="padding:9px 8px">최근</th>
-            <th style="padding:9px 8px">조치</th></tr></thead>
-          <tbody id="slBody"><tr><td colspan="8" style="padding:20px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody>
-        </table>
-      </div>
-      <div class="card" style="margin-top:16px;overflow-x:auto">
-        <div class="tt">차단·허용 목록</div>
-        <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;min-width:640px">
-          <thead><tr style="background:#fafbff;color:#6b7080;font-size:12px">
-            <th style="padding:9px 8px;text-align:left">IP</th><th style="padding:9px 8px">구분</th>
-            <th style="padding:9px 8px;text-align:left">사유</th><th style="padding:9px 8px">해제시각</th>
-            <th style="padding:9px 8px">조치</th></tr></thead>
-          <tbody id="slBlocked"><tr><td colspan="5" style="padding:20px;text-align:center;color:#9aa0b0">-</td></tr></tbody>
-        </table>
-      </div>
-      <div class="card" style="margin-top:16px">
-        <div class="tt">판정 시뮬레이션</div>
-        <div class="meta">광고 클릭이 반복될 때 어느 지점에서 경고·차단이 되는지 미리 확인합니다. 실제 데이터는 건드리지 않습니다.</div>
-        <div class="row" style="margin-top:12px">
-          <button class="btn btn-red" id="slSim" type="button" style="--btn-h:42px;font-size:13px">시뮬레이션 실행</button>
-        </div>
-        <div id="slSimOut" style="margin-top:14px"></div>
-      </div>
-      <div class="card" style="margin-top:16px">
-        <div class="tt">IP 직접 등록</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <label style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px"><span style="font-size:11.5px;font-weight:700;color:#8b90a0">IP 주소</span>
-            <input id="slIp" placeholder="예: 123.45.67.89" style="height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit"></label>
-          <label style="display:flex;flex-direction:column;gap:5px;width:190px"><span style="font-size:11.5px;font-weight:700;color:#8b90a0">차단 시간 · 0 = 영구</span>
-            <input id="slHour" type="number" min="0" value="24" style="height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit"></label>
-          <button class="btn btn-red" id="slBlock" type="button" style="--btn-h:44px;font-size:13px">차단</button>
-          <button class="btn" id="slAllow" type="button" style="--btn-h:44px;font-size:13px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 16px">허용</button>
-        </div>
-        <p id="slMsg" style="font-size:12.5px;color:#0a9d58;font-weight:700;margin-top:10px"></p>
+    <div class="cards" id="sumCards"></div>
+    <div class="card" style="margin-top:16px">
+      <b style="font-size:14px">기존 기록 재집계</b>
+      <p class="hint">페이지 이동을 방문으로 세던 기존 데이터를 새 규칙(세션 단위)으로 다시 묶습니다. 10일 단위로 처리하며, 여러 번 눌러 끝까지 진행하세요.</p>
+      <div class="bar"><i id="rxBar"></i></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-red" id="rxStart" type="button">재집계 시작</button>
+        <span id="rxMsg" style="font-size:12.5px;color:var(--mut);font-weight:700"></span>
       </div>
     </div>
+  </section>
+
+  <section id="tabVisit" style="display:none;margin-top:18px">
+    <div class="toolbar">
+      <select id="vDays"><option value="1">오늘</option><option value="7" selected>최근 7일</option><option value="30">최근 30일</option><option value="90">최근 90일</option></select>
+      <select id="vSrc"><option value="all">전체 유입</option><option value="ad">광고</option><option value="nonad">광고 외</option></select>
+      <select id="vVd"><option value="all">전체 판정</option><option value="normal">정상</option><option value="watch">주의</option><option value="warn">의심</option><option value="block">차단</option></select>
+      <input type="text" id="vQ" placeholder="IP 또는 기기지문">
+      <button class="btn btn-red" id="vGo" type="button">조회</button>
     </div>
+    <div class="tw">
+      <table><thead><tr>
+        <th>시작</th><th>유입</th><th>IP</th><th>IP 대역</th><th>기기지문</th><th>페이지</th><th>총 체류</th><th>판정</th><th>점수</th>
+      </tr></thead><tbody id="vBody"><tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody></table>
+    </div>
+    <div class="pager" id="vPager"></div>
+    <p class="hint">한 줄이 방문 1회입니다. 페이지를 여러 개 봐도 방문은 1회로 집계됩니다.</p>
+  </section>
+
+  <section id="tabSus" style="display:none;margin-top:18px">
+    <div class="toolbar">
+      <select id="sDays"><option value="1">오늘</option><option value="7" selected>최근 7일</option><option value="30">최근 30일</option><option value="90">최근 90일</option></select>
+      <button class="btn btn-red" id="sGo" type="button">조회</button>
+    </div>
+    <div class="tw">
+      <table><thead><tr>
+        <th>IP</th><th>위험점수</th><th>방문</th><th>광고</th><th>기기</th><th>총 체류</th><th>지역</th><th>최근</th><th>조치</th>
+      </tr></thead><tbody id="sBody"><tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody></table>
+    </div>
+    <div class="pager" id="sPager"></div>
+    <div class="tw" style="margin-top:22px">
+      <div style="padding:14px 16px 0"><b style="font-size:14px">IP 대역(ASN) 반복</b>
+        <p class="hint" style="margin-top:6px">IP를 바꿔가며 접속해도 같은 회선·같은 대역이면 여기에 묶입니다. 통신사(ISP) 대역은 채점에서 제외합니다.</p></div>
+      <table style="margin-top:8px"><thead><tr>
+        <th>대역</th><th>회선명</th><th>광고 방문</th><th>고유 IP</th><th>기기</th><th>최고점수</th><th>지역</th><th>최근</th>
+      </tr></thead><tbody id="asBody"><tr><td colspan="8" style="padding:22px;text-align:center;color:#9aa0b0">-</td></tr></tbody></table>
+    </div>
+    <p class="hint">광고로 유입된 접속과 위험점수 60점 이상만 표시합니다. 직접방문이 많은 IP는 여기에 올리지 않습니다.</p>
+  </section>
+
+  <section id="tabBlock" style="display:none;margin-top:18px">
+    <div class="toolbar">
+      <input type="text" id="bIp" placeholder="차단할 IP">
+      <input type="number" id="bHour" value="24" min="0" style="width:110px">
+      <button class="btn btn-red" id="bBlock" type="button">차단</button>
+      <button class="btn btn-line" id="bAllow" type="button">허용</button>
+      <button class="btn btn-line" id="bReload" type="button">새로고침</button>
+      <button class="btn btn-danger" id="bReset" type="button">기록 전체 삭제</button>
+    </div>
+    <div class="tw">
+      <table><thead><tr><th>IP</th><th>상태</th><th>사유</th><th>해제 시각</th><th>등록</th><th></th></tr></thead>
+      <tbody id="bBody"><tr><td colspan="6" style="padding:22px;text-align:center;color:#9aa0b0">-</td></tr></tbody></table>
+    </div>
+    <p id="bMsg" style="font-size:12.5px;font-weight:700;margin-top:10px"></p>
+  </section>
+
+  <section id="tabRaw" style="display:none;margin-top:18px">
+    <div class="toolbar">
+      <select id="rDays"><option value="1">오늘</option><option value="7" selected>최근 7일</option><option value="30">최근 30일</option></select>
+      <button class="btn btn-red" id="rGo" type="button">조회</button>
+    </div>
+    <div class="tw">
+      <table><thead><tr><th>시각</th><th>IP</th><th>기기</th><th>페이지</th><th>유입</th><th>검색어</th><th>체류</th><th>점수</th></tr></thead>
+      <tbody id="rBody"><tr><td colspan="8" style="padding:22px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody></table>
+    </div>
+    <div class="pager" id="rPager"></div>
+    <p class="hint">페이지뷰 원본입니다. 방문 집계에는 쓰이지 않고, 문제 세션을 들여다볼 때만 사용합니다.</p>
+  </section>
+</div>
+
+<div class="detail" id="detail">
+  <div class="veil" data-close-detail></div>
+  <div class="body">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <b style="font-size:16px">방문 상세</b>
+      <button class="btn btn-line" data-close-detail type="button" style="height:34px;font-size:12px">닫기</button>
+    </div>
+    <div id="detailBody" style="margin-top:14px"></div>
   </div>
 </div>
+
 <script>
 (function(){
   var token = sessionStorage.getItem("adm") || "";
   var base = "/api";
+  var ST = { post:{page:1,pages:1,total:0}, visit:{page:1,pages:1,total:0}, sus:{page:1,pages:1,total:0}, raw:{page:1,pages:1,total:0} };
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
   function dt(s){ return String(s||"").slice(0,16); }
-
-  var ST = { page:1, pages:1, total:0 };
-  function pager(){
-    var el = $("admPager"); if(!el) return;
-    var p = ST.page, n = ST.pages;
-    if(n <= 1 && !ST.total){ el.innerHTML = ""; return; }
-    var out = "";
-    out += '<button type="button" data-pg="'+(p-1)+'"'+(p<=1?' disabled':'')+'>이전</button>';
-    var from = Math.max(1, p - 2), to = Math.min(n, from + 4); from = Math.max(1, to - 4);
-    for(var i=from; i<=to; i++){ out += '<button type="button" data-pg="'+i+'"'+(i===p?' class="is-on"':'')+'>'+i+'</button>'; }
-    out += '<button type="button" data-pg="'+(p+1)+'"'+(p>=n?' disabled':'')+'>다음</button>';
-    out += '<span class="pv">'+p+' / '+n+' 페이지 · 전체 '+ST.total+'건</span>';
+  function dur(ms){ var s=Math.round((+ms||0)/1000); if(s<60) return s+"초"; var m=Math.floor(s/60); return m+"분 "+(s%60)+"초"; }
+  function api(op, extra){
+    var body = Object.assign({ password: token, op: op, days: ($("vDays")&&+$("vDays").value)||7 }, extra||{});
+    return fetch("/api/smartlog", { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify(body) })
+      .then(function(r){ return r.json(); });
+  }
+  function pager(el, st, go){
+    if(!el) return;
+    if(st.pages<=1 && !st.total){ el.innerHTML=""; return; }
+    var out = '<button type="button" data-pg="'+(st.page-1)+'"'+(st.page<=1?" disabled":"")+'>이전</button>';
+    var from=Math.max(1,st.page-2), to=Math.min(st.pages,from+4); from=Math.max(1,to-4);
+    for(var i=from;i<=to;i++) out += '<button type="button" data-pg="'+i+'"'+(i===st.page?' class="is-on"':'')+'>'+i+'</button>';
+    out += '<button type="button" data-pg="'+(st.page+1)+'"'+(st.page>=st.pages?" disabled":"")+'>다음</button>';
+    out += '<span class="pv">'+st.page+' / '+st.pages+' · 전체 '+st.total+'건</span>';
     el.innerHTML = out;
-  }
-  function render(list, total, page, pages){
-    var box = $("admList"); if(!box){ return; }
-    $("loginBox").style.display = "none";
-    $("listBox").style.display = "";
-    ST.total = total || 0; ST.page = page || 1; ST.pages = pages || 1;
-    if(!list.length){ box.innerHTML = '<div class="card">등록된 문의가 없습니다.</div>'; pager(); return; }
-    $("admList").innerHTML = list.map(function(p){
-      return '<div class="card" data-id="'+p.id+'">'
-        + '<div class="hd"><span class="badge kind">'+(p.kind==='inquiry'?'1:1문의':'상담신청')+'</span><span class="tt">'+esc(p.title)+'</span>'
-        + (p.reply ? '<span class="badge done">답변완료</span>' : '<span class="badge">답변대기</span>')+'</div>'
-        + '<div class="meta">'+esc(p.author)+' · '+(p.phone?esc(p.phone)+' · ':'')+esc(p.product||"")+' · '+dt(p.created_at)+'</div>'
-        + '<div class="ct">'+esc(p.content)+'</div>'
-        + '<textarea placeholder="답변을 입력하세요">'+esc(p.reply||"")+'</textarea>'
-        + '<div class="row"><span class="ok" style="display:none">저장되었습니다</span>'
-        + '<button class="btn" type="button" data-delpost style="border:1px solid #f3c7c4;background:#fff;color:#e03c35;font-weight:800">삭제</button>'
-        + '<button class="btn btn-red" type="button" data-save>답변 저장</button></div>'
-        + '</div>';
-    }).join("");
-    pager();
+    el.onclick = function(e){ var b=e.target.closest("[data-pg]"); if(!b||b.disabled) return; var n=+b.dataset.pg; if(n<1||n>st.pages||n===st.page) return; go(n); };
   }
 
-  function load(pg){
-    var _t=$("admList"); if(_t && !ST.total) _t.innerHTML='<div class="card" style="color:#8b90a0">불러오는 중입니다…</div>';
-    fetch(base + "/admin", { method:"POST", headers:{"content-type":"application/json"}, body: JSON.stringify({ password: token, page: pg || 1, per: 10 }) })
-      .then(function(r){ return r.json(); })
-      .then(function(j){
-        if(!j.ok){ sessionStorage.removeItem("adm"); $("admErr").textContent = "비밀번호가 올바르지 않습니다."; return; }
-        render(j.list||[], j.total, j.page, j.pages);
-      })
-      .catch(function(){ $("admErr").textContent = "서버에 연결할 수 없습니다. 배포 상태를 확인해 주세요."; });
+  /* ───────── 상담 문의 ───────── */
+  function postCard(p){
+    return '<div class="card post" data-id="'+p.id+'" style="margin-top:12px">'
+      + '<div class="hd"><span class="badge">'+(p.kind==="inquiry"?"1:1문의":"상담신청")+'</span><span class="tt">'+esc(p.title)+'</span>'
+      + (p.reply?'<span class="badge b-ok">답변완료</span>':'<span class="badge">답변대기</span>')+'</div>'
+      + '<div class="meta">'+esc(p.author)+' · '+(p.phone?esc(p.phone)+' · ':'')+esc(p.product||"")+' · '+dt(p.created_at)+'</div>'
+      + '<div class="ct">'+esc(p.content)+'</div>'
+      + '<textarea placeholder="답변을 입력하세요">'+esc(p.reply||"")+'</textarea>'
+      + '<div class="row"><span class="ok" style="display:none;color:#0a9d58;font-weight:800;font-size:12px">저장되었습니다</span>'
+      + '<button class="btn btn-line" type="button" data-delpost>삭제</button>'
+      + '<button class="btn btn-red" type="button" data-save>답변 저장</button></div></div>';
   }
-
-  $("admLogin").addEventListener("click", function(){
-    token = $("admPw").value;
-    sessionStorage.setItem("adm", token);
-    $("admErr").textContent = "";
-    load();
-  });
-  $("admPw").addEventListener("keydown", function(e){ if(e.key==="Enter") $("admLogin").click(); });
-
-  $("admList").addEventListener("click", function(e){
-    var db = e.target.closest("[data-delpost]");
-    if(db){
-      var dcard = db.closest(".card");
-      var did = dcard.dataset.id;
-      var dtitle = (dcard.querySelector(".tt")||{}).textContent || "";
-      if(!confirm("이 문의를 삭제할까요?\n\n" + dtitle + "\n\n삭제 후에는 되돌릴 수 없습니다.")) return;
-      db.disabled = true; db.textContent = "삭제 중…";
-      fetch(base + "/posts/" + did + "/delete", {
-        method: "POST", headers: { "content-type":"application/json", "x-admin": token },
-        body: "{}"
-      }).then(function(r){ return r.json(); }).then(function(j){
-        db.disabled = false; db.textContent = "삭제";
-        if(!j.ok){ alert("삭제 실패: " + (j.error||"알 수 없는 오류")); return; }
-        dcard.style.transition = "opacity .2s"; dcard.style.opacity = "0";
-        setTimeout(function(){ load(ST.page); }, 200);
-      }).catch(function(){ db.disabled = false; db.textContent = "삭제"; alert("삭제 실패: 네트워크 오류"); });
+  function loadPosts(pg){
+    fetch(base+"/admin",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:token,page:pg||1,per:10})})
+      .then(function(r){return r.json();}).then(function(j){
+        if(!j.ok){ sessionStorage.removeItem("adm"); $("listBox").style.display="none"; $("loginBox").style.display=""; $("admErr").textContent="비밀번호가 올바르지 않습니다."; return; }
+        $("loginBox").style.display="none"; $("listBox").style.display="";
+        ST.post={page:j.page||1,pages:j.pages||1,total:j.total||0};
+        $("admList").innerHTML = (j.list||[]).length ? j.list.map(postCard).join("") : '<div class="card">등록된 문의가 없습니다.</div>';
+        pager($("admPager"),ST.post,loadPosts);
+      }).catch(function(){ $("admErr").textContent="서버에 연결할 수 없습니다."; });
+  }
+  document.addEventListener("click", function(e){
+    var save=e.target.closest("[data-save]");
+    if(save){
+      var card=save.closest(".card"), id=card.dataset.id, reply=card.querySelector("textarea").value.trim();
+      if(reply.length<2){ alert("답변을 2자 이상 입력해 주세요."); return; }
+      save.disabled=true; save.textContent="저장 중…";
+      fetch(base+"/posts/"+id+"/reply",{method:"POST",headers:{"content-type":"application/json","x-admin":token},body:JSON.stringify({reply:reply})})
+        .then(function(r){return r.json();}).then(function(j){
+          save.disabled=false; save.textContent="답변 저장";
+          if(!j.ok){ alert("저장 실패: "+(j.error||"")); return; }
+          card.querySelector(".ok").style.display="";
+          var b=card.querySelector(".badge:not(.b-ok)"); if(b){ b.className="badge b-ok"; b.textContent="답변완료"; }
+        });
       return;
     }
-    var b = e.target.closest("[data-save]"); if(!b) return;
-    var card = b.closest(".card");
-    var id = card.dataset.id;
-    var reply = card.querySelector("textarea").value.trim();
-    if(reply.length < 2){ alert("답변을 2자 이상 입력해 주세요."); return; }
-    b.disabled = true; b.textContent = "저장 중…";
-    fetch(base + "/posts/" + id + "/reply", {
-      method: "POST", headers: { "content-type":"application/json", "x-admin": token },
-      body: JSON.stringify({ reply: reply })
-    }).then(function(r){ return r.json(); }).then(function(j){
-      b.disabled = false; b.textContent = "답변 저장";
-      if(!j.ok){ alert("저장 실패: " + (j.error||"알 수 없는 오류")); return; }
-      card.querySelector(".ok").style.display = "";
-      var badge = card.querySelector(".badge");
-      badge.className = "badge done"; badge.textContent = "답변완료";
-    }).catch(function(){ b.disabled = false; b.textContent = "답변 저장"; alert("저장 실패: 네트워크 오류"); });
+    var del=e.target.closest("[data-delpost]");
+    if(del){
+      var c2=del.closest(".card"), id2=c2.dataset.id;
+      var tt=(c2.querySelector(".tt")||{}).textContent||"";
+      if(!confirm("이 문의를 삭제할까요?\n\n"+tt+"\n\n삭제 후 되돌릴 수 없습니다.")) return;
+      del.disabled=true; del.textContent="삭제 중…";
+      fetch(base+"/posts/"+id2+"/admin-delete",{method:"POST",headers:{"content-type":"application/json","x-admin":token},body:"{}"})
+        .then(function(r){return r.json();}).then(function(j){
+          del.disabled=false; del.textContent="삭제";
+          if(!j.ok){ alert("삭제 실패: "+(j.error||"")); return; }
+          c2.style.opacity="0"; setTimeout(function(){ loadPosts(ST.post.page); },180);
+        }).catch(function(){ del.disabled=false; del.textContent="삭제"; });
+    }
   });
 
-  var _pg=document.getElementById("admPager");
-  if(_pg) _pg.addEventListener("click",function(e){
-    var b=e.target.closest("[data-pg]"); if(!b||b.disabled) return;
-    var n=+b.dataset.pg; if(n<1||n>ST.pages||n===ST.page) return;
-    load(n); window.scrollTo({top:0,behavior:"smooth"});
+  /* ───────── 요약 ───────── */
+  function loadSummary(){
+    var d=+$("sumDays").value;
+    fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:token,op:"summary",days:d})})
+      .then(function(r){return r.json();}).then(function(j){
+        if(!j.ok) return;
+        var s=j.stat||{}, pv=j.pv||{};
+        var ad=s.ad||0, adMs=s.ad_ms||0;
+        var avg = ad ? (adMs/ad/1000) : 0;
+        var bounce = ad ? Math.round((s.bounce||0)/ad*100) : 0;
+        function card(l,v,h){ return '<div class="stat"><div class="l">'+l+'</div><div class="v">'+v+'</div>'+(h?'<div class="h">'+h+'</div>':'')+'</div>'; }
+        $("sumCards").innerHTML =
+            card("방문 수", (s.visits||0)+"회", "페이지 이동 제외")
+          + card("광고 방문", ad+"회", "전체의 "+(s.visits?Math.round(ad/s.visits*100):0)+"%")
+          + card("광고 평균 체류", dur(avg*1000), "참고 지표 · 판정 미반영")
+          + card("즉시 이탈률", bounce+"%", "참고 지표 · 판정 미반영")
+          + card("의심·차단", ((s.warned||0)+(s.blocked||0))+"건", "주의 "+(s.watched||0)+"건")
+          + card("페이지뷰", (pv.pv||0)+"회", "내부이동 "+(pv.internal||0)+"회")
+          + card("고유 IP", (s.ips||0)+"개", "기기 "+(s.devices||0)+"대")
+          + card("현재 차단 IP", (j.blockedNow||0)+"개", "");
+      });
+  }
+  $("sumReload") && $("sumReload").addEventListener("click", loadSummary);
+  $("sumDays") && $("sumDays").addEventListener("change", loadSummary);
+  $("sumCsv") && $("sumCsv").addEventListener("click", function(){
+    api("export",{days:+$("sumDays").value}).then(function(j){
+      if(!j.ok) return alert("내려받기 실패");
+      var blob=new Blob(["\ufeff"+j.csv],{type:"text/csv;charset=utf-8"});
+      var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+      a.download="부정클릭_"+new Date().toISOString().slice(0,10)+".csv"; a.click();
+    });
   });
 
-  /* 탭 */
+  /* ───────── 재집계 ───────── */
+  var rxFrom="";
+  $("rxStart") && $("rxStart").addEventListener("click", function(){
+    var btn=this; btn.disabled=true; rxFrom=""; var total=0;
+    function step(){
+      fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:token,op:"reindex",from:rxFrom})})
+        .then(function(r){return r.json();}).then(function(j){
+          if(!j.ok){ $("rxMsg").textContent="실패: "+(j.error||""); btn.disabled=false; return; }
+          total += (j.inserted||0);
+          $("rxMsg").textContent = "처리 " + total + "건 · " + (j.to||"");
+          $("rxBar").style.width = j.done ? "100%" : "60%";
+          if(!j.done && j.next){ rxFrom=j.next; setTimeout(step, 200); }
+          else { $("rxMsg").textContent = "완료 · 세션 " + total + "건 재집계"; $("rxBar").style.width="100%"; btn.disabled=false; loadSummary(); }
+        }).catch(function(){ $("rxMsg").textContent="네트워크 오류"; btn.disabled=false; });
+    }
+    step();
+  });
+
+  /* ───────── 방문 목록 ───────── */
+  function verdictBadge(v){
+    if(v==="block") return '<span class="badge b-warn">차단</span>';
+    if(v==="warn") return '<span class="badge b-warn">의심</span>';
+    if(v==="watch") return '<span class="badge b-watch">주의</span>';
+    return '<span class="badge b-ok">정상</span>';
+  }
+  function loadVisits(pg){
+    var body={password:token,op:"visits",days:+$("vDays").value,src:$("vSrc").value,verdict:$("vVd").value,q:$("vQ").value.trim(),page:pg||1,per:20};
+    fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)})
+      .then(function(r){return r.json();}).then(function(j){
+        if(!j.ok) return;
+        ST.visit={page:j.page||1,pages:j.pages||1,total:j.total||0};
+        var l=j.list||[];
+        $("vBody").innerHTML = l.length ? l.map(function(x){
+          return '<tr data-sid="'+esc(x.sid)+'" style="cursor:pointer">'
+            +'<td style="color:#8b90a0;font-size:12px;white-space:nowrap">'+esc(dt(x.started_at))+'</td>'
+            +'<td>'+(x.is_ad?'<span class="badge b-ad">광고</span>':'<span class="badge">직접</span>')+'</td>'
+            +'<td class="mono">'+esc(x.ip)+'</td>'
+            +'<td style="font-size:11.5px;color:#6b7080" title="'+esc((x.asn||"")+" "+(x.org||""))+'">'+esc(x.asn?("AS"+x.asn):"-")+'</td>'
+            +'<td class="mono" style="color:#9aa0b0">'+esc(String(x.fp||"").slice(0,10)||"-")+'</td>'
+            +'<td style="text-align:center;font-weight:800">'+(x.pages||1)+'</td>'
+            +'<td style="font-weight:800;color:'+((x.total_ms||0)<3000?"#e03c35":"#3b3e47")+'">'+dur(x.total_ms)+'</td>'
+            +'<td>'+verdictBadge(x.verdict)+'</td>'
+            +'<td style="text-align:center;color:#8b90a0;font-weight:700">'+(x.score||0)+'</td></tr>';
+        }).join("") : '<tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">기록이 없습니다.</td></tr>';
+        pager($("vPager"),ST.visit,loadVisits);
+      });
+  }
+  $("vGo") && $("vGo").addEventListener("click", function(){ loadVisits(1); });
+  $("vBody") && $("vBody").addEventListener("click", function(e){
+    var tr=e.target.closest("[data-sid]"); if(!tr) return;
+    var sid=tr.dataset.sid;
+    api("detail",{sid:sid,days:+$("vDays").value}).then(function(j){
+      if(!j.ok||!j.visit){ return; }
+      var v=j.visit, l=j.logs||[];
+      $("detailBody").innerHTML =
+          '<div class="card" style="box-shadow:none">'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px">'
+        + '<div><b>IP</b> <span class="mono">'+esc(v.ip)+'</span></div>'
+        + '<div><b>기기</b> <span class="mono">'+esc(String(v.fp||"-").slice(0,14))+'</span></div>'
+        + '<div><b>유입</b> '+(v.is_ad?"광고":"직접/검색")+'</div>'
+        + '<div><b>판정</b> '+verdictBadge(v.verdict)+'</div>'
+        + '<div><b>총 체류</b> '+dur(v.total_ms)+'</div>'
+        + '<div><b>페이지</b> '+(v.pages||1)+'개</div>'
+        + '</div>'
+        + (v.reasons?'<p class="hint">사유 · '+esc(v.reasons)+'</p>':'')
+        + '</div>'
+        + '<ul class="tl">' + l.map(function(x){
+            return '<li><div class="p">'+esc(x.path||"/")+'</div>'
+              +'<div class="m">'+esc(dt(x.created_at))+' · '+(x.act_ms?(Math.round(x.act_ms/1000)+"초"):(x.dwell!=null?x.dwell+"초":"-"))
+              +' · '+esc(x.reason||"")+(x.keyword?' · '+esc(x.keyword):'')+'</div></li>';
+          }).join("") + '</ul>';
+      $("detail").classList.add("is-on");
+    });
+  });
+  document.addEventListener("click", function(e){ if(e.target.closest("[data-close-detail]")) $("detail").classList.remove("is-on"); });
+
+  /* ───────── 의심 IP ───────── */
+  function loadSus(pg){
+    var body={password:token,op:"suspicious",days:+$("sDays").value,page:pg||1,per:20};
+    fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)})
+      .then(function(r){return r.json();}).then(function(j){
+        if(!j.ok) return;
+        ST.sus={page:j.page||1,pages:j.pages||1,total:j.total||0};
+        var l=j.list||[];
+        $("sBody").innerHTML = l.length ? l.map(function(x){
+          var col = x.top>=75?"#e03c35":x.top>=45?"#c47f00":"#6b7080";
+          return '<tr><td class="mono" style="font-weight:800">'+esc(x.ip)+'</td>'
+            +'<td style="text-align:center;font-weight:900;color:'+col+'">'+(x.top||0)+'</td>'
+            +'<td style="text-align:center">'+(x.sessions||0)+'</td>'
+            +'<td style="text-align:center;font-weight:800;color:#4a5fc8">'+(x.ad_sessions||0)+'</td>'
+            +'<td style="text-align:center">'+(x.devices||0)+'</td>'
+            +'<td style="text-align:center">'+dur(x.ms)+'</td>'
+            +'<td style="font-size:12px;color:#6b7080">'+esc(x.region||"-")+'</td>'
+            +'<td style="font-size:11.5px;color:#9aa0b0">'+esc(String(x.last||"").slice(5,16))+'</td>'
+            +'<td style="white-space:nowrap"><button type="button" class="btn btn-danger" data-blk="'+esc(x.ip)+'" style="height:30px;font-size:11.5px;padding:0 10px">차단</button> '
+            +'<button type="button" class="btn btn-line" data-alw="'+esc(x.ip)+'" style="height:30px;font-size:11.5px;padding:0 10px">허용</button></td></tr>';
+        }).join("") : '<tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">의심 접속이 없습니다.</td></tr>';
+        pager($("sPager"),ST.sus,loadSus);
+      });
+  }
+  function loadAsn(){
+    fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:token,op:"asn",days:+$("sDays").value})})
+      .then(function(r){return r.json();}).then(function(j){
+        if(!j.ok) return;
+        var l=j.list||[];
+        $("asBody").innerHTML = l.length ? l.map(function(x){
+          var col = x.top>=75?"#e03c35":x.top>=45?"#c47f00":"#6b7080";
+          return '<tr><td class="mono" style="font-weight:800">AS'+esc(String(x.asn||""))+'</td>'
+            +'<td style="font-size:11.5px;color:#6b7080;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.org||"-")+'</td>'
+            +'<td style="text-align:center;font-weight:900;color:#4a5fc8">'+(x.ad_sessions||0)+'</td>'
+            +'<td style="text-align:center;font-weight:800">'+(x.ips||0)+'</td>'
+            +'<td style="text-align:center">'+(x.devices||0)+'</td>'
+            +'<td style="text-align:center;font-weight:900;color:'+col+'">'+(x.top||0)+'</td>'
+            +'<td style="font-size:12px;color:#8b90a0">'+esc(x.region||"-")+'</td>'
+            +'<td style="font-size:11.5px;color:#9aa0b0">'+esc(String(x.last||"").slice(5,16))+'</td></tr>';
+        }).join("") : '<tr><td colspan="8" style="padding:22px;text-align:center;color:#9aa0b0">대역 반복이 없습니다.</td></tr>';
+      });
+  }
+  $("sGo") && $("sGo").addEventListener("click", function(){ loadSus(1); loadAsn(); });
+  $("sBody") && $("sBody").addEventListener("click", function(e){
+    var b=e.target.closest("[data-blk]"), a=e.target.closest("[data-alw]");
+    if(b){ api("block",{ip:b.dataset.blk,hours:24}).then(function(){ loadSus(ST.sus.page); }); }
+    if(a){ api("allow",{ip:a.dataset.alw}).then(function(){ loadSus(ST.sus.page); }); }
+  });
+
+  /* ───────── 차단 관리 ───────── */
+  function loadBlocked(){
+    api("blocked",{}).then(function(j){
+      if(!j.ok) return;
+      var l=j.list||[];
+      $("bBody").innerHTML = l.length ? l.map(function(x){
+        return '<tr><td class="mono" style="font-weight:800">'+esc(x.ip)+'</td>'
+          +'<td>'+(x.mode==="allow"?'<span class="badge b-ok">허용</span>':'<span class="badge b-warn">차단</span>')+'</td>'
+          +'<td style="font-size:12px;color:#6b7080">'+esc(x.reason||"-")+'</td>'
+          +'<td style="font-size:12px;color:#8b90a0">'+(x.blocked_until?esc(x.blocked_until.slice(5,16)):"영구")+'</td>'
+          +'<td style="font-size:11.5px;color:#9aa0b0">'+(x.manual?"수동":"자동")+'</td>'
+          +'<td><button type="button" class="btn btn-line" data-unblk="'+esc(x.ip)+'" style="height:30px;font-size:11.5px;padding:0 10px">해제</button></td></tr>';
+      }).join("") : '<tr><td colspan="6" style="padding:22px;text-align:center;color:#9aa0b0">등록된 IP가 없습니다.</td></tr>';
+    });
+  }
+  $("bReload") && $("bReload").addEventListener("click", loadBlocked);
+  $("bBlock") && $("bBlock").addEventListener("click", function(){
+    var ip=$("bIp").value.trim(); if(!ip) return;
+    api("block",{ip:ip,hours:+$("bHour").value}).then(function(j){ $("bMsg").textContent=j.ok?"차단했습니다: "+ip:"실패"; $("bMsg").style.color=j.ok?"#0a9d58":"#e03c35"; loadBlocked(); });
+  });
+  $("bAllow") && $("bAllow").addEventListener("click", function(){
+    var ip=$("bIp").value.trim(); if(!ip) return;
+    api("allow",{ip:ip}).then(function(j){ $("bMsg").textContent=j.ok?"허용했습니다: "+ip:"실패"; $("bMsg").style.color=j.ok?"#0a9d58":"#e03c35"; loadBlocked(); });
+  });
+  $("bReset") && $("bReset").addEventListener("click", function(){
+    if(!confirm("모든 접속 기록과 방문 집계를 삭제할까요? 되돌릴 수 없습니다.")) return;
+    api("reset",{}).then(function(j){ $("bMsg").textContent=j.ok?"삭제했습니다.":"실패"; loadBlocked(); });
+  });
+  $("bBody") && $("bBody").addEventListener("click", function(e){
+    var b=e.target.closest("[data-unblk]"); if(!b) return;
+    api("unblock",{ip:b.dataset.unblk}).then(function(){ loadBlocked(); });
+  });
+
+  /* ───────── 원본 로그 ───────── */
+  function loadRaw(pg){
+    var body={password:token,op:"logs",days:+$("rDays").value,page:pg||1,per:30};
+    fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)})
+      .then(function(r){return r.json();}).then(function(j){
+        if(!j.ok) return;
+        ST.raw={page:j.page||1,pages:j.pages||1,total:j.total||0};
+        var l=j.list||[];
+        $("rBody").innerHTML = l.length ? l.map(function(x){
+          return '<tr><td style="color:#8b90a0;font-size:11.5px;white-space:nowrap">'+esc(String(x.created_at||"").slice(5,16))+'</td>'
+            +'<td class="mono">'+esc(x.ip)+'</td>'
+            +'<td class="mono" style="color:#9aa0b0">'+esc(String(x.fp||"").slice(0,8)||"-")+'</td>'
+            +'<td style="font-size:12px;color:#6b7080;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.path||"/")+'</td>'
+            +'<td style="font-size:11.5px">'+(x.is_naver?'<span class="badge b-ad">광고</span>':esc(x.reason||"-"))+'</td>'
+            +'<td style="font-size:11.5px;color:#6b7080">'+esc(x.keyword||"-")+'</td>'
+            +'<td style="font-size:11.5px;color:#8b90a0">'+(x.act_ms?Math.round(x.act_ms/1000)+"초":(x.dwell!=null?x.dwell+"초":"-"))+'</td>'
+            +'<td style="text-align:center;color:#8b90a0">'+(x.score||0)+'</td></tr>';
+        }).join("") : '<tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">기록이 없습니다.</td></tr>';
+        pager($("rPager"),ST.raw,loadRaw);
+      });
+  }
+  $("rGo") && $("rGo").addEventListener("click", function(){ loadRaw(1); });
+
+  /* ───────── 탭 ───────── */
   document.querySelectorAll(".tab").forEach(function(t){
-    t.addEventListener("click",function(){
+    t.addEventListener("click", function(){
       document.querySelectorAll(".tab").forEach(function(x){ x.classList.remove("is-on"); });
       t.classList.add("is-on");
       var k=t.dataset.tab;
-      $("tabList").style.display = k==="list" ? "" : "none";
-      $("tabSl").style.display   = k==="sl"   ? "" : "none";
-      if(k==="sl" && window.slBoot) window.slBoot();
-    });
-  });
-
-  if(token) load(1);
-  /* ---------------- 스마트로그 ---------------- */
-  var slPanel=document.getElementById("slPanel");
-  window.slBoot=function(){ try{ slLoad(); }catch(e){} };
-  function slApi(op,extra){
-    var body=Object.assign({password:token,op:op},extra||{});
-    return fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json();});
-  }
-  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-  function slMsg(t,bad){var m=document.getElementById("slMsg");if(!m)return;m.textContent=t;m.style.color=bad?"#e03c35":"#0a9d58";}
-  function slLoad(){
-    if(!slPanel) return;
-    var d=document.getElementById("slDays").value;
-    slApi("list",{days:+d}).then(function(r){
-      if(!r.ok) return;
-      var st=r.stat||{};
-      var mi=document.getElementById('slMyIp'); if(mi&&r.myIp) mi.textContent=r.myIp;
-      function card(lbl,val,col){return '<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px"><div style="font-size:11.5px;color:#8b90a0;font-weight:700">'+lbl+'</div><div style="font-size:22px;font-weight:900;letter-spacing:-.03em;color:'+col+';margin-top:4px">'+(val||0)+'</div></div>';}
-      document.getElementById("slStat").innerHTML=
-        card("총 접속",st.total,"#101114")+card("광고 유입",st.ad,"#4a5fc8")
-        +card("자연검색",st.organic,"#0a9d58")+card("직접방문",st.direct,"#6b7080")
-        +card("내부 이동",st.internal,"#9aa0b0")+card("차단",st.blocked,"#ff2d20")+card("경고",st.warned,"#d98a00");
-      var tt=r.test||{}, mi2=document.getElementById("slTestInfo");
-      if(mi2){ mi2.textContent = tt.n ? ("테스트 기록 "+tt.n+"건 (통계 제외 · 마지막 "+String(tt.last||"").slice(5,16)+")") : ""; }
-      var tb=document.getElementById("slBody");
-      var list=r.suspicious||[];
-      if(!list.length){tb.innerHTML='<tr><td colspan="8" style="padding:20px;text-align:center;color:#9aa0b0">의심 접속이 없습니다.</td></tr>';}
-      else{tb.innerHTML=list.map(function(x){
-        return '<tr style="border-bottom:1px solid #f2f3f8">'
-          +'<td style="padding:10px 8px;font-weight:700;font-variant-numeric:tabular-nums">'+esc(x.ip)+'</td>'
-          +'<td style="padding:10px 8px;text-align:center;font-weight:800;color:'+(x.top>=80?"#e03c35":x.top>=45?"#d98a00":"#6b7080")+'">'+x.top+'</td>'
-          +'<td style="padding:10px 8px;text-align:center">'+x.hits+'</td>'
-          +'<td style="padding:10px 8px;text-align:center">'+(x.naver?'<span style="color:#4a5fc8;font-weight:700">광고</span>':'-')+'</td>'
-          +'<td style="padding:10px 8px;font-size:11.5px;color:#6b7080">'+esc(x.region||"-")+'<br><span style="color:#9aa0b0">기기 '+x.devices+'</span></td>'
-          +'<td style="padding:10px 8px;color:#6b7080;font-size:12px">'+esc(x.reason||"-")+'</td>'
-          +'<td style="padding:10px 8px;text-align:center;color:#9aa0b0;font-size:11.5px">'+esc((x.last||"").slice(5,16))+'</td>'
-          +'<td style="padding:10px 8px;text-align:center;white-space:nowrap">'
-          +'<button type="button" data-blk="'+esc(x.ip)+'" style="border:0;background:#e03c35;color:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:800;cursor:pointer">차단</button> '
-          +'<button type="button" data-alw="'+esc(x.ip)+'" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;margin-top:2px">허용</button>'
-          +'</td></tr>';}).join("");}
-      var lb=document.getElementById("slLogs"), lg=r.logs||[];
-      function srcTag(x){
-        if(x.is_naver) return '<span style="color:#4a5fc8;font-weight:800">광고</span>';
-        if(x.reason==="자연검색") return '<span style="color:#0a9d58;font-weight:700">자연검색</span>';
-        if(x.reason==="내부 이동") return '<span style="color:#9aa0b0">내부이동</span>';
-        return '<span style="color:#6b7080">직접방문</span>';
-      }
-      if(lb){
-        if(!lg.length){ lb.innerHTML='<tr><td colspan="8" style="padding:20px;text-align:center;color:#9aa0b0">기록이 없습니다.</td></tr>'; }
-        else lb.innerHTML=lg.map(function(x){
-          var pc = x.action==="block"?"#e03c35":x.action==="warn"?"#d98a00":"#9aa0b0";
-          var fpv = String(x.fp||"");
-          var fpt = fpv ? fpv.slice(0,10) : "없음";
-          var ipv = +x.ip_visits||0, fpvc = +x.fp_visits||0;
-          var vcol = (ipv>=10||fpvc>=10) ? "#e03c35" : (ipv>=4||fpvc>=4) ? "#d98a00" : "#6b7080";
-          return '<tr style="border-bottom:1px solid #f2f3f8">'
-            +'<td style="padding:8px;color:#9aa0b0;font-size:11.5px;white-space:nowrap">'+esc(String(x.created_at||"").slice(5,16))+'</td>'
-            +'<td style="padding:8px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap">'+esc(x.ip)+'</td>'
-            +'<td style="padding:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:'+(fpv?"#4a4f5c":"#c0c4ce")+'" title="'+esc(fpv)+'">'+esc(fpt)+'</td>'
-            +'<td style="padding:8px">'+srcTag(x)+'</td>'
-            +'<td style="padding:8px;color:#6b7080">'+esc(x.keyword||"-")+'</td>'
-            +'<td style="padding:8px;color:#6b7080;font-size:11.5px">'+esc(x.path||"/")+'</td>'
-            +'<td style="padding:8px;text-align:center;font-weight:800;color:'+pc+'">'+(x.score||0)+'</td>'
-            +'<td style="padding:8px;text-align:center;font-size:11px;font-weight:800;color:'+vcol+';white-space:nowrap">IP '+ipv+'회<br>FP '+fpvc+'회</td>'
-            +'<td style="padding:8px;text-align:center;color:#9aa0b0">'+(x.dwell==null?"-":x.dwell+"초")+'</td>'
-            +'<td style="padding:8px;font-size:11.5px;color:#6b7080">'+esc(x.region||"-")+'</td></tr>';
-        }).join("");
-      }
-      var bb=document.getElementById("slBlocked");
-      var bl=r.blocked||[];
-      if(!bl.length){bb.innerHTML='<tr><td colspan="5" style="padding:20px;text-align:center;color:#9aa0b0">등록된 IP가 없습니다.</td></tr>';}
-      else{bb.innerHTML=bl.map(function(x){
-        return '<tr style="border-bottom:1px solid #f2f3f8">'
-          +'<td style="padding:10px 8px;font-weight:700">'+esc(x.ip)+'</td>'
-          +'<td style="padding:10px 8px;text-align:center">'+(x.mode==="allow"?'<span class="badge" style="background:#e9f8f0;color:#0a9d58">허용</span>':'<span class="badge" style="background:#fdeceb;color:#e03c35">차단</span>')+'</td>'
-          +'<td style="padding:10px 8px;font-size:11.5px;color:#6b7080">'+esc(x.region||"-")+'<br><span style="color:#9aa0b0">기기 '+x.devices+'</span></td>'
-          +'<td style="padding:10px 8px;color:#6b7080;font-size:12px">'+esc(x.reason||"-")+'</td>'
-          +'<td style="padding:10px 8px;text-align:center;color:#9aa0b0;font-size:11.5px">'+(x.blocked_until?esc(x.blocked_until.slice(5,16)):"영구")+'</td>'
-          +'<td style="padding:10px 8px;text-align:center"><button type="button" data-del="'+esc(x.ip)+'" style="border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;font-size:11.5px;cursor:pointer">해제</button></td></tr>';}).join("");}
-    });
-  }
-  document.addEventListener("click",function(e){
-    var t=e.target;
-    if(t.dataset&&t.dataset.blk){ slApi("block",{ip:t.dataset.blk,hours:24}).then(function(){slMsg("차단했습니다: "+t.dataset.blk);slLoad();}); }
-    else if(t.dataset&&t.dataset.alw){ slApi("allow",{ip:t.dataset.alw}).then(function(){slMsg("허용 목록에 추가했습니다: "+t.dataset.alw);slLoad();}); }
-    else if(t.dataset&&t.dataset.del){ slApi("unblock",{ip:t.dataset.del}).then(function(){slMsg("해제했습니다: "+t.dataset.del);slLoad();}); }
-  });
-  var slR=document.getElementById("slReload");
-  if(slR) slR.addEventListener("click",slLoad);
-  var slD=document.getElementById("slDays");
-  if(slD) slD.addEventListener("change",slLoad);
-  var slC=document.getElementById("slCsv");
-  if(slC) slC.addEventListener("click",function(){
-    var d=document.getElementById("slDays").value;
-    fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:token,op:"export",days:+d})})
-      .then(function(r){return r.blob();}).then(function(b){
-        var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="smartlog_"+new Date().toISOString().slice(0,10)+".csv";a.click();
+      [["post","tabPost"],["sum","tabSum"],["visit","tabVisit"],["sus","tabSus"],["block","tabBlock"],["raw","tabRaw"]].forEach(function(p){
+        var el=$(p[1]); if(el) el.style.display = (p[0]===k?"":"none");
       });
-  });
-  var slRs=document.getElementById("slReset");
-  if(slRs) slRs.addEventListener("click",function(){
-    if(!confirm("접속 기록과 자동 차단을 모두 삭제할까요?\n상담 문의 내역은 삭제되지 않습니다.")) return;
-    slApi("reset",{target:"all"}).then(function(){ slMsg("접속 기록과 자동 차단을 초기화했습니다."); slLoad(); });
-  });
-  var slB=document.getElementById("slBlock");
-  if(slB) slB.addEventListener("click",function(){
-    var ip=document.getElementById("slIp").value.trim(); if(!ip) return;
-    var h=+document.getElementById("slHour").value||0;
-    slApi("block",{ip:ip,hours:h}).then(function(){slMsg("차단했습니다: "+ip+(h?" ("+h+"시간)":" (영구)"));slLoad();});
-  });
-  var slA=document.getElementById("slAllow");
-  if(slA) slA.addEventListener("click",function(){
-    var ip=document.getElementById("slIp").value.trim(); if(!ip) return;
-    slApi("allow",{ip:ip}).then(function(){slMsg("허용 등록했습니다: "+ip);slLoad();});
-  });
-
-  var slSimBtn=document.getElementById("slSim");
-  if(slSimBtn) slSimBtn.addEventListener("click",function(){
-    var out=document.getElementById("slSimOut");
-    out.innerHTML='<p style="color:#8b90a0;font-size:13px">계산 중…</p>';
-    slApi("simulate",{}).then(function(r){
-      if(!r.ok){out.innerHTML='<p style="color:#e03c35;font-size:13px">실패</p>';return;}
-      var cols=["광고클릭","점수","판정","사유"];
-      var head='<tr style="background:#fafbff;color:#6b7080;font-size:11.5px">'+cols.map(function(c){return '<th style="padding:7px 8px;text-align:left">'+c+'</th>';}).join("")+'</tr>';
-      var body=r.rows.map(function(x){
-        var col=x.action==="block"?"#ff2d20":x.action==="warn"?"#d98a00":"#0a9d58";
-        var lbl=x.action==="block"?"차단":x.action==="warn"?(x.stage===2?"경고2":"경고1"):"통과";
-        return '<tr style="border-bottom:1px solid #f2f3f8"><td style="padding:7px 8px;font-weight:700">'+x.clicks+'회</td>'
-          +'<td style="padding:7px 8px;font-weight:800;color:'+col+'">'+x.score+'</td>'
-          +'<td style="padding:7px 8px;font-weight:800;color:'+col+'">'+lbl+'</td>'
-          +'<td style="padding:7px 8px;font-size:11.5px;color:#6b7080">'+(x.reasons||"-")+'</td></tr>';
-      }).join("");
-      out.innerHTML='<p style="font-size:12px;color:#8b90a0;margin-bottom:8px">접속 대역: '+(r.org||"알수없음")+' · 경고1 '+r.thresholds.watch+'점 / 경고2 '+r.thresholds.warn+'점 / 차단 '+r.thresholds.block+'점</p>'
-        +'<table style="width:100%;border-collapse:collapse;font-size:12.5px"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>'
-        +'<p style="margin-top:12px;font-size:12px;color:#6b7080;background:#f7f8fc;border-radius:8px;padding:10px">IP 변경 시나리오(3회 클릭 + 기기4회 + IP4개): <b style="color:'+(r.ipChange.action==="block"?"#ff2d20":"#d98a00")+'">'+r.ipChange.score+'점 · '+(r.ipChange.action==="block"?"차단":"경고")+'</b> — '+r.ipChange.reasons.join(', ')+'</p>';
+      if(k==="sum") loadSummary();
+      if(k==="visit") loadVisits(1);
+      if(k==="sus"){ loadSus(1); loadAsn(); }
+      if(k==="block") loadBlocked();
+      if(k==="raw") loadRaw(1);
     });
   });
 
+  /* ───────── 로그인 ───────── */
+  $("admLogin").addEventListener("click", function(){
+    token=$("admPw").value; sessionStorage.setItem("adm",token); $("admErr").textContent="";
+    loadPosts(1);
+  });
+  $("admPw").addEventListener("keydown", function(e){ if(e.key==="Enter") $("admLogin").click(); });
+  if(token) loadPosts(1);
 })();
 </script>
-</body></html>
+</body>
+</html>

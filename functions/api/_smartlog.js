@@ -142,3 +142,83 @@ export function evaluate(c) {
 
   return { score: s, reasons: why, action, stage };
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   세션(방문) 단위 판정 — v2
+   축 1) 위험도: 반복성 (같은 IP/기기의 광고 세션 반복)
+   축 2) 품질  : 머묾 (총 체류·페이지 수·활동)
+   품질이 좋으면 위험도를 깎아 '정상'으로 되돌린다.
+   ═══════════════════════════════════════════════════════════ */
+export const VERDICT_LABEL = { normal: '정상', watch: '주의', warn: '의심', block: '차단' };
+
+export function judgeSession(c) {
+  const why = [];
+  let s = 0;
+
+  // ── 위험도: 반복성 (광고 세션만 센다)
+  if (c.isAd) {
+    if (c.ipAd >= 10) { s += 100; why.push(`같은 IP 광고 ${c.ipAd}회`); }
+    else if (c.ipAd >= 6) { s += 75; why.push(`같은 IP 광고 ${c.ipAd}회`); }
+    else if (c.ipAd >= 4) { s += 55; why.push(`같은 IP 광고 ${c.ipAd}회`); }
+    else if (c.ipAd >= 3) { s += 35; why.push(`같은 IP 광고 ${c.ipAd}회`); }
+
+    if (c.fpAd >= 8) { s += 110; why.push(`같은 기기 광고 ${c.fpAd}회`); }
+    else if (c.fpAd >= 5) { s += 80; why.push(`같은 기기 광고 ${c.fpAd}회`); }
+    else if (c.fpAd >= 4) { s += 55; why.push(`같은 기기 광고 ${c.fpAd}회`); }
+    else if (c.fpAd >= 3) { s += 35; why.push(`같은 기기 광고 ${c.fpAd}회`); }
+
+    if (c.fpIps >= 3) { s += 80; why.push(`기기당 IP ${c.fpIps}개`); }
+    else if (c.fpIps >= 2) { s += 45; why.push(`기기당 IP ${c.fpIps}개`); }
+  }
+
+  // ── IP 대역(ASN) 반복 — 경쟁사가 여러 IP를 돌려 써도 같은 회선이면 한 대역으로 묶인다
+  //    단, 통신사(ISP) 대역은 수백만 명이 공유하므로 채점에서 제외한다 (오탐 방지)
+  if (c.isAd && c.asnAd >= 3 && !c.carrier) {
+    if (c.asnAd >= 8) { s += 65; why.push(`같은 대역 광고 ${c.asnAd}회`); }
+    else if (c.asnAd >= 5) { s += 45; why.push(`같은 대역 광고 ${c.asnAd}회`); }
+    else { s += 25; why.push(`같은 대역 광고 ${c.asnAd}회`); }
+  }
+
+  // ── 환경
+  if (c.bot) { s += 60; why.push('자동화 프로그램'); }
+  if (c.hosting) { s += 50; why.push('호스팅/VPN 대역'); }
+  else if (c.carrier) { s -= 25; why.push('국내 통신사(감점)'); }
+
+  // ── 체류시간·페이지 수·활동량은 '표시용 지표'일 뿐, 점수에 반영하지 않는다.
+  //    (경쟁사가 오래 머무는 것만으로 감점되면 실제 고객과 구분이 안 되므로 제외)
+
+  s = Math.max(0, Math.round(s));
+
+  let verdict = 'normal';
+  if (s >= STAGE.block) verdict = 'block';
+  else if (s >= STAGE.warn) verdict = 'warn';
+  else if (s >= STAGE.watch) verdict = 'watch';
+
+  // 상담을 완료한 방문은 실제 고객이므로 차단하지 않는다
+  if (c.converted) { verdict = 'normal'; s = Math.min(s, 40); }
+
+  return { score: s, verdict, reasons: why };
+}
+
+/* 스키마 보장 — 세션 컬럼/테이블이 없으면 만든다 (1회) */
+let _schemaReady = false;
+export async function ensureSchema(env) {
+  if (_schemaReady || !env || !env.DB) return;
+  try {
+    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS visits (
+      sid TEXT PRIMARY KEY, fp TEXT, ip TEXT, src TEXT, is_ad INTEGER NOT NULL DEFAULT 0,
+      started_at TEXT NOT NULL, last_at TEXT, total_ms INTEGER NOT NULL DEFAULT 0,
+      pages INTEGER NOT NULL DEFAULT 1, moved INTEGER NOT NULL DEFAULT 0,
+      depth INTEGER NOT NULL DEFAULT 1, asn TEXT, region TEXT, org TEXT, country TEXT, ua TEXT,
+      score INTEGER NOT NULL DEFAULT 0, verdict TEXT NOT NULL DEFAULT 'normal', reasons TEXT)`).run();
+    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_time ON visits (started_at DESC)').run();
+    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_ip ON visits (ip, started_at DESC)').run();
+    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_fp ON visits (fp, started_at DESC)').run();
+    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_ad ON visits (is_ad, started_at DESC)').run();
+    try { await env.DB.prepare('ALTER TABLE click_logs ADD COLUMN sid TEXT').run(); } catch (e) {}
+    try { await env.DB.prepare('ALTER TABLE click_logs ADD COLUMN act_ms INTEGER').run(); } catch (e) {}
+    try { await env.DB.prepare('ALTER TABLE visits ADD COLUMN asn TEXT').run(); } catch (e) {}
+    _schemaReady = true;
+  } catch (e) {}
+}
