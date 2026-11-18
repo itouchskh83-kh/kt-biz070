@@ -486,12 +486,10 @@ body.kt .post:hover{border-left-color:var(--kt)}
       });
   }
   $("vGo") && $("vGo").addEventListener("click", function(){ loadVisits(1); });
-  $("vBody") && $("vBody").addEventListener("click", function(e){
-    var tr=e.target.closest("[data-sid]"); if(!tr) return;
-    var sid=tr.dataset.sid;
+  function openDetail(sid){
     api("detail",{sid:sid,days:+$("vDays").value}).then(function(j){
       if(!j.ok||!j.visit){ return; }
-      var v=j.visit, l=j.logs||[];
+      var v=j.visit, l=j.logs||[], lk=j.linked||{}, rs=lk.rows||[], st=lk.stat||{};
       $("detailBody").innerHTML =
           '<div class="card" style="box-shadow:none">'
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px">'
@@ -506,13 +504,48 @@ body.kt .post:hover{border-left-color:var(--kt)}
         + '</div>'
         + (v.reasons?'<p class="hint">사유 · '+esc(v.reasons)+'</p>':'')
         + '</div>'
+        + '<div style="margin-top:18px"><b style="font-size:13px">이 방문의 페이지 흐름</b></div>'
         + '<ul class="tl">' + l.map(function(x){
             return '<li><div class="p">'+esc(x.path||"/")+'</div>'
               +'<div class="m">'+esc(dt(x.created_at))+' · '+(x.act_ms?(Math.round(x.act_ms/1000)+"초"):(x.dwell!=null?x.dwell+"초":"-"))
               +' · '+esc(x.reason||"")+(x.keyword?' · '+esc(x.keyword):'')+'</div></li>';
-          }).join("") + '</ul>';
+          }).join("") + '</ul>'
+        + '<div style="margin-top:22px"><b style="font-size:13px">연계 접속 기록</b>'
+        + '<p class="hint" style="margin-top:5px">이 IP로 들어온 접속 전부와, 이 IP를 쓴 기기가 <b>다른 IP로</b> 들어온 접속까지 합쳐서 보여줍니다. 줄을 누르면 그 방문으로 이동합니다.</p>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 8px">'
+        + '<span class="badge">이 IP '+(st.ipn||0)+'회</span>'
+        + '<span class="badge">연계 기기 '+(st.fpn||0)+'대</span>'
+        + '<span class="badge">연계 IP '+(st.ips||0)+'개</span>'
+        + '<span class="badge b-ad">광고 '+(st.ad||0)+' · 전체 '+(st.total||0)+'회</span>'
+        + '</div>'
+        + (st.first?'<div style="font-size:11px;color:#9aa0b0;margin-bottom:8px">'+esc(String(st.first).slice(0,16))+' ~ '+esc(String(st.last).slice(0,16))
+          +(st.total>rs.length?' · 최근 '+rs.length+'건만 표시':'')+'</div>':'')
+        + '<div class="tw" style="max-height:46vh;overflow:auto;border:1px solid #eceef3;border-radius:10px">'
+        + '<table style="font-size:11px"><thead><tr><th>시각</th><th>IP</th><th>기기</th><th>관계</th><th>유입</th><th>판정</th></tr></thead><tbody>'
+        + rs.map(function(x){
+            var hit = String(x.sid)===String(v.sid);
+            var rc = x.rel==="기기"?"#4a5fc8":x.rel==="IP"?"#8b90a0":"#c7cbd6";
+            return '<tr data-lsid="'+esc(x.sid)+'" style="cursor:pointer'+(hit?';background:#f1f3ff':'')+'">'
+              +'<td style="white-space:nowrap;font-size:10.5px;color:#8b90a0">'+esc(String(x.started_at||"").slice(5,16))
+                +(x.kw?'<div style="color:#b0b5c2;max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(x.kw)+'">“'+esc(x.kw)+'”</div>':'')+'</td>'
+              +'<td class="mono" style="font-size:10.5px">'+esc(x.ip)+'</td>'
+              +'<td class="mono" style="font-size:10.5px;color:#9aa0b0">'+esc(String(x.fp||"-").slice(0,6))+'</td>'
+              +'<td style="text-align:center;font-weight:800;color:'+rc+'">'+x.rel+'</td>'
+              +'<td style="text-align:center">'+(x.is_ad?'<span style="color:#4a5fc8;font-weight:800">광고</span>':'<span style="color:#9aa0b0">직접</span>')+'</td>'
+              +'<td>'+verdictBadge(x.verdict)+'</td></tr>';
+          }).join("")
+        + '</tbody></table></div></div>';
       $("detail").classList.add("is-on");
+      $("detail").querySelector(".body").scrollTop = 0;
     });
+  }
+  $("vBody") && $("vBody").addEventListener("click", function(e){
+    var tr=e.target.closest("[data-sid]"); if(!tr) return;
+    openDetail(tr.dataset.sid);
+  });
+  $("detailBody") && $("detailBody").addEventListener("click", function(e){
+    var tr=e.target.closest("[data-lsid]"); if(!tr) return;
+    openDetail(tr.dataset.lsid);
   });
   document.addEventListener("click", function(e){ if(e.target.closest("[data-close-detail]")) $("detail").classList.remove("is-on"); });
 

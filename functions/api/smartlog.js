@@ -191,10 +191,55 @@ export async function onRequestPost(context) {
   if (op === 'detail') {
     const sid = String(b.sid || '');
     const v = await env.DB.prepare('SELECT * FROM visits WHERE sid = ?').bind(sid).first();
+    if (!v) return json({ ok: true, visit: null, logs: [], linked: { rows: [], stat: {} } });
     const l = await env.DB.prepare(
       `SELECT id, path, ref, keyword, created_at, dwell, act_ms, moved, reason
          FROM click_logs WHERE sid = ? ORDER BY id ASC LIMIT 60`).bind(sid).all();
-    return json({ ok: true, visit: v || null, logs: l.results || [] });
+
+    /* ── 연계 기록 ──
+       이 IP로 들어온 접속 전부 + 이 IP를 쓴 기기가 '다른 IP'로 들어온 접속까지 합친다.
+       (IP만 바꿔가며 반복하는 경우를 한 화면에서 보기 위한 것) */
+    const fp0 = String(v.fp || '');
+    let fps = [];
+    try {
+      const dv = await env.DB.prepare(
+        `SELECT fp, COUNT(*) AS n FROM visits WHERE ip = ? AND fp <> ''
+          GROUP BY fp ORDER BY n DESC LIMIT 12`).bind(v.ip).all();
+      fps = (dv.results || []).map((r) => String(r.fp)).filter(Boolean);
+    } catch (e) {}
+    if (fp0 && fps.indexOf(fp0) < 0) fps.unshift(fp0);
+
+    const ph = fps.map(() => '?').join(',');
+    const cond = fps.length ? '(ip = ? OR fp IN (' + ph + '))' : 'ip = ?';
+    const cp = [v.ip].concat(fps);
+
+    const rw = await env.DB.prepare(
+      `SELECT sid, ip, fp, is_ad, started_at, last_at, total_ms, pages, kw, verdict, score, region, org
+         FROM visits WHERE ${cond} ORDER BY started_at DESC LIMIT 200`).bind(...cp).all();
+    const sm = await env.DB.prepare(
+      `SELECT COUNT(*) AS total, MIN(started_at) AS first, MAX(started_at) AS last,
+              SUM(is_ad) AS ad, COUNT(DISTINCT ip) AS ips, COUNT(DISTINCT NULLIF(fp,'')) AS fpn
+         FROM visits WHERE ${cond}`).bind(...cp).first();
+    const ipn = await env.DB.prepare('SELECT COUNT(*) AS c FROM visits WHERE ip = ?').bind(v.ip).first();
+
+    const rows = (rw.results || []).map((r) => {
+      const sameIp = String(r.ip) === String(v.ip);
+      const sameFp = !!fp0 && String(r.fp) === fp0;
+      return Object.assign({}, r, { rel: sameIp && sameFp ? '동일' : sameIp ? 'IP' : '기기' });
+    });
+
+    return json({ ok: true, visit: v, logs: l.results || [], linked: {
+      rows,
+      stat: {
+        total: Number((sm || {}).total) || 0,
+        first: (sm || {}).first || '',
+        last: (sm || {}).last || '',
+        ad: Number((sm || {}).ad) || 0,
+        ips: Number((sm || {}).ips) || 0,
+        fpn: Number((sm || {}).fpn) || 0,
+        ipn: Number((ipn || {}).c) || 0
+      }
+    }});
   }
 
   /* ── 의심 IP: 광고 유입 또는 고위험 점수만 (직접방문 다수는 제외) ── */
