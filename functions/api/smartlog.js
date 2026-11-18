@@ -9,22 +9,28 @@ const clampPer  = (v) => Math.min(100, Math.max(5, parseInt(v || '20', 10) || 20
 function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
 
 async function rxStatus(env) {
-  const wm = await getSet(env, 'reindex_from', '');
-  const mnRow = await env.DB.prepare("SELECT MIN(created_at) AS m FROM click_logs WHERE action <> 'test'").first();
-  const cutRow = await env.DB.prepare("SELECT MIN(started_at) AS m FROM visits WHERE sid NOT LIKE 'b%'").first();
   const now = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 19).replace('T', ' ');
-  const mn = (mnRow || {}).m;
-  const end = (cutRow || {}).m || now;
-  if (!mn) return { need: false, done: true, from: '', end, msg: '재집계할 원본 기록이 없습니다.' };
-  const from = wm || mn;
-  return { need: from < end, done: from >= end, from, end, wm };
+  const err = await getSet(env, 'last_db_err', '');
+  const gap = await env.DB.prepare(
+    `SELECT d.day AS day, d.c AS logs FROM (
+       SELECT substr(created_at,1,10) AS day, COUNT(*) AS c
+         FROM click_logs WHERE action <> 'test' AND created_at < ? GROUP BY day
+     ) d
+     LEFT JOIN (
+       SELECT substr(started_at,1,10) AS day, COUNT(*) AS c FROM visits GROUP BY day
+     ) v ON v.day = d.day
+     WHERE COALESCE(v.c,0) = 0
+     ORDER BY d.day ASC LIMIT 1`
+  ).bind(now).first();
+  if (!gap || !gap.day) return { need: false, done: true, from: '', end: now, err, msg: '자동 재집계 완료 · 모든 날짜가 반영되어 있습니다' };
+  return { need: true, done: false, from: gap.day, end: now, err, logs: gap.logs };
 }
 
 async function reindexBatch(env, fromIn) {
     let from = String(fromIn || '').trim();
     if (!from) {
       const mn = await env.DB.prepare("SELECT MIN(created_at) AS m FROM click_logs WHERE action <> 'test'").first('m');
-      if (!mn) return json({ ok: true, done: true, inserted: 0, msg: '기록이 없습니다.' });
+      if (!mn) return { ok: true, done: true, inserted: 0, msg: '기록이 없습니다.' };
       from = mn;
     }
     const toRow = await env.DB.prepare("SELECT datetime(?, '+10 days') AS t").bind(from).first();
@@ -106,7 +112,7 @@ async function reindexBatch(env, fromIn) {
     const nowK = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 19).replace('T', ' ');
     const done = !list.length || to > nowK;
     await setSet(env, 'reindex_from', done ? nowK : to);
-    return json({ ok: true, done, from, to, inserted: list.length, next: done ? null : to });
+    return { ok: true, done, from, to, inserted: list.length, next: done ? null : to };
   }
 
 export async function onRequestPost(context) {

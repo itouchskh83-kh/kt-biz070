@@ -203,25 +203,40 @@ export function judgeSession(c) {
 
 /* 스키마 보장 — 세션 컬럼/테이블이 없으면 만든다 (1회) */
 let _schemaReady = false;
+
+/* 컬럼 존재를 실제로 확인하고 없을 때만 추가 — 어떤 실패에도 안전 */
+async function ensureCol(env, table, col, type) {
+  try {
+    const info = await env.DB.prepare(`PRAGMA table_info(${table})`).all();
+    const has = (info.results || []).some((r) => String(r.name).toLowerCase() === col.toLowerCase());
+    if (!has) await env.DB.prepare(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`).run();
+  } catch (e) {}
+}
+
+export async function repairSchema(env) {
+  if (!env || !env.DB) return false;
+  await ensureCol(env, 'click_logs', 'sid', 'TEXT');
+  await ensureCol(env, 'click_logs', 'act_ms', 'INTEGER');
+  await ensureCol(env, 'visits', 'asn', 'TEXT');
+  await ensureCol(env, 'visits', 'kw', 'TEXT');
+  _schemaReady = true;
+  return true;
+}
+
 export async function ensureSchema(env) {
   if (_schemaReady || !env || !env.DB) return;
-  try {
-    await env.DB.prepare(`CREATE TABLE IF NOT EXISTS visits (
+  // 단계별로 독립 실행 — 하나가 실패해도 나머지가 계속 진행된다
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS visits (
       sid TEXT PRIMARY KEY, fp TEXT, ip TEXT, src TEXT, is_ad INTEGER NOT NULL DEFAULT 0,
       started_at TEXT NOT NULL, last_at TEXT, total_ms INTEGER NOT NULL DEFAULT 0,
       pages INTEGER NOT NULL DEFAULT 1, moved INTEGER NOT NULL DEFAULT 0,
       depth INTEGER NOT NULL DEFAULT 1, asn TEXT, region TEXT, org TEXT, country TEXT, ua TEXT, kw TEXT,
-      score INTEGER NOT NULL DEFAULT 0, verdict TEXT NOT NULL DEFAULT 'normal', reasons TEXT)`).run();
-    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_time ON visits (started_at DESC)').run();
-    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_ip ON visits (ip, started_at DESC)').run();
-    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_fp ON visits (fp, started_at DESC)').run();
-    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_ad ON visits (is_ad, started_at DESC)').run();
-    try { await env.DB.prepare('ALTER TABLE click_logs ADD COLUMN sid TEXT').run(); } catch (e) {}
-    try { await env.DB.prepare('ALTER TABLE click_logs ADD COLUMN act_ms INTEGER').run(); } catch (e) {}
-    try { await env.DB.prepare('ALTER TABLE visits ADD COLUMN asn TEXT').run(); } catch (e) {}
-    try { await env.DB.prepare('ALTER TABLE visits ADD COLUMN kw TEXT').run(); } catch (e) {}
-    _schemaReady = true;
-  } catch (e) {}
+      score INTEGER NOT NULL DEFAULT 0, verdict TEXT NOT NULL DEFAULT 'normal', reasons TEXT)`).run().catch(() => null);
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_time ON visits (started_at DESC)').run().catch(() => null);
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_ip ON visits (ip, started_at DESC)').run().catch(() => null);
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_fp ON visits (fp, started_at DESC)').run().catch(() => null);
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_visits_ad ON visits (is_ad, started_at DESC)').run().catch(() => null);
+  await repairSchema(env);
 }
 
 /* ── app_settings 읽기/쓰기 ── */

@@ -1,7 +1,7 @@
 
 import { json } from './_lib.js';
 import { notifyBlock } from './_notify.js';
-import { clientIP, uaHash, detectSource, blockState, maybePurge, STAGE, isHosting, isCarrier, srcLabel, judgeSession, ensureSchema } from './_smartlog.js';
+import { clientIP, uaHash, detectSource, blockState, maybePurge, STAGE, isHosting, isCarrier, srcLabel, judgeSession, ensureSchema, repairSchema, setSet } from './_smartlog.js';
 
 const BOT_UA = /(bot|crawl|spider|headless|phantom|selenium|puppeteer|playwright|curl|wget|python-requests|okhttp|scrapy|httpclient|java\/)/i;
 const MAX_ACT = 30 * 60 * 1000; // 페이지당 활성 체류 상한 30분
@@ -150,18 +150,27 @@ export async function onRequestPost(context) {
   });
 
   let dbErr = null;
-  try {
-    await env.DB.prepare(
+  const _vi = () => env.DB.prepare(
       `INSERT INTO visits (sid, fp, ip, src, is_ad, started_at, last_at, total_ms, pages, moved, depth, asn, region, org, country, ua, kw, score, verdict, reasons)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+       VALUES (?,?,?,?,?,?,?,?,1,?,?,?,?,?,?,?,?,?,?,?)
        ON CONFLICT(sid) DO UPDATE SET last_at = excluded.last_at, pages = pages + 1,
          moved = MAX(COALESCE(visits.moved,0), excluded.moved), score = excluded.score,
          verdict = excluded.verdict, reasons = excluded.reasons,
          kw = CASE WHEN visits.kw IS NULL OR visits.kw = '' THEN excluded.kw ELSE visits.kw END`
     ).bind(sid, fp, ip, src, isAd ? 1 : 0, kst(0), kst(0), actMs, moved, depth, asn,
-           region, org, country, ua.slice(0, 200), kw, ev.score, ev.verdict, ev.reasons.join(' / ')).run();
+           region, org, country, ua.slice(0, 200), kw, ev.score, ev.verdict, ev.reasons.join(' / '));
+  try {
+    await _vi().run();
   } catch (e) {
-    dbErr = String(e && e.message || e).slice(0, 200);
+    dbErr = String((e && e.message) || e).slice(0, 200);
+    try {
+      await repairSchema(env);
+      await _vi().run();
+      dbErr = null;
+    } catch (e2) {
+      dbErr = String((e2 && e2.message) || e2).slice(0, 200);
+      await setSet(env, 'last_db_err', dbErr + ' @ ' + kst(0));
+    }
   }
 
   /* ── 7) 차단 등록 (광고 유입 + 차단 판정만) */
