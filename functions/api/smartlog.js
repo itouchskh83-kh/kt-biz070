@@ -1,6 +1,6 @@
 
 import { json } from './_lib.js';
-import { clientIP, ensureSchema, getSet, setSet } from './_smartlog.js';
+import { clientIP, ensureSchema, getSet, setSet } , evalRules, RANK } from './_smartlog.js';
 
 const clampDays = (v) => Math.min(365, Math.max(1, parseInt(v || '7', 10) || 7));
 const clampPage = (v) => Math.max(1, parseInt(v || '1', 10) || 1);
@@ -166,9 +166,25 @@ export async function onRequestPost(context) {
     const rows = await env.DB.prepare(
       'SELECT * FROM visits ' + where + ' ORDER BY started_at DESC LIMIT ? OFFSET ?'
     ).bind(...binds, per, (page - 1) * per).all();
+    /* 누적 접속횟수 — 기간 필터와 무관한 전 기간 집계 */
+    const vips = Array.from(new Set((rows.results || []).map((r) => r.ip).filter(Boolean)));
+    const cmap = {};
+    if (vips.length) {
+      const ph = vips.map(() => '?').join(',');
+      const c = await env.DB.prepare(
+        `SELECT ip, SUM(is_ad) AS ad, SUM(CASE WHEN is_ad = 0 THEN 1 ELSE 0 END) AS direct
+           FROM visits WHERE ip IN (${ph}) GROUP BY ip`
+      ).bind(...vips).all();
+      (c.results || []).forEach((r) => { cmap[r.ip] = { ad: r.ad || 0, direct: r.direct || 0 }; });
+    }
+    const list = (rows.results || []).map((r) => Object.assign({}, r, {
+      cum_ad: (cmap[r.ip] || {}).ad || 0,
+      cum_direct: (cmap[r.ip] || {}).direct || 0,
+      ad7: 0, ad30: 0
+    }));
     const rx = await rxStatus(env);
     if (rx.need) WA(reindexBatch(env).catch(() => null));
-    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list: rows.results || [], rx });
+    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list, rx });
   }
 
   /* ── 한 세션의 페이지 타임라인 ── */
@@ -184,20 +200,65 @@ export async function onRequestPost(context) {
   /* ── 의심 IP: 광고 유입 또는 고위험 점수만 (직접방문 다수는 제외) ── */
   if (op === 'suspicious') {
     const page = clampPage(b.page), per = clampPer(b.per);
-    const base = `FROM visits WHERE started_at >= ${win} AND (is_ad = 1 OR score >= 60)`;
-    const total = await env.DB.prepare('SELECT COUNT(DISTINCT ip) AS c ' + base).first('c');
     const rows = await env.DB.prepare(
-      `SELECT ip, COUNT(*) AS sessions, SUM(is_ad) AS ad_sessions, MAX(score) AS top,
-              COUNT(DISTINCT fp) AS devices, SUM(total_ms) AS ms, MAX(region) AS region,
-              MAX(org) AS org, MAX(last_at) AS last, MAX(reasons) AS reason
-         ${base}
+      `SELECT ip, COUNT(*) AS sessions, SUM(is_ad) AS ad_sessions,
+              SUM(CASE WHEN is_ad = 1 AND started_at >= datetime('now','+9 hours','-7 days') THEN 1 ELSE 0 END) AS ad7,
+              SUM(CASE WHEN is_ad = 1 THEN 1 ELSE 0 END) AS ad30,
+              COUNT(DISTINCT fp) AS devices, SUM(total_ms) AS ms,
+              MAX(region) AS region, MAX(org) AS org, MAX(score) AS top,
+              MAX(last_at) AS last, MAX(reasons) AS reason
+         FROM visits
+        WHERE started_at >= datetime('now','+9 hours','-30 days')
         GROUP BY ip
-        HAVING SUM(is_ad) >= 1 OR MAX(score) >= 60
-        ORDER BY top DESC, sessions DESC LIMIT ? OFFSET ?`
-    ).bind(per, (page - 1) * per).all();
+        HAVING SUM(is_ad) >= 1 OR MAX(score) >= 60`
+    ).all();
+    const all = rows.results || [];
+    const ips = Array.from(new Set(all.map((r) => r.ip).filter(Boolean)));
+    const cmap = {};
+    if (ips.length) {
+      const ph = ips.map(() => '?').join(',');
+      const c = await env.DB.prepare(
+        `SELECT ip, SUM(is_ad) AS ad, SUM(CASE WHEN is_ad = 0 THEN 1 ELSE 0 END) AS direct
+           FROM visits WHERE ip IN (${ph}) GROUP BY ip`
+      ).bind(...ips).all();
+      (c.results || []).forEach((r) => { cmap[r.ip] = { ad: r.ad || 0, direct: r.direct || 0 }; });
+    }
+    const list = all.map((r) => {
+      const rr = evalRules(r.ad7, r.ad30);
+      return Object.assign({}, r, {
+        state: rr.state, ad7: rr.ad7, ad30: rr.ad30,
+        cum_ad: (cmap[r.ip] || {}).ad || 0,
+        cum_direct: (cmap[r.ip] || {}).direct || 0
+      });
+    }).filter((r) => r.state === 'block' || r.state === 'warn' || (r.state === 'observe' && (r.cum_ad || 0) >= 2))
+      .sort((a, b) => ((RANK[b.state] || 0) - (RANK[a.state] || 0))
+        || ((b.ad30 || 0) - (a.ad30 || 0))
+        || String(b.last || '').localeCompare(String(a.last || '')));
+    const total = list.length;
     const rx = await rxStatus(env);
-    if (rx.need) WA(reindexBatch(env).catch(() => null));
-    return json({ ok: true, page, per, total: total || 0, pages: Math.max(1, Math.ceil((total || 0) / per)), list: rows.results || [], rx });
+    return json({ ok: true, page, per, total, pages: Math.max(1, Math.ceil(total / per)),
+      list: list.slice((page - 1) * per, page * per), rx });
+  }
+
+  /* ── 기기(지문) 단위 반복 — IP를 바꿔도 같은 기기면 잡힌다 ── */
+  if (op === 'devices') {
+    const rows = await env.DB.prepare(
+      `SELECT COALESCE(NULLIF(fp,''), 'ip:' || ip) AS dev,
+              COUNT(*) AS sessions, SUM(is_ad) AS ad_sessions,
+              SUM(CASE WHEN is_ad = 1 AND started_at >= datetime('now','+9 hours','-7 days') THEN 1 ELSE 0 END) AS ad7,
+              SUM(CASE WHEN is_ad = 1 THEN 1 ELSE 0 END) AS ad30,
+              COUNT(DISTINCT ip) AS ips, MAX(org) AS org, MAX(region) AS region,
+              MAX(score) AS top, MAX(last_at) AS last
+         FROM visits
+        WHERE started_at >= datetime('now','+9 hours','-30 days')
+        GROUP BY dev
+        HAVING SUM(is_ad) >= 2
+        ORDER BY ad30 DESC, ad7 DESC, ips DESC LIMIT 30`).all();
+    const list = (rows.results || []).map((r) => {
+      const rr = evalRules(r.ad7, r.ad30);
+      return Object.assign({}, r, { state: rr.state });
+    }).sort((a, b) => ((RANK[b.state] || 0) - (RANK[a.state] || 0)) || ((b.ad30 || 0) - (a.ad30 || 0)));
+    return json({ ok: true, list });
   }
 
   /* ── IP 대역(ASN) 반복 — 여러 IP로 나눠 들어와도 같은 회선이면 잡힌다 ── */
@@ -260,7 +321,7 @@ export async function onRequestPost(context) {
     const ip = String(b.ip || '').trim();
     if (!ip) return json({ ok: false, error: 'BAD_IP' }, 400);
     if (op === 'unblock') {
-      await env.DB.prepare('DELETE FROM blocked_ips WHERE ip = ? AND manual = 1').bind(ip).run();
+      await env.DB.prepare('DELETE FROM blocked_ips WHERE ip = ?').bind(ip).run();
       return json({ ok: true });
     }
     const mode = op;

@@ -253,3 +253,33 @@ export async function setSet(env, key, val) {
       .bind(key, String(val), new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 19).replace('T', ' ')).run();
   } catch (e) {}
 }
+
+
+/* ═══════════ 접속 횟수 규칙 (사용자 지정 기준) ═══════════
+   7일  창 : 광고 2회 → 경고, 3회 → 영구차단
+   30일 창 : 광고 4회 → 경고, 5회 → 영구차단
+   두 규칙 중 먼저 도달하는 쪽이 발동한다. */
+export const RULE = { d7: { warn: 2, block: 3 }, d30: { warn: 4, block: 5 } };
+
+export function evalRules(ad7, ad30) {
+  const a7 = Number(ad7) || 0;
+  const a30 = Number(ad30) || 0;
+  const why = [];
+  let state = 'normal';
+  if (a7 >= RULE.d7.block) { state = 'block'; why.push('7일 광고 ' + a7 + '회'); }
+  else if (a30 >= RULE.d30.block) { state = 'block'; why.push('30일 광고 ' + a30 + '회'); }
+  else if (a7 >= RULE.d7.warn) { state = 'warn'; why.push('7일 광고 ' + a7 + '회'); }
+  else if (a30 >= RULE.d30.warn) { state = 'warn'; why.push('30일 광고 ' + a30 + '회'); }
+  else if (a7 >= 1 || a30 >= 1) { state = 'observe'; }
+  return { state, ad7: a7, ad30: a30, why, permanent: state === 'block' };
+}
+
+export const RANK = { normal: 0, observe: 1, watch: 1, warn: 2, block: 3 };
+
+/* 점수 판정과 규칙 판정 중 강한 쪽을 최종 판정으로 쓴다 */
+export function strongerVerdict(scoreVerdict, ruleState) {
+  const a = RANK[scoreVerdict] || 0;
+  const b = RANK[ruleState] || 0;
+  if (b > a) return ruleState === 'observe' ? 'watch' : ruleState;
+  return scoreVerdict;
+}

@@ -1,7 +1,7 @@
 
 import { json } from './_lib.js';
 import { notifyBlock } from './_notify.js';
-import { clientIP, uaHash, detectSource, blockState, maybePurge, STAGE, isHosting, isCarrier, srcLabel, judgeSession, ensureSchema, repairSchema, setSet } from './_smartlog.js';
+import { clientIP, uaHash, detectSource, blockState, maybePurge, STAGE, isHosting, isCarrier, srcLabel, judgeSession, evalRules, strongerVerdict, ensureSchema, repairSchema, setSet } from './_smartlog.js';
 
 const BOT_UA = /(bot|crawl|spider|headless|phantom|selenium|puppeteer|playwright|curl|wget|python-requests|okhttp|scrapy|httpclient|java\/)/i;
 const MAX_ACT = 30 * 60 * 1000; // 페이지당 활성 체류 상한 30분
@@ -143,11 +143,39 @@ export async function onRequestPost(context) {
     ipAd = ((d || {}).n || 0) + 1;
   }
 
+  /* ── 6-1) 접속 횟수 규칙 집계 (7일 / 30일, 광고 유입만) ── */
+  let ip7 = 0, ip30 = 0, fp7 = 0, fp30 = 0;
+  if (isAd) {
+    try {
+      const r1 = await env.DB.prepare(
+        `SELECT SUM(CASE WHEN started_at >= datetime('now','+9 hours','-7 days') THEN 1 ELSE 0 END) AS d7,
+                COUNT(*) AS d30
+           FROM visits WHERE ip = ? AND is_ad = 1 AND started_at >= datetime('now','+9 hours','-30 days')`
+      ).bind(ip).first();
+      ip7 = Number((r1 || {}).d7) || 0;
+      ip30 = Number((r1 || {}).d30) || 0;
+      if (fp) {
+        const r2 = await env.DB.prepare(
+          `SELECT SUM(CASE WHEN started_at >= datetime('now','+9 hours','-7 days') THEN 1 ELSE 0 END) AS d7,
+                  COUNT(*) AS d30
+             FROM visits WHERE fp = ? AND is_ad = 1 AND started_at >= datetime('now','+9 hours','-30 days')`
+        ).bind(fp).first();
+        fp7 = Number((r2 || {}).d7) || 0;
+        fp30 = Number((r2 || {}).d30) || 0;
+      }
+    } catch (e) {}
+  }
+  const rr = evalRules(Math.max(ip7, fp7), Math.max(ip30, fp30));
+
   const ev = judgeSession({
     isAd, ipAd, fpAd, fpIps, asnAd,
     totalSec: Math.round(actMs / 1000), pages: 1, moved: moved === 1,
     bot: BOT_UA.test(ua), hosting: isHosting(org), carrier: isCarrier(org), converted: false
   });
+
+  /* ── 6-2) 최종 판정: 점수 판정과 접속횟수 규칙 중 강한 쪽 ── */
+  const finalVerdict = strongerVerdict(ev.verdict, rr.state);
+  const finalReasons = [ev.reasons.join(' / '), rr.why.join(' / ')].filter(Boolean).join(' / ');
 
   let dbErr = null;
   const _vi = () => env.DB.prepare(
@@ -158,7 +186,7 @@ export async function onRequestPost(context) {
          verdict = excluded.verdict, reasons = excluded.reasons,
          kw = CASE WHEN visits.kw IS NULL OR visits.kw = '' THEN excluded.kw ELSE visits.kw END`
     ).bind(sid, fp, ip, src, isAd ? 1 : 0, kst(0), kst(0), actMs, moved, depth, asn,
-           region, org, country, ua.slice(0, 200), kw, ev.score, ev.verdict, ev.reasons.join(' / '));
+           region, org, country, ua.slice(0, 200), kw, ev.score, finalVerdict, finalReasons);
   try {
     await _vi().run();
   } catch (e) {
@@ -174,13 +202,14 @@ export async function onRequestPost(context) {
   }
 
   /* ── 7) 차단 등록 (광고 유입 + 차단 판정만) */
-  let action = whitelisted ? 'allow' : (ev.verdict === 'block' ? 'block' : ev.verdict === 'warn' ? 'warn' : 'allow');
-  let stage = ev.verdict === 'block' ? 3 : ev.verdict === 'warn' ? 2 : ev.verdict === 'watch' ? 1 : 0;
+  let action = whitelisted ? 'allow' : (finalVerdict === 'block' ? 'block' : finalVerdict === 'warn' ? 'warn' : 'allow');
+  let stage = finalVerdict === 'block' ? 3 : finalVerdict === 'warn' ? 2 : finalVerdict === 'watch' ? 1 : 0;
   let blockedUntil = null;
 
   if (action === 'block' && isAd) {
+    const permanent = rr.state === 'block';
     const hours = ev.score >= STAGE.block + 60 ? 24 : 4;
-    blockedUntil = kst(hours * 3600000);
+    blockedUntil = permanent ? null : kst(hours * 3600000);
     const prev = await env.DB.prepare('SELECT mode, blocked_until FROM blocked_ips WHERE ip = ?').bind(ip).first();
     const isNew = !prev || prev.mode === 'allow' || (prev.blocked_until && prev.blocked_until < kst(0));
     await env.DB.prepare(
@@ -189,18 +218,18 @@ export async function onRequestPost(context) {
        ON CONFLICT(ip) DO UPDATE SET reason=excluded.reason, score=excluded.score,
          hit_count=COALESCE(blocked_ips.hit_count,0)+1, blocked_until=excluded.blocked_until
        WHERE blocked_ips.manual = 0`
-    ).bind(ip, ev.reasons.join(' / ') || '반복 접속', ev.score, ipAd, blockedUntil, fp).run();
+    ).bind(ip, finalReasons || '반복 접속', ev.score, ipAd, blockedUntil, fp).run();
 
     if (isNew) {
       waitUntil(notifyBlock(env, {
-        ip, score: ev.score, hits: ipAd, reason: ev.reasons.join(' / ') || '반복 접속',
+        ip, score: ev.score, hits: ipAd, reason: finalReasons || '반복 접속',
         region, org, country, blockedUntil, path, keyword: kw
       }));
     }
   }
 
   await maybePurge(env);
-  return json({ ok: true, action, stage, score: ev.score, hits: ipAd, verdict: ev.verdict,
-                reason: ev.reasons.join(' / '), blockedUntil, region, org, src, id: logId,
+  return json({ ok: true, action, stage, score: ev.score, hits: ipAd, verdict: finalVerdict,
+                reason: finalReasons, blockedUntil, rule: rr.state, ad7: Math.max(ip7, fp7), ad30: Math.max(ip30, fp30), region, org, src, id: logId,
                 sid, kw, dbErr });
 }

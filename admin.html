@@ -237,8 +237,8 @@ body.kt .post:hover{border-left-color:var(--kt)}
     </div>
     <div class="tw">
       <table><thead><tr>
-        <th>시작</th><th>유입</th><th>IP</th><th>회선</th><th>위치</th><th>기기지문</th><th>페이지</th><th>총 체류</th><th>판정</th><th>점수</th>
-      </tr></thead><tbody id="vBody"><tr><td colspan="10" style="padding:22px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody></table>
+        <th>시작</th><th>유입</th><th>IP</th><th>회선</th><th>위치</th><th>기기지문</th><th>페이지</th><th>총 체류</th><th>누적</th><th>판정</th><th>점수</th>
+      </tr></thead><tbody id="vBody"><tr><td colspan="11" style="padding:22px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody></table>
     </div>
     <div class="pager" id="vPager"></div>
     <p class="hint">한 줄이 방문 1회입니다. 페이지를 여러 개 봐도 방문은 1회로 집계됩니다.</p>
@@ -251,8 +251,8 @@ body.kt .post:hover{border-left-color:var(--kt)}
     </div>
     <div class="tw">
       <table><thead><tr>
-        <th>IP</th><th>위험점수</th><th>방문</th><th>광고</th><th>기기</th><th>총 체류</th><th>지역</th><th>최근</th><th>조치</th>
-      </tr></thead><tbody id="sBody"><tr><td colspan="10" style="padding:22px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody></table>
+        <th>IP</th><th>상태</th><th>7일</th><th>30일</th><th>누적</th><th>기기</th><th>회선·위치</th><th>최근</th><th>조치</th>
+      </tr></thead><tbody id="sBody"><tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">불러오는 중…</td></tr></tbody></table>
     </div>
     <div class="pager" id="sPager"></div>
     <div class="tw" style="margin-top:22px">
@@ -262,7 +262,14 @@ body.kt .post:hover{border-left-color:var(--kt)}
         <th>회선명</th><th>광고 방문</th><th>고유 IP</th><th>기기</th><th>최고점수</th><th>지역</th><th>최근</th>
       </tr></thead><tbody id="asBody"><tr><td colspan="7" style="padding:22px;text-align:center;color:#9aa0b0">-</td></tr></tbody></table>
     </div>
-    <p class="hint">광고로 유입된 접속과 위험점수 60점 이상만 표시합니다. 직접방문이 많은 IP는 여기에 올리지 않습니다.</p>
+    <div class="tw" style="margin-top:22px">
+      <div style="padding:14px 16px 0"><b style="font-size:14px">기기 단위 반복</b>
+        <p class="hint" style="margin-top:6px">IP를 바꿔도 같은 기기면 여기 한 줄로 묶입니다. 7일 3회 도달 시 영구차단 대상입니다.</p></div>
+      <table style="margin-top:8px"><thead><tr>
+        <th>기기지문</th><th>상태</th><th>7일</th><th>30일</th><th>IP 수</th><th>회선</th><th>최근</th>
+      </tr></thead><tbody id="dBody"><tr><td colspan="7" style="padding:22px;text-align:center;color:#9aa0b0">-</td></tr></tbody></table>
+    </div>
+    <p class="hint">상태 기준 — 7일 광고 2회/30일 4회 = 경고, 7일 3회/30일 5회 = 영구차단. 광고 1회만 있는 IP는 표시하지 않습니다.</p>
   </section>
 
   <section id="tabBlock" style="display:none;margin-top:18px">
@@ -471,9 +478,10 @@ body.kt .post:hover{border-left-color:var(--kt)}
             +'<td class="mono" style="color:#9aa0b0">'+esc(String(x.fp||"").slice(0,10)||"-")+'</td>'
             +'<td style="text-align:center;font-weight:800">'+(x.pages||1)+'</td>'
             +'<td style="font-weight:800;color:'+((x.total_ms||0)<3000?"#e03c35":"#3b3e47")+'">'+dur(x.total_ms)+'</td>'
+            +'<td style="text-align:center;font-size:11.5px;white-space:nowrap"><b style="color:#4a5fc8">광고 '+(x.cum_ad||0)+'</b><span style="color:#9aa0b0"> · 직접 '+(x.cum_direct||0)+'</span></td>'
             +'<td>'+verdictBadge(x.verdict)+'</td>'
             +'<td style="text-align:center;color:#8b90a0;font-weight:700">'+(x.score||0)+'</td></tr>';
-        }).join("") : '<tr><td colspan="10" style="padding:22px;text-align:center;color:#9aa0b0">기록이 없습니다.</td></tr>';
+        }).join("") : '<tr><td colspan="11" style="padding:22px;text-align:center;color:#9aa0b0">기록이 없습니다.</td></tr>';
         pager($("vPager"),ST.visit,loadVisits);
       });
   }
@@ -517,18 +525,22 @@ body.kt .post:hover{border-left-color:var(--kt)}
         ST.sus={page:j.page||1,pages:j.pages||1,total:j.total||0};
         var l=j.list||[];
         $("sBody").innerHTML = l.length ? l.map(function(x){
-          var col = x.top>=75?"#e03c35":x.top>=45?"#c47f00":"#6b7080";
+          var st=x.state||"observe";
+          var bg=st==="block"?"#fdecec":st==="warn"?"#fff4e5":"#eef0f5";
+          var fg=st==="block"?"#c2312a":st==="warn"?"#a05a00":"#6b7080";
+          var nm=st==="block"?"영구차단":st==="warn"?"경고":"관찰";
+          var h7=st==="block"?"#c2312a":st==="warn"?"#a05a00":"#6b7080";
           return '<tr><td class="mono" style="font-weight:800">'+esc(x.ip)+'</td>'
-            +'<td style="text-align:center;font-weight:900;color:'+col+'">'+(x.top||0)+'</td>'
-            +'<td style="text-align:center">'+(x.sessions||0)+'</td>'
-            +'<td style="text-align:center;font-weight:800;color:#4a5fc8">'+(x.ad_sessions||0)+'</td>'
+            +'<td style="text-align:center"><span class="badge" style="background:'+bg+';color:'+fg+';border-color:'+bg+';font-weight:800">'+nm+'</span></td>'
+            +'<td style="text-align:center;font-weight:900;color:'+h7+'">'+(x.ad7||0)+'/3</td>'
+            +'<td style="text-align:center;font-weight:800">'+(x.ad30||0)+'/5</td>'
+            +'<td style="text-align:center;font-size:11.5px;white-space:nowrap"><b style="color:#4a5fc8">광고 '+(x.cum_ad||0)+'</b><span style="color:#9aa0b0"> · 직접 '+(x.cum_direct||0)+'</span></td>'
             +'<td style="text-align:center">'+(x.devices||0)+'</td>'
-            +'<td style="text-align:center">'+dur(x.ms)+'</td>'
-            +'<td style="font-size:12px;color:#6b7080">'+esc(x.region||"-")+'</td>'
+            +'<td style="font-size:11.5px;color:#6b7080;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc((x.org||"")+" / "+(x.region||""))+'">'+esc(x.org||"-")+'</td>'
             +'<td style="font-size:11.5px;color:#9aa0b0">'+esc(String(x.last||"").slice(5,16))+'</td>'
             +'<td style="white-space:nowrap"><button type="button" class="btn btn-danger" data-blk="'+esc(x.ip)+'" style="height:30px;font-size:11.5px;padding:0 10px">차단</button> '
-            +'<button type="button" class="btn btn-line" data-alw="'+esc(x.ip)+'" style="height:30px;font-size:11.5px;padding:0 10px">허용</button></td></tr>';
-        }).join("") : '<tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">의심 접속이 없습니다.</td></tr>';
+            +'<button type="button" class="btn btn-line" data-alw="'+esc(x.ip)+'" style="height:30px;font-size:11.5px;padding:0 10px">해제</button></td></tr>';
+        }).join("") : '<tr><td colspan="9" style="padding:22px;text-align:center;color:#9aa0b0">기준에 해당하는 IP가 없습니다.</td></tr>';
         pager($("sPager"),ST.sus,loadSus);
       });
   }
@@ -549,7 +561,27 @@ body.kt .post:hover{border-left-color:var(--kt)}
         }).join("") : '<tr><td colspan="7" style="padding:22px;text-align:center;color:#9aa0b0">회선 반복이 없습니다.</td></tr>';
       });
   }
-  $("sGo") && $("sGo").addEventListener("click", function(){ loadSus(1); loadAsn(); });
+  function loadDev(){
+    fetch("/api/smartlog",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:token,op:"devices"})})
+      .then(function(r){return r.json();}).then(function(j){
+        if(!j.ok) return;
+        var l=j.list||[], el=$("dBody"); if(!el) return;
+        el.innerHTML = l.length ? l.map(function(x){
+          var st=x.state||"observe";
+          var bg=st==="block"?"#fdecec":st==="warn"?"#fff4e5":"#eef0f5";
+          var fg=st==="block"?"#c2312a":st==="warn"?"#a05a00":"#6b7080";
+          var nm=st==="block"?"영구차단":st==="warn"?"경고":"관찰";
+          return '<tr><td class="mono" style="color:#6b7080">'+esc(String(x.dev||"").slice(0,12))+'</td>'
+            +'<td style="text-align:center"><span class="badge" style="background:'+bg+';color:'+fg+';border-color:'+bg+';font-weight:800">'+nm+'</span></td>'
+            +'<td style="text-align:center;font-weight:900;color:'+fg+'">'+(x.ad7||0)+'/3</td>'
+            +'<td style="text-align:center;font-weight:800">'+(x.ad30||0)+'/5</td>'
+            +'<td style="text-align:center;font-weight:800;color:#4a5fc8">'+(x.ips||0)+'</td>'
+            +'<td style="font-size:11.5px;color:#6b7080;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.org||"-")+'</td>'
+            +'<td style="font-size:11.5px;color:#9aa0b0">'+esc(String(x.last||"").slice(5,16))+'</td></tr>';
+        }).join("") : '<tr><td colspan="7" style="padding:22px;text-align:center;color:#9aa0b0">기기 반복이 없습니다.</td></tr>';
+      });
+  }
+  $("sGo") && $("sGo").addEventListener("click", function(){ loadSus(1); loadAsn(); loadDev(); });
   $("sBody") && $("sBody").addEventListener("click", function(e){
     var b=e.target.closest("[data-blk]"), a=e.target.closest("[data-alw]");
     if(b){ api("block",{ip:b.dataset.blk,hours:24}).then(function(){ loadSus(ST.sus.page); }); }
@@ -606,7 +638,7 @@ body.kt .post:hover{border-left-color:var(--kt)}
             +'<td style="font-size:11.5px;color:#6b7080">'+esc(x.keyword||"-")+'</td>'
             +'<td style="font-size:11.5px;color:#8b90a0">'+(x.act_ms?Math.round(x.act_ms/1000)+"초":(x.dwell!=null?x.dwell+"초":"-"))+'</td>'
             +'<td style="text-align:center;color:#8b90a0">'+(x.score||0)+'</td></tr>';
-        }).join("") : '<tr><td colspan="10" style="padding:22px;text-align:center;color:#9aa0b0">기록이 없습니다.</td></tr>';
+        }).join("") : '<tr><td colspan="11" style="padding:22px;text-align:center;color:#9aa0b0">기록이 없습니다.</td></tr>';
         pager($("rPager"),ST.raw,loadRaw);
       });
   }
