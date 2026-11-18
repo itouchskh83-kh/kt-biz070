@@ -1,6 +1,6 @@
 
 import { json } from './_lib.js';
-import { clientIP, ensureSchema, getSet, setSet } , evalRules, RANK } from './_smartlog.js';
+import { clientIP, ensureSchema, getSet, setSet , evalRules, RANK } from './_smartlog.js';
 
 const clampDays = (v) => Math.min(365, Math.max(1, parseInt(v || '7', 10) || 7));
 const clampPage = (v) => Math.max(1, parseInt(v || '1', 10) || 1);
